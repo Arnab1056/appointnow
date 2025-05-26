@@ -1,3 +1,3 @@
 void main(){
-  print("Hello, ami");
+  print("Hello, word!");
 }
