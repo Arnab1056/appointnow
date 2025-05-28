@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../controllers/auth_controller.dart';
+import 'register.dart'; // Ensure this is the correct path to the file containing RegisterPage
 
 class LoginPage extends StatefulWidget {
   @override
@@ -62,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: Text(
                   'Forgot Password?',
                   style: TextStyle(
-                    color: const Color.fromARGB(255, 22, 129, 129),
+                    color: Color(0xFF199A8E),
                     // decoration: TextDecoration.underline,
                   ),
                 ),
@@ -91,11 +92,17 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 Text("Don't have an account? "),
                 GestureDetector(
-                  onTap: _authController.signUp,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => RegisterPage()),
+                    );
+                    _authController.signUp();
+                  },
                   child: Text(
                     'Sign Up',
                     style: TextStyle(
-                      color: const Color.fromARGB(255, 22, 129, 129),
+                      color: Color(0xFF199A8E),
                       // decoration: TextDecoration.underline,
                     ),
                   ),
