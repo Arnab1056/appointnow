@@ -192,7 +192,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF199A8E),
+                backgroundColor: Color.fromRGBO(25, 154, 142, 1),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20.0),
                 ),
