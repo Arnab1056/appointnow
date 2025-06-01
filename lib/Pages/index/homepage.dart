@@ -39,12 +39,12 @@ class _HomePageState extends State<HomePage> {
                   prefixIcon: const Icon(Icons.search,
                       color: Colors.grey), // Icon color changed to black
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                    borderSide: const BorderSide(color: Colors.teal),
+                    borderRadius: BorderRadius.circular(24.0),
+                    borderSide: BorderSide(color: Colors.teal),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                    borderSide: const BorderSide(color: Colors.teal),
+                    borderRadius: BorderRadius.circular(24.0),
+                    borderSide: BorderSide(color: Colors.teal),
                   ),
                 ),
               ),
@@ -54,10 +54,10 @@ class _HomePageState extends State<HomePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildCategoryIcon(Icons.local_hospital, 'Doctor'),
-                  _buildCategoryIcon(Icons.local_pharmacy, 'Pharmacy'),
-                  _buildCategoryIcon(Icons.apartment, 'Hospital'),
-                  _buildCategoryIcon(Icons.local_taxi, 'Ambulance'),
+                  _buildCategoryCard('assets/icon/Doctor.png', 'Doctor'),
+                  _buildCategoryCard('assets/icon/Pharmacy.png', 'Pharmacy'),
+                  _buildCategoryCard('assets/icon/Hospital.png', 'Hospital'),
+                  _buildCategoryCard('assets/icon/Ambulance.png', 'Ambulance'),
                 ],
               ),
               const SizedBox(height: 16.0),
@@ -133,31 +133,63 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
+      // Updated BottomNavigationBar to ensure equal spacing between items
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: Colors.teal, // Changed selected item color to teal
-        items: const [
+        unselectedItemColor:
+            Colors.grey, // Added unselected item color for visibility
+        showUnselectedLabels:
+            true, // Ensures labels are visible for unselected items
+        type: BottomNavigationBarType
+            .fixed, // Ensures equal spacing between items
+        items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_today),
+              label: 'Appointments'), // Appointment date icon
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );
   }
 
-  Widget _buildCategoryIcon(IconData icon, String label) {
-    return Column(
-      children: [
-        CircleAvatar(
-          radius: 24.0,
-          backgroundColor: Colors.teal, // Changed background color to teal
-          child: Icon(icon,
-              size: 24.0, color: Colors.white), // Icon color changed to white
-        ),
-        const SizedBox(height: 8.0),
-        Text(label,
-            style:
-                const TextStyle(color: Colors.black)), // Text color changed to black
-      ],
+  Widget _buildCategoryCard(String iconPath, String label) {
+    return GestureDetector(
+      onTap: () {
+        // Handle card click
+        print('$label card clicked');
+      },
+      child: Column(
+        children: [
+          Container(
+            width: 60.0,
+            height: 60.0,
+            decoration: BoxDecoration(
+              color: Colors.white, // Set background color to white
+              borderRadius: BorderRadius.circular(8.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: Offset(0, 3), // changes position of shadow
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Image.asset(iconPath,
+                  width: 32.0, height: 32.0), // Fixed image size to 32x32
+            ),
+          ),
+          SizedBox(height: 8.0),
+          Text(label,
+              style: TextStyle(
+                  color: const Color.fromARGB(
+                      255, 103, 102, 102))), // Text color set to black
+        ],
+      ),
     );
   }
 
