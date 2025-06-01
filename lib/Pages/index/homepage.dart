@@ -18,20 +18,31 @@ class _HomePageState extends State<HomePage> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Find Your desire',
-              style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 22.0,
-                  fontWeight: FontWeight.w500),
+            Padding(
+              padding: const EdgeInsets.only(top: 12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Find your desire',
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 22.0,
+                        fontWeight: FontWeight.w500),
+                  ),
+                  Text(
+                    'health solution',
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 22.0,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
             ),
-            Text(
-              'health solution',
-              style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 22.0,
-                  fontWeight: FontWeight.w500),
-            ),
+            
+            
+           
           ],
         ),
         backgroundColor: Colors.white,
@@ -49,27 +60,31 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Search Bar
-              TextField(
-                decoration: InputDecoration(
+                SizedBox(
+                height: 40.0, // Set a shorter height for the search bar
+                child: TextField(
+                  decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                   hintText: 'Search Doctor, Hospitals, Ambulance...',
                   hintStyle: const TextStyle(
-                      color: Colors.grey), // Hint text color changed to black
+                    color: Colors.grey), // Hint text color changed to black
                   prefixIcon: const Icon(Icons.search,
-                      color: Colors.grey), // Icon color changed to black
+                    color: Colors.grey), // Icon color changed to black
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24.0),
-                    borderSide: BorderSide(color: Colors.teal),
+                    borderSide: const BorderSide(color: Colors.grey),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24.0),
-                    borderSide: BorderSide(color: Colors.teal),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
                   ),
                 ),
-              ),
+                ),
               const SizedBox(height: 16.0),
 
               // Categories
-              Row(
+                Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildCategoryCard('assets/icon/Doctor.png', 'Doctor'),
@@ -77,7 +92,7 @@ class _HomePageState extends State<HomePage> {
                   _buildCategoryCard('assets/icon/Hospital.png', 'Hospital'),
                   _buildCategoryCard('assets/icon/Ambulance.png', 'Ambulance'),
                 ],
-              ),
+                ),
               const SizedBox(height: 16.0),
 
               // Banner
@@ -94,13 +109,16 @@ class _HomePageState extends State<HomePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Early protection for your family health',
-                            style: TextStyle(
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold,
-                              color:
-                                  Colors.black, // Text color changed to black
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: const Text(
+                              'Early protection for your family health',
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    Colors.black, // Text color changed to black
+                              ),
                             ),
                           ),
                           const SizedBox(height: 20.0),
@@ -120,7 +138,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     const SizedBox(width: 16.0),
                     Image.asset('assets/image.png',
-                        width: 180.0, height: 180.0),
+                        width: 120.0, height: 120.0),
                     // Icon(Icons.health_and_safety,
                     //     size: 64.0,
                     //     color: Colors.teal), // Icon color changed to teal
