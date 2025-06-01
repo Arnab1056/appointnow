@@ -106,7 +106,7 @@ class Screen05 extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => RegisterPage()),
+                    MaterialPageRoute(builder: (context) => const RegisterPage()),
                   ); // Navigate to Sign Up Screen
                 },
                 style: OutlinedButton.styleFrom(

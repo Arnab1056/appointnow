@@ -1,12 +1,6 @@
 // import 'package:appointnow/Pages/Auth/login.dart';
 // import 'package:appointnow/Pages/Auth/register.dart';
-import 'package:appointnow/pages/auth/login_success_screen.dart';
-import 'package:appointnow/pages/auth/register.dart';
-import 'package:appointnow/pages/auth/register_success_screen.dart';
 import 'package:appointnow/pages/index/homepage.dart';
-import 'package:appointnow/pages/index/screen01.dart';
-import 'package:appointnow/pages/index/screen02.dart';
-import 'package:appointnow/pages/index/screen03.dart';
 import 'package:flutter/material.dart';
 
 void main() {

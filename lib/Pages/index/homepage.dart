@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 // Converted the HomePage widget to a StatefulWidget
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -11,13 +13,13 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Find your desire health solution',
+        title: const Text('Find your desire health solution',
             style:
                 TextStyle(color: Colors.black)), // Text color changed to black
         backgroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications),
+            icon: const Icon(Icons.notifications),
             onPressed: () {},
           ),
         ],
@@ -32,21 +34,21 @@ class _HomePageState extends State<HomePage> {
               TextField(
                 decoration: InputDecoration(
                   hintText: 'Search Doctor, Hospitals, Ambulance...',
-                  hintStyle: TextStyle(
+                  hintStyle: const TextStyle(
                       color: Colors.grey), // Hint text color changed to black
-                  prefixIcon: Icon(Icons.search,
+                  prefixIcon: const Icon(Icons.search,
                       color: Colors.grey), // Icon color changed to black
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20.0),
-                    borderSide: BorderSide(color: Colors.teal),
+                    borderSide: const BorderSide(color: Colors.teal),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20.0),
-                    borderSide: BorderSide(color: Colors.teal),
+                    borderSide: const BorderSide(color: Colors.teal),
                   ),
                 ),
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
 
               // Categories
               Row(
@@ -58,11 +60,11 @@ class _HomePageState extends State<HomePage> {
                   _buildCategoryIcon(Icons.local_taxi, 'Ambulance'),
                 ],
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
 
               // Banner
               Container(
-                padding: EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
                   color: Colors.teal.withOpacity(
                       0.2), // Changed background color to teal with opacity
@@ -74,7 +76,7 @@ class _HomePageState extends State<HomePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Early protection for your family health',
                             style: TextStyle(
                               fontSize: 18.0,
@@ -83,14 +85,14 @@ class _HomePageState extends State<HomePage> {
                                   Colors.black, // Text color changed to black
                             ),
                           ),
-                          SizedBox(height: 20.0),
+                          const SizedBox(height: 20.0),
                           ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
                                   Colors.teal, // Button color changed to teal
                             ),
-                            child: Text('Learn more',
+                            child: const Text('Learn more',
                                 style: TextStyle(
                                     color: Colors
                                         .white)), // Text color changed to white
@@ -98,7 +100,7 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     ),
-                    SizedBox(width: 16.0),
+                    const SizedBox(width: 16.0),
                     Image.asset('assets/image.png',
                         width: 180.0, height: 180.0),
                     // Icon(Icons.health_and_safety,
@@ -107,24 +109,24 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
 
               // Top Doctors
               _buildSectionHeader('Top Doctor', onViewAll: () {}),
-              SizedBox(height: 8.0),
+              const SizedBox(height: 8.0),
               _buildHorizontalList(
                   ['Dr. Marcus Horiz', 'Dr. Maria Elena', 'Dr. Stevi Jess']),
 
               // Top Hospitals
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               _buildSectionHeader('Top Hospitals', onViewAll: () {}),
-              SizedBox(height: 8.0),
+              const SizedBox(height: 8.0),
               _buildHorizontalList(['Hospital A', 'Hospital B', 'Hospital C']),
 
               // Top Ambulance Service
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               _buildSectionHeader('Top Ambulance Service', onViewAll: () {}),
-              SizedBox(height: 8.0),
+              const SizedBox(height: 8.0),
               _buildHorizontalList(
                   ['Ambulance A', 'Ambulance B', 'Ambulance C']),
             ],
@@ -133,7 +135,7 @@ class _HomePageState extends State<HomePage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: Colors.teal, // Changed selected item color to teal
-        items: [
+        items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
@@ -151,10 +153,10 @@ class _HomePageState extends State<HomePage> {
           child: Icon(icon,
               size: 24.0, color: Colors.white), // Icon color changed to white
         ),
-        SizedBox(height: 8.0),
+        const SizedBox(height: 8.0),
         Text(label,
             style:
-                TextStyle(color: Colors.black)), // Text color changed to black
+                const TextStyle(color: Colors.black)), // Text color changed to black
       ],
     );
   }
@@ -165,7 +167,7 @@ class _HomePageState extends State<HomePage> {
       children: [
         Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 18.0,
             fontWeight: FontWeight.bold,
             color: Colors.black, // Text color changed to black
@@ -173,7 +175,7 @@ class _HomePageState extends State<HomePage> {
         ),
         TextButton(
           onPressed: onViewAll,
-          child: Text('See all',
+          child: const Text('See all',
               style: TextStyle(
                   color: Colors.teal)), // Button text color changed to black
         ),
@@ -190,7 +192,7 @@ class _HomePageState extends State<HomePage> {
         itemBuilder: (context, index) {
           return Container(
             width: 100.0,
-            margin: EdgeInsets.only(right: 8.0),
+            margin: const EdgeInsets.only(right: 8.0),
             decoration: BoxDecoration(
               color: Colors.teal.withOpacity(
                   0.2), // Changed background color to teal with opacity
@@ -200,7 +202,7 @@ class _HomePageState extends State<HomePage> {
               child: Text(
                 items[index],
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                     color: Colors.black), // Text color changed to black
               ),
             ),
