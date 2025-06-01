@@ -1,5 +1,7 @@
 import 'package:appointnow/pages/findDoctors/find_doctors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // Converted the HomePage widget to a StatefulWidget
 class HomePage extends StatefulWidget {
@@ -12,180 +14,202 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white, // Added background color
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Find your desire',
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 22.0,
-                        fontWeight: FontWeight.w500),
-                  ),
-                  Text(
-                    'health solution',
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 22.0,
-                        fontWeight: FontWeight.w500),
-                  ),
-                ],
-              ),
-            ),
-            
-            
-           
-          ],
-        ),
-        backgroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
+    return WillPopScope(
+      onWillPop: () async {
+        // Minimize the app (go to phone's home screen) instead of navigating back
+        SystemNavigator.pop();
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white, // Added background color
+        appBar: AppBar(
+          automaticallyImplyLeading: false, // Remove the top back button
+          title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Search Bar
-                SizedBox(
-                height: 40.0, // Set a shorter height for the search bar
-                child: TextField(
-                  decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-                  hintText: 'Search Doctor, Hospitals, Ambulance...',
-                  hintStyle: const TextStyle(
-                    color: Colors.grey), // Hint text color changed to black
-                  prefixIcon: const Icon(Icons.search,
-                    color: Colors.grey), // Icon color changed to black
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24.0),
-                    borderSide: const BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24.0),
-                    borderSide: const BorderSide(color: Colors.grey),
-                  ),
-                  ),
-                ),
-                ),
-              const SizedBox(height: 16.0),
-
-              // Categories
-                Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildCategoryCard('assets/icon/Doctor.png', 'Doctor'),
-                  _buildCategoryCard('assets/icon/Pharmacy.png', 'Pharmacy'),
-                  _buildCategoryCard('assets/icon/Hospital.png', 'Hospital'),
-                  _buildCategoryCard('assets/icon/Ambulance.png', 'Ambulance'),
-                ],
-                ),
-              const SizedBox(height: 16.0),
-
-              // Banner
-              Container(
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  color: Colors.teal.withOpacity(
-                      0.2), // Changed background color to teal with opacity
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Row(
+              Padding(
+                padding: const EdgeInsets.only(top: 12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: const Text(
-                              'Early protection for your family health',
-                              style: TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.bold,
-                                color:
-                                    Colors.black, // Text color changed to black
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 20.0),
-                          ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  Colors.teal, // Button color changed to teal
-                            ),
-                            child: const Text('Learn more',
-                                style: TextStyle(
-                                    color: Colors
-                                        .white)), // Text color changed to white
-                          ),
-                        ],
-                      ),
+                    Text(
+                      'Find your desire',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 22.0,
+                          fontWeight: FontWeight.w500),
                     ),
-                    const SizedBox(width: 16.0),
-                    Image.asset('assets/image.png',
-                        width: 120.0, height: 120.0),
-                    // Icon(Icons.health_and_safety,
-                    //     size: 64.0,
-                    //     color: Colors.teal), // Icon color changed to teal
+                    Text(
+                      'health solution',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 22.0,
+                          fontWeight: FontWeight.w500),
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(height: 16.0),
-
-              // Top Doctors
-              _buildSectionHeader('Top Doctor', onViewAll: () {}),
-              const SizedBox(height: 8.0),
-              _buildHorizontalList(
-                  ['Dr. Marcus Horiz', 'Dr. Maria Elena', 'Dr. Stevi Jess']),
-
-              // Top Hospitals
-              const SizedBox(height: 16.0),
-              _buildSectionHeader('Top Hospitals', onViewAll: () {}),
-              const SizedBox(height: 8.0),
-              _buildHorizontalList(['Hospital A', 'Hospital B', 'Hospital C']),
-
-              // Top Ambulance Service
-              const SizedBox(height: 16.0),
-              _buildSectionHeader('Top Ambulance Service', onViewAll: () {}),
-              const SizedBox(height: 8.0),
-              _buildHorizontalList(
-                  ['Ambulance A', 'Ambulance B', 'Ambulance C']),
             ],
           ),
+          backgroundColor: Colors.white,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.notifications),
+              onPressed: () {},
+            ),
+            IconButton(
+              icon: const Icon(Icons.logout),
+              tooltip: 'Logout',
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Logged out successfully')),
+                  );
+                }
+              },
+            ),
+          ],
         ),
-      ),
-      // Updated BottomNavigationBar to ensure equal spacing between items
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.teal, // Changed selected item color to teal
-        unselectedItemColor:
-            Colors.grey, // Added unselected item color for visibility
-        showUnselectedLabels:
-            true, // Ensures labels are visible for unselected items
-        type: BottomNavigationBarType
-            .fixed, // Ensures equal spacing between items
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today),
-              label: 'Appointments'), // Appointment date icon
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Search Bar
+                SizedBox(
+                  height: 40.0, // Set a shorter height for the search bar
+                  child: TextField(
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 0, horizontal: 16),
+                      hintText: 'Search Doctor, Hospitals, Ambulance...',
+                      hintStyle: const TextStyle(
+                          color:
+                              Colors.grey), // Hint text color changed to black
+                      prefixIcon: const Icon(Icons.search,
+                          color: Colors.grey), // Icon color changed to black
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24.0),
+                        borderSide: const BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24.0),
+                        borderSide: const BorderSide(color: Colors.grey),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+
+                // Categories
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildCategoryCard('assets/icon/Doctor.png', 'Doctor'),
+                    _buildCategoryCard('assets/icon/Pharmacy.png', 'Pharmacy'),
+                    _buildCategoryCard('assets/icon/Hospital.png', 'Hospital'),
+                    _buildCategoryCard(
+                        'assets/icon/Ambulance.png', 'Ambulance'),
+                  ],
+                ),
+                const SizedBox(height: 16.0),
+
+                // Banner
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: Colors.teal.withOpacity(
+                        0.2), // Changed background color to teal with opacity
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: const Text(
+                                'Early protection for your family health',
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors
+                                      .black, // Text color changed to black
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20.0),
+                            ElevatedButton(
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Colors.teal, // Button color changed to teal
+                              ),
+                              child: const Text('Learn more',
+                                  style: TextStyle(
+                                      color: Colors
+                                          .white)), // Text color changed to white
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16.0),
+                      Image.asset('assets/image.png',
+                          width: 120.0, height: 120.0),
+                      // Icon(Icons.health_and_safety,
+                      //     size: 64.0,
+                      //     color: Colors.teal), // Icon color changed to teal
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+
+                // Top Doctors
+                _buildSectionHeader('Top Doctor', onViewAll: () {}),
+                const SizedBox(height: 8.0),
+                _buildHorizontalList(
+                    ['Dr. Marcus Horiz', 'Dr. Maria Elena', 'Dr. Stevi Jess']),
+
+                // Top Hospitals
+                const SizedBox(height: 16.0),
+                _buildSectionHeader('Top Hospitals', onViewAll: () {}),
+                const SizedBox(height: 8.0),
+                _buildHorizontalList(
+                    ['Hospital A', 'Hospital B', 'Hospital C']),
+
+                // Top Ambulance Service
+                const SizedBox(height: 16.0),
+                _buildSectionHeader('Top Ambulance Service', onViewAll: () {}),
+                const SizedBox(height: 8.0),
+                _buildHorizontalList(
+                    ['Ambulance A', 'Ambulance B', 'Ambulance C']),
+              ],
+            ),
+          ),
+        ),
+        // Updated BottomNavigationBar to ensure equal spacing between items
+        bottomNavigationBar: BottomNavigationBar(
+          selectedItemColor: Colors.teal, // Changed selected item color to teal
+          unselectedItemColor:
+              Colors.grey, // Added unselected item color for visibility
+          showUnselectedLabels:
+              true, // Ensures labels are visible for unselected items
+          type: BottomNavigationBarType
+              .fixed, // Ensures equal spacing between items
+          items: [
+            BottomNavigationBarItem(
+                icon: Icon(Icons.home_rounded), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.calendar_today),
+                label: 'Appointments'), // Appointment date icon
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          ],
+        ),
       ),
     );
   }
