@@ -2,7 +2,10 @@
 // import 'package:appointnow/Pages/Auth/register.dart';
 import 'package:appointnow/pages/index/homepage.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
+// ...
 void main() {
   runApp(const MyApp());
 }
