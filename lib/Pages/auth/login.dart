@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controllers/auth_controller.dart';
 import 'register.dart'; // Ensure this is the correct path to the file containing RegisterPage
+import 'package:appointnow/pages/index/homepage.dart'; // Ensure this is the correct path to the file containing HomePage
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -73,11 +74,32 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () {
-                _authController.login(
-                  _emailController.text,
-                  _passwordController.text,
-                );
+              onPressed: () async {
+                try {
+                  final userData = await _authController.login(
+                    _emailController.text,
+                    _passwordController.text,
+                  );
+                  if (mounted) {
+                    if (userData != null && userData['role'] == 'User') {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => HomePage()),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content:
+                                Text('Login successful, but not a User role.')),
+                      );
+                      // TODO: Handle other roles if needed
+                    }
+                  }
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Login failed: \\${e.toString()}')),
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF199A8E),
@@ -97,7 +119,8 @@ class _LoginPageState extends State<LoginPage> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const RegisterPage()),
+                      MaterialPageRoute(
+                          builder: (context) => const RegisterPage()),
                     );
                     _authController.signUp();
                   },

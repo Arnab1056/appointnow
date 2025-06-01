@@ -1,6 +1,6 @@
 import 'package:appointnow/Pages/Auth/register.dart';
-// import 'package:appointnow/Pages/Auth/login.dart';
 import 'package:appointnow/pages/index/homepage.dart';
+import 'package:appointnow/pages/index/screen01.dart'; // Add this import for Screen01
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
         //   '/register': (context) => const RegisterPage(),
         //   '/login': (context) => LoginPage(),
         // },
-        home: RegisterPage(),
+        home: Screen01(),
         // Screen01()
         // RegisterSuccessScreen()
         // // Change this to Screen02() to test the second scree

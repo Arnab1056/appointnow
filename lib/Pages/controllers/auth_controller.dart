@@ -2,9 +2,37 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthController {
-  void login(String email, String password) {
-    // Implement login logic here
-    print('Logging in with email: $email and password: $password');
+  Future<Map<String, dynamic>?> login(String email, String password) async {
+    if (email.isEmpty || password.isEmpty) {
+      print('Email and password are required');
+      throw Exception('Email and password are required');
+    }
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      print('Login successful: \\${userCredential.user?.uid}');
+      // Fetch user data from Firestore
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user?.uid)
+          .get();
+      if (userDoc.exists) {
+        print('User data: \\${userDoc.data()}');
+        return userDoc.data();
+      } else {
+        print('No user data found in Firestore');
+        return null;
+      }
+    } on FirebaseAuthException catch (e) {
+      print('Login failed: \\${e.message}');
+      throw Exception(e.message);
+    } catch (e) {
+      print('An error occurred: \\${e.toString()}');
+      throw Exception(e.toString());
+    }
   }
 
   void signUp() {
