@@ -1,4 +1,5 @@
 import 'package:appointnow/pages/index/screen03.dart';
+import 'package:appointnow/pages/index/screen05.dart';
 import 'package:flutter/material.dart';
 
 class Screen02 extends StatelessWidget {
@@ -17,22 +18,16 @@ class Screen02 extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Align(
-                        alignment: Alignment.topLeft,
-                        child: IconButton(
-                          icon: const Icon(Icons.arrow_back),
-                          onPressed: () {
-                            Navigator.pop(
-                                context); // Goes back to previous screen
-                          },
-                        ),
-                      ),
                       const Spacer(),
                       Align(
                         alignment: Alignment.topRight,
                         child: TextButton(
                           onPressed: () {
-                            // Skip action
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const Screen05()),
+                            );
                           },
                           child: const Text("Skip"),
                         ),
@@ -43,9 +38,11 @@ class Screen02 extends StatelessWidget {
 
                   // Doctor Image
                   Expanded(
-                    child: Image.asset(
-                      'assets/image.png',
-                      fit: BoxFit.contain,
+                    child: Center(
+                      child: Image.asset(
+                        'assets/image.png',
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
 
@@ -69,7 +66,7 @@ class Screen02 extends StatelessWidget {
                               Text(
                                 "Consult only with a doctor you trust",
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.black87,
                                 ),

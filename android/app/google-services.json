@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "507759935433",
+    "project_id": "appointnow-2bdba",
+    "storage_bucket": "appointnow-2bdba.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:507759935433:android:053fba5f2ec4c3a972b218",
+        "android_client_info": {
+          "package_name": "com.example.appointnow"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABjtOKRdqqAZx4g6pett9SGQkgNe-_MsE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
