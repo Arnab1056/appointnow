@@ -65,6 +65,10 @@ flutter:
     - assets/image.png
     - assets/ManDoctor.png
     - assets/MaleDoctor.webP
+    - assets/icon/Doctor.png
+    - assets/icon/Pharmacy.png
+    - assets/icon/Hospital.png
+    - assets/icon/Ambulance.png
     # - images/a_dot_burr.jpeg
     # - images/a_dot_ham.jpeg
 
