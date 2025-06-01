@@ -25,7 +25,8 @@ class MyApp extends StatelessWidget {
         //   '/register': (context) => const RegisterPage(),
         //   '/login': (context) => LoginPage(),
         // },
-        home: Screen01()
+        home: HomePage()
+        // Screen01()
         // RegisterSuccessScreen()
         // // Change this to Screen02() to test the second scree
         );

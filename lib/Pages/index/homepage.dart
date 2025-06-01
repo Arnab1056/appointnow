@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 
-class HomePage extends StatelessWidget {
+// Converted the HomePage widget to a StatefulWidget
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,11 +37,11 @@ class HomePage extends StatelessWidget {
                   prefixIcon: Icon(Icons.search,
                       color: Colors.grey), // Icon color changed to black
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+                    borderRadius: BorderRadius.circular(20.0),
                     borderSide: BorderSide(color: Colors.teal),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+                    borderRadius: BorderRadius.circular(20.0),
                     borderSide: BorderSide(color: Colors.teal),
                   ),
                 ),
@@ -56,10 +62,10 @@ class HomePage extends StatelessWidget {
 
               // Banner
               Container(
-                padding: EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
                   color: Colors.teal.withOpacity(
-                      0.1), // Changed background color to teal with opacity
+                      0.2), // Changed background color to teal with opacity
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: Row(
@@ -71,31 +77,33 @@ class HomePage extends StatelessWidget {
                           Text(
                             'Early protection for your family health',
                             style: TextStyle(
-                              fontSize: 16.0,
+                              fontSize: 18.0,
                               fontWeight: FontWeight.normal,
                               color:
                                   Colors.black, // Text color changed to black
                             ),
                           ),
-                          SizedBox(height: 8.0),
+                          SizedBox(height: 20.0),
                           ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
                                   Colors.teal, // Button color changed to teal
                             ),
-                            child: Text(
-                              'Learn more',
-                              style: TextStyle(color: Colors.white),
-                            ),
+                            child: Text('Learn more',
+                                style: TextStyle(
+                                    color: Colors
+                                        .white)), // Text color changed to white
                           ),
                         ],
                       ),
                     ),
                     SizedBox(width: 16.0),
-                    Icon(Icons.health_and_safety,
-                        size: 64.0,
-                        color: Colors.teal), // Icon color changed to teal
+                    Image.asset('assets/image.png',
+                        width: 180.0, height: 180.0),
+                    // Icon(Icons.health_and_safety,
+                    //     size: 64.0,
+                    //     color: Colors.teal), // Icon color changed to teal
                   ],
                 ),
               ),
