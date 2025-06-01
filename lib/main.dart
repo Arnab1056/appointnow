@@ -3,6 +3,7 @@ import 'package:appointnow/pages/index/homepage.dart';
 import 'package:appointnow/pages/index/screen01.dart'; // Add this import for Screen01
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -19,16 +20,24 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        // initialRoute: '/register',
-        // routes: {
-        //   '/register': (context) => const RegisterPage(),
-        //   '/login': (context) => LoginPage(),
-        // },
-        home: Screen01(),
-        // Screen01()
-        // RegisterSuccessScreen()
-        // // Change this to Screen02() to test the second scree
-        );
+      debugShowCheckedModeBanner: false,
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+          if (snapshot.hasData && snapshot.data != null) {
+            // User is logged in
+            return HomePage();
+          } else {
+            // User is not logged in
+            return Screen01();
+          }
+        },
+      ),
+    );
   }
 }
