@@ -1,3 +1,4 @@
+import 'package:appointnow/pages/findDoctors/find_doctors.dart';
 import 'package:flutter/material.dart';
 
 // Converted the HomePage widget to a StatefulWidget
@@ -10,10 +11,27 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // Added background color
       appBar: AppBar(
-        title: Text('Find your desire health solution',
-            style:
-                TextStyle(color: Colors.black)), // Text color changed to black
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Find Your desire',
+              style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 22.0,
+                  fontWeight: FontWeight.w500),
+            ),
+            Text(
+              'health solution',
+              style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 22.0,
+                  fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
         backgroundColor: Colors.white,
         actions: [
           IconButton(
@@ -78,7 +96,7 @@ class _HomePageState extends State<HomePage> {
                             'Early protection for your family health',
                             style: TextStyle(
                               fontSize: 18.0,
-                              fontWeight: FontWeight.normal,
+                              fontWeight: FontWeight.bold,
                               color:
                                   Colors.black, // Text color changed to black
                             ),
@@ -155,6 +173,10 @@ class _HomePageState extends State<HomePage> {
   Widget _buildCategoryCard(String iconPath, String label) {
     return GestureDetector(
       onTap: () {
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => FindDoctorScreen()),
+        // );
         // Handle card click
         print('$label card clicked');
       },
@@ -168,7 +190,7 @@ class _HomePageState extends State<HomePage> {
               borderRadius: BorderRadius.circular(8.0),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
+                  color: Colors.white,
                   spreadRadius: 2,
                   blurRadius: 5,
                   offset: Offset(0, 3), // changes position of shadow
