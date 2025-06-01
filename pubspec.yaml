@@ -65,9 +65,10 @@ flutter:
   assets:
     - assets/google_icon.png
     - assets/logo.png
+    - assets/no.png
     - assets/image.png
     - assets/ManDoctor.png
-    - assets/MaleDoctor.webP
+    - assets/MaleDoctor.png
     - assets/icon/Doctor.png
     - assets/icon/Pharmacy.png
     - assets/icon/Hospital.png

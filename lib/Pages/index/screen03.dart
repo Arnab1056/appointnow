@@ -1,4 +1,5 @@
 import 'package:appointnow/pages/index/screen04.dart';
+import 'package:appointnow/pages/index/screen05.dart';
 import 'package:flutter/material.dart';
 
 class Screen03 extends StatelessWidget {
@@ -33,7 +34,11 @@ class Screen03 extends StatelessWidget {
                         alignment: Alignment.topRight,
                         child: TextButton(
                           onPressed: () {
-                            // Skip action
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const Screen05()),
+                            );
                           },
                           child: const Text("Skip"),
                         ),
@@ -44,9 +49,11 @@ class Screen03 extends StatelessWidget {
 
                   // Doctor Image
                   Expanded(
-                    child: Image.asset(
-                      'assets/ManDoctor.png',
-                      fit: BoxFit.contain,
+                    child: Center(
+                      child: Image.asset(
+                        'assets/ManDoctor.png',
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
 
