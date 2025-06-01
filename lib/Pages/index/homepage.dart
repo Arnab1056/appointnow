@@ -1,3 +1,4 @@
+import 'package:appointnow/pages/user_profile/user_profile.dart';
 import 'package:appointnow/pages/findDoctors/find_doctors.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +9,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int _currentIndex = 0; // Added variable to track the current index
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -149,22 +152,60 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      // Updated BottomNavigationBar to ensure equal spacing between items
+      // Updated BottomNavigationBar to navigate to specific pages on tap
       bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.teal, // Changed selected item color to teal
+        currentIndex: _currentIndex, // Set the current index
+        selectedItemColor: Colors.teal, // Ensure selected item color is teal
         unselectedItemColor:
             Colors.grey, // Added unselected item color for visibility
         showUnselectedLabels:
             true, // Ensures labels are visible for unselected items
+        backgroundColor:
+            Colors.white, // Ensures labels are visible for unselected items
         type: BottomNavigationBarType
             .fixed, // Ensures equal spacing between items
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index; // Update the selected index
+          });
+
+          // Navigate to the specific page based on the selected index
+          switch (index) {
+            case 0:
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => HomePage()),
+              );
+              break;
+            // case 1:
+            //   Navigator.push(
+            //     context,
+            //     MaterialPageRoute(builder: (context) => ChatPage()),
+            //   );
+            //   break;
+            // case 2:
+            //   Navigator.push(
+            //     context,
+            //     MaterialPageRoute(builder: (context) => AppointmentsPage()),
+            //   );
+            //   break;
+            case 3:
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => UserProfilePage()),
+              );
+              break;
+            default:
+              break;
+          }
+        },
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.mail_outline), label: ''),
           BottomNavigationBarItem(
               icon: Icon(Icons.calendar_today),
-              label: 'Appointments'), // Appointment date icon
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+              label: ''), // Appointment date icon
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
         ],
       ),
     );

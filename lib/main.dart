@@ -1,5 +1,6 @@
-// import 'package:appointnow/Pages/Auth/login.dart';
+import 'package:appointnow/Pages/Auth/login.dart';
 // import 'package:appointnow/Pages/Auth/register.dart';
+import 'package:appointnow/pages/user_profile/user_profile.dart';
 import 'package:appointnow/pages/auth/login_success_screen.dart';
 import 'package:appointnow/pages/auth/register.dart';
 import 'package:appointnow/pages/auth/register_success_screen.dart';
@@ -25,7 +26,9 @@ class MyApp extends StatelessWidget {
         //   '/register': (context) => const RegisterPage(),
         //   '/login': (context) => LoginPage(),
         // },
-        home: HomePage()
+        home:
+            // UserProfilePage()
+            HomePage()
         // Screen01()
         // RegisterSuccessScreen()
         // // Change this to Screen02() to test the second scree
