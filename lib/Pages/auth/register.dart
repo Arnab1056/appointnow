@@ -69,8 +69,9 @@ class _RegisterPageState extends State<RegisterPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // Set background to pure white
       appBar: AppBar(
-        title: const Text('Sign Up', style: TextStyle(color: Colors.black)),
+        title: const Text('', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,
@@ -86,215 +87,266 @@ class _RegisterPageState extends State<RegisterPage>
           SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextField(
-                    controller: _nameController,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.person_outline,
-                          color: Color.fromARGB(255, 139, 136, 136)),
-                      hintText: 'Enter your name',
-                      border: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 185, 183, 183)),
-                        borderRadius: BorderRadius.circular(20.0),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Logo at the top
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 24.0),
+                      child: Image.asset(
+                        'assets/no.png',
+                        width: 120,
+                        height: 120,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.email_outlined,
-                          color: Color.fromARGB(255, 139, 136, 136)),
-                      hintText: 'Enter your email',
-                      border: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 185, 183, 183)),
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.lock_outline,
-                          color: Color.fromARGB(255, 139, 136, 136)),
-                      suffixIcon: const Icon(Icons.visibility_off,
-                          color: Color.fromARGB(255, 139, 136, 136)),
-                      hintText: 'Enter your password',
-                      border: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 185, 183, 183)),
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _confirmPasswordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.lock_outline,
-                          color: Color.fromARGB(255, 139, 136, 136)),
-                      suffixIcon: const Icon(Icons.visibility_off,
-                          color: Color.fromARGB(255, 139, 136, 136)),
-                      hintText: 'Confirm your password',
-                      border: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 185, 183, 183)),
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<String>(
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.person_outline,
-                          color: Color.fromARGB(255, 139, 136, 136)),
-                      hintText: 'Select your role',
-                      border: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 185, 183, 183)),
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 'User', child: Text('User')),
-                      DropdownMenuItem(value: 'Doctor', child: Text('Doctor')),
-                      DropdownMenuItem(value: 'Assistant', child: Text('Assistant')),
-                      DropdownMenuItem(value: 'Hospital', child: Text('Hospital')),
-                      DropdownMenuItem(value: 'Diagnosis', child: Text('Diagnosis')),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedRole = value;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Checkbox(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5.0),
+                    // Name input
+                    TextField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.person_outline,
+                            color: Colors.grey),
+                        hintText: 'Enter your name',
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24.0),
+                          borderSide: const BorderSide(color: Colors.grey),
                         ),
-                        activeColor: const Color(0xFF199A8E),
-                        // checkColor: Colors.white,
-                        value: _agreeToTerms,
-                        onChanged: (value) {
-                          setState(() {
-                            _agreeToTerms = value!;
-                          });
-                        },
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24.0),
+                          borderSide: const BorderSide(
+                              color: Color(0xFF199A8E), width: 2),
+                        ),
                       ),
-                      Expanded(
-                        child: RichText(
-                          text: const TextSpan(
-                            text: 'I agree to the appointnow ',
-                            style: TextStyle(color: Colors.black),
-                            children: [
-                              TextSpan(
-                                text: 'Terms of Service',
-                                style: TextStyle(color: Color(0xFF199A8E)),
-                                // Add navigation logic here
-                              ),
-                              TextSpan(
-                                text: ' and ',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                              TextSpan(
-                                text: 'Privacy Policy',
-                                style: TextStyle(color: Color(0xFF199A8E)),
-                                // Add navigation logic here
-                              ),
-                            ],
+                    ),
+                    const SizedBox(height: 16),
+                    // Email input
+                    TextField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.email_outlined,
+                            color: Colors.grey),
+                        hintText: 'Enter your email',
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24.0),
+                          borderSide: const BorderSide(color: Colors.grey),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24.0),
+                          borderSide: const BorderSide(
+                              color: Color(0xFF199A8E), width: 2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Password input
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        prefixIcon:
+                            const Icon(Icons.lock_outline, color: Colors.grey),
+                        suffixIcon: const Icon(Icons.visibility_off,
+                            color: Colors.grey),
+                        hintText: 'Enter your password',
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24.0),
+                          borderSide: const BorderSide(color: Colors.grey),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24.0),
+                          borderSide: const BorderSide(
+                              color: Color(0xFF199A8E), width: 2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Confirm Password input
+                    TextField(
+                      controller: _confirmPasswordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        prefixIcon:
+                            const Icon(Icons.lock_outline, color: Colors.grey),
+                        suffixIcon: const Icon(Icons.visibility_off,
+                            color: Colors.grey),
+                        hintText: 'Confirm your password',
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24.0),
+                          borderSide: const BorderSide(color: Colors.grey),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24.0),
+                          borderSide: const BorderSide(
+                              color: Color(0xFF199A8E), width: 2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Role dropdown
+                    DropdownButtonFormField<String>(
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.person_outline,
+                            color: Colors.grey),
+                        hintText: 'Select your role',
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        filled: true,
+                        fillColor:
+                            Colors.white, // Ensure dropdown background is white
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24.0),
+                          borderSide: const BorderSide(color: Colors.grey),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24.0),
+                          borderSide: const BorderSide(
+                              color: Color(0xFF199A8E), width: 2),
+                        ),
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: 'User', child: Text('User')),
+                        DropdownMenuItem(
+                            value: 'Doctor', child: Text('Doctor')),
+                        DropdownMenuItem(
+                            value: 'Assistant', child: Text('Assistant')),
+                        DropdownMenuItem(
+                            value: 'Hospital', child: Text('Hospital')),
+                        DropdownMenuItem(
+                            value: 'Diagnosis', child: Text('Diagnosis')),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedRole = value;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    // Terms and conditions
+                    Row(
+                      children: [
+                        Checkbox(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                          activeColor: const Color(0xFF199A8E),
+                          value: _agreeToTerms,
+                          onChanged: (value) {
+                            setState(() {
+                              _agreeToTerms = value!;
+                            });
+                          },
+                        ),
+                        Expanded(
+                          child: RichText(
+                            text: const TextSpan(
+                              text: 'I agree to the appointnow ',
+                              style: TextStyle(color: Colors.black),
+                              children: [
+                                TextSpan(
+                                  text: 'Terms of Service',
+                                  style: TextStyle(color: Color(0xFF199A8E)),
+                                ),
+                                TextSpan(
+                                  text: ' and ',
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                                TextSpan(
+                                  text: 'Privacy Policy',
+                                  style: TextStyle(color: Color(0xFF199A8E)),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (_passwordController.text !=
-                          _confirmPasswordController.text) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Passwords do not match!')),
-                        );
-                        return;
-                      }
-                      if (!_agreeToTerms) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('You must agree to the terms!')),
-                        );
-                        return;
-                      }
-                      if (_selectedRole == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Please select a role!')),
-                        );
-                        return;
-                      }
-                      try {
-                        await _authController.register(
-                          _nameController.text,
-                          _emailController.text,
-                          _passwordController.text,
-                          _selectedRole,
-                        );
-                        if (mounted) {
-                          _showSuccessAndNavigate();
-                        }
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content:
-                                  Text('Registration failed: \\${e.toString()}')),
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromRGBO(25, 154, 142, 1),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                      minimumSize: const Size(double.infinity, 50),
+                      ],
                     ),
-                    child:
-                        const Text('Sign Up', style: TextStyle(color: Colors.white)),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Do you already have an account? "),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => LoginPage()),
+                    const SizedBox(height: 16),
+                    // Sign Up button
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (_passwordController.text !=
+                            _confirmPasswordController.text) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Passwords do not match!')),
                           );
-                        },
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(
-                            color: Color(0xFF199A8E),
-                            // decoration: TextDecoration.underline,
+                          return;
+                        }
+                        if (!_agreeToTerms) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('You must agree to the terms!')),
+                          );
+                          return;
+                        }
+                        if (_selectedRole == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Please select a role!')),
+                          );
+                          return;
+                        }
+                        try {
+                          await _authController.register(
+                            _nameController.text,
+                            _emailController.text,
+                            _passwordController.text,
+                            _selectedRole,
+                          );
+                          if (mounted) {
+                            _showSuccessAndNavigate();
+                          }
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text(
+                                    'Registration failed: \\${e.toString()}')),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF199A8E),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        minimumSize: const Size(double.infinity, 50),
+                      ),
+                      child: const Text('Sign Up',
+                          style: TextStyle(color: Colors.white)),
+                    ),
+                    const SizedBox(height: 16),
+                    // Login link
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Do you already have an account? "),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LoginPage()),
+                            );
+                          },
+                          child: const Text(
+                            'Login',
+                            style: TextStyle(
+                              color: Color(0xFF199A8E),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-          if (_registerSuccess)
+          if (_registerSuccess) ...[
             Positioned.fill(
               child: Container(
                 color: Colors.black.withOpacity(0.3),
@@ -345,6 +397,7 @@ class _RegisterPageState extends State<RegisterPage>
                 ),
               ),
             ),
+          ],
         ],
       ),
     );
