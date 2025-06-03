@@ -1,4 +1,5 @@
 import 'package:appointnow/Pages/Auth/register.dart';
+import 'package:appointnow/pages/doctor_details_pages/appointment.dart';
 import 'package:appointnow/pages/doctor_details_pages/doctor_details.dart';
 import 'package:appointnow/pages/findDoctors/find_doctors.dart';
 import 'package:appointnow/pages/index/homepage.dart';
@@ -22,7 +23,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false, home: DoctorDetailsPage()
+        debugShowCheckedModeBanner: false, home: AppointmentPage()
+        // DoctorDetailsPage()
         // FindDoctorsPage()
         // StreamBuilder<User?>(
         //   stream: FirebaseAuth.instance.authStateChanges(),

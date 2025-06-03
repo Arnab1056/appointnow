@@ -50,6 +50,15 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
         centerTitle: true,
         elevation: 0,
         leading: const BackButton(color: Colors.black),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.more_vert, color: Colors.black),
+            onPressed: () {
+              // Handle three-dotted icon action
+              print("Three-dotted icon clicked");
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -150,72 +159,82 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                 return Card(
                   color: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(color: Colors.grey.withOpacity(0.2)),
+                    borderRadius: BorderRadius.circular(15),
+                    side: BorderSide(color: Colors.white.withOpacity(0.1)),
                   ),
-                  margin: const EdgeInsets.only(bottom: 10),
+                  margin: const EdgeInsets.only(bottom: 7),
                   child: Padding(
                     padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: Colors.teal,
-                                borderRadius: BorderRadius.circular(8),
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.teal,
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                slot['day'],
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
                               ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    slot['day'],
-                                    style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  Text(
-                                    slot['date'],
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                ],
+                              Text(
+                                slot['date'],
+                                style: const TextStyle(color: Colors.white),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            ...List.generate(slot['times'].length, (tIndex) {
-                              String time = slot['times'][tIndex];
-                              bool selected =
-                                  selectedSlot == index * 10 + tIndex;
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 6),
-                                child: ChoiceChip(
-                                  label: Text(time),
-                                  selected: selected,
-                                  selectedColor: Colors.teal,
-                                  onSelected: (_) {
-                                    setState(() {
-                                      selectedSlot = index * 10 + tIndex;
-                                    });
-                                  },
-                                ),
-                              );
-                            })
-                          ],
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 8),
-                        Row(
+                        const SizedBox(width: 15),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.location_on,
-                                size: 14, color: Colors.grey),
-                            const SizedBox(width: 4),
-                            Text(
-                              slot['location'],
-                              style: const TextStyle(
-                                  fontSize: 12, color: Colors.black),
+                            Row(
+                              children:
+                                  List.generate(slot['times'].length, (tIndex) {
+                                String time = slot['times'][tIndex];
+                                bool selected =
+                                    selectedSlot == index * 10 + tIndex;
+                                return Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 6),
+                                  child: ChoiceChip(
+                                    label: Text(time),
+                                    selected: selected,
+                                    selectedColor: Colors.teal,
+                                    labelStyle: TextStyle(
+                                      color: selected
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontSize: 12,
+                                    ),
+                                    backgroundColor: Colors.white,
+                                    onSelected: (_) {
+                                      setState(() {
+                                        selectedSlot = index * 10 + tIndex;
+                                      });
+                                    },
+                                  ),
+                                );
+                              }),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.location_on,
+                                    size: 14, color: Colors.grey),
+                                const SizedBox(width: 4),
+                                Text(
+                                  slot['location'],
+                                  style: const TextStyle(
+                                      fontSize: 12, color: Colors.black),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -227,44 +246,51 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
             ),
             const SizedBox(height: 16),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment:
+                  MainAxisAlignment.spaceAround, // Align items to the edges
               children: [
                 GestureDetector(
                   onTap: () {
-                    print("Message icon clicked");
+                    print("Chat icon clicked");
                   },
                   child: Container(
+                    padding: const EdgeInsets.only(left: 10, right: 10),
                     width: 50,
                     height: 50,
                     decoration: BoxDecoration(
                       color: Colors.teal.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.message, color: Colors.teal),
+                    child: Image.asset(
+                      'assets/icon/chat.png',
+                      width: 24,
+                      height: 24,
+                    ),
                   ),
                 ),
-                const SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: selectedSlot >= 0
-                      ? () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  const Placeholder(), // Replace with AppointmentsPage
-                            ),
-                          );
-                        }
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    shape: const StadiumBorder(),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 50, vertical: 14),
-                    backgroundColor: Colors.teal,
-                  ),
-                  child: const Text(
-                    "Book Appointment",
-                    style: TextStyle(color: Colors.white, fontSize: 14),
+                SizedBox(
+                  width: 250, // Set button width to 266 pixels
+                  height: 45, // Set button height to 50 pixels
+                  child: ElevatedButton(
+                    onPressed: selectedSlot >= 0
+                        ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    const Placeholder(), // Replace with AppointmentsPage
+                              ),
+                            );
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      shape: const StadiumBorder(),
+                      backgroundColor: Colors.teal,
+                    ),
+                    child: const Text(
+                      "Book Appointment",
+                      style: TextStyle(color: Colors.white, fontSize: 14),
+                    ),
                   ),
                 ),
               ],
