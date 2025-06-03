@@ -254,10 +254,10 @@ class _HomePageState extends State<HomePage> {
   Widget _buildCategoryCard(String iconPath, String label) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => FindDoctorsPage()),
-        );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => FindDoctorsPage()),
+        // );
         // Handle card click
         print('$label card clicked');
       },
