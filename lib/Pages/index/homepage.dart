@@ -1,3 +1,4 @@
+import 'package:appointnow/pages/Profile/user_profile.dart';
 import 'package:appointnow/pages/findDoctors/find_doctors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +13,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int _currentIndex = 0; // Added variable to track the current index
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -200,6 +203,40 @@ class _HomePageState extends State<HomePage> {
               true, // Ensures labels are visible for unselected items
           type: BottomNavigationBarType
               .fixed, // Ensures equal spacing between items
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+
+            switch (index) {
+              case 0:
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomePage()),
+                );
+                break;
+              // case 1:
+              //   Navigator.push(
+              //     context,
+              //     MaterialPageRoute(builder: (context) => HomePage()),
+              //   );
+              //   break;
+              // case 2:
+              //   Navigator.push(
+              //     context,
+              //     MaterialPageRoute(builder: (context) => HomePage()),
+              //   );
+              //   break;
+              case 3:
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => UserProfilePage()),
+                );
+                break;
+              default:
+                break;
+            }
+          },
           items: [
             BottomNavigationBarItem(
                 icon: Icon(Icons.home_rounded), label: 'Home'),
@@ -219,7 +256,7 @@ class _HomePageState extends State<HomePage> {
       onTap: () {
         // Navigator.push(
         //   context,
-        //   MaterialPageRoute(builder: (context) => FindDoctorScreen()),
+        //   MaterialPageRoute(builder: (context) => FindDoctorsPage()),
         // );
         // Handle card click
         print('$label card clicked');
