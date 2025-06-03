@@ -80,6 +80,13 @@ flutter:
     - assets/icon/Pharmacy.png
     - assets/icon/Hospital.png
     - assets/icon/Ambulance.png
+    - assets/icon/lungs.png
+    - assets/icon/dentist.png
+    - assets/icon/alargy.png
+    - assets/icon/neuron.png
+    - assets/icon/cardiologist.png
+    - assets/icon/surgeon.png
+
     # - images/a_dot_burr.jpeg
     # - images/a_dot_ham.jpeg
 
