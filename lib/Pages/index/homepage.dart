@@ -62,7 +62,6 @@ class _HomePageState extends State<HomePage> {
               icon: const Icon(Icons.notifications),
               onPressed: () {},
             ),
-            
           ],
         ),
         body: SingleChildScrollView(
@@ -219,12 +218,14 @@ class _HomePageState extends State<HomePage> {
   Widget _buildCategoryCard(String iconPath, String label) {
     return GestureDetector(
       onTap: () {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => FindDoctorsPage()),
-        // );
-        // Handle card click
-        print('$label card clicked');
+        if (label == 'Doctor') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const FindDoctorsPage()),
+          );
+        } else {
+          // Handle other card clicks if needed
+        }
       },
       child: Column(
         children: [

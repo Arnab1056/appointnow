@@ -1,4 +1,7 @@
 import 'package:appointnow/Pages/Auth/register.dart';
+import 'package:appointnow/pages/doctor_details_pages/appointment.dart';
+import 'package:appointnow/pages/doctor_details_pages/doctor_details.dart';
+import 'package:appointnow/pages/findDoctors/find_doctors.dart';
 import 'package:appointnow/pages/index/homepage.dart';
 import 'package:appointnow/pages/index/screen01.dart'; 
 import 'package:flutter/material.dart';
