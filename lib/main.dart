@@ -1,6 +1,6 @@
 import 'package:appointnow/Pages/Auth/register.dart';
 import 'package:appointnow/pages/index/homepage.dart';
-import 'package:appointnow/pages/index/screen01.dart'; // Add this import for Screen01
+import 'package:appointnow/pages/index/screen01.dart'; 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,10 +31,10 @@ class MyApp extends StatelessWidget {
           }
           if (snapshot.hasData && snapshot.data != null) {
             // User is logged in
-            return HomePage();
+            return const HomePage();
           } else {
             // User is not logged in
-            return Screen01();
+            return const Screen01();
           }
         },
       ),

@@ -115,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
                         if (userData != null && userData['role'] == 'User') {
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(builder: (context) => HomePage()),
+                            MaterialPageRoute(builder: (context) => const HomePage()),
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(

@@ -61,7 +61,7 @@ class _RegisterPageState extends State<RegisterPage>
       });
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
+        MaterialPageRoute(builder: (context) => const LoginPage()),
       );
     }
   }
@@ -329,7 +329,7 @@ class _RegisterPageState extends State<RegisterPage>
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => LoginPage()),
+                                  builder: (context) => const LoginPage()),
                             );
                           },
                           child: const Text(

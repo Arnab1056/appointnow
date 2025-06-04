@@ -1,5 +1,7 @@
 import 'package:appointnow/pages/Profile/user_profile.dart';
 import 'package:appointnow/pages/findDoctors/find_doctors.dart';
+import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
+// Make sure the path above is correct and the file 'app_bottom_navigation_bar.dart' defines 'AppBottomNavigationBar'
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,11 +29,11 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.white, // Added background color
         appBar: AppBar(
           automaticallyImplyLeading: false, // Remove the top back button
-          title: Column(
+          title: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 12.0),
+                padding: EdgeInsets.only(top: 12.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -133,9 +135,9 @@ class _HomePageState extends State<HomePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: const Text(
+                            const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
                                 'Early protection for your family health',
                                 style: TextStyle(
                                   fontSize: 18.0,
@@ -195,14 +197,8 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         // Updated BottomNavigationBar to ensure equal spacing between items
-        bottomNavigationBar: BottomNavigationBar(
-          selectedItemColor: Colors.teal, // Changed selected item color to teal
-          unselectedItemColor:
-              Colors.grey, // Added unselected item color for visibility
-          showUnselectedLabels:
-              true, // Ensures labels are visible for unselected items
-          type: BottomNavigationBarType
-              .fixed, // Ensures equal spacing between items
+        bottomNavigationBar: AppBottomNavigationBar(
+          currentIndex: _currentIndex,
           onTap: (index) {
             setState(() {
               _currentIndex = index;
@@ -210,42 +206,22 @@ class _HomePageState extends State<HomePage> {
 
             switch (index) {
               case 0:
-                Navigator.push(
+                Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => HomePage()),
+                  MaterialPageRoute(builder: (context) => const HomePage()),
                 );
                 break;
-              // case 1:
-              //   Navigator.push(
-              //     context,
-              //     MaterialPageRoute(builder: (context) => HomePage()),
-              //   );
-              //   break;
-              // case 2:
-              //   Navigator.push(
-              //     context,
-              //     MaterialPageRoute(builder: (context) => HomePage()),
-              //   );
-              //   break;
               case 3:
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => UserProfilePage()),
+                  MaterialPageRoute(
+                      builder: (context) => const UserProfilePage()),
                 );
                 break;
               default:
                 break;
             }
           },
-          items: [
-            BottomNavigationBarItem(
-                icon: Icon(Icons.home_rounded), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.calendar_today),
-                label: 'Appointments'), // Appointment date icon
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          ],
         ),
       ),
     );
@@ -269,7 +245,7 @@ class _HomePageState extends State<HomePage> {
             decoration: BoxDecoration(
               color: Colors.white, // Set background color to white
               borderRadius: BorderRadius.circular(8.0),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
                   color: Colors.white,
                   spreadRadius: 2,
@@ -284,10 +260,10 @@ class _HomePageState extends State<HomePage> {
                   width: 32.0, height: 32.0), // Fixed image size to 32x32
             ),
           ),
-          SizedBox(height: 8.0),
+          const SizedBox(height: 8.0),
           Text(label,
-              style: TextStyle(
-                  color: const Color.fromARGB(
+              style: const TextStyle(
+                  color: Color.fromARGB(
                       255, 103, 102, 102))), // Text color set to black
         ],
       ),
