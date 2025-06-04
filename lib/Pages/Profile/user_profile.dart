@@ -149,10 +149,22 @@ class _UserProfilePageState extends State<UserProfilePage> {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+          insetPadding: const EdgeInsets.symmetric(
+              horizontal: 24,
+              vertical: 24), // Add padding to avoid edge clipping
+          shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(24), // Ensure all corners are 24
+          ),
+          elevation: 0,
+          backgroundColor:
+              Colors.transparent, // Make dialog background transparent
           child: Container(
-            color: Colors.white,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius:
+                  BorderRadius.circular(24), // Ensure corners are rounded
+            ),
             padding: const EdgeInsets.all(20),
             width: MediaQuery.of(context).size.width * 0.8,
             child: Column(
