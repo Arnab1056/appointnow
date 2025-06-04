@@ -62,18 +62,7 @@ class _HomePageState extends State<HomePage> {
               icon: const Icon(Icons.notifications),
               onPressed: () {},
             ),
-            IconButton(
-              icon: const Icon(Icons.logout),
-              tooltip: 'Logout',
-              onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Logged out successfully')),
-                  );
-                }
-              },
-            ),
+            
           ],
         ),
         body: SingleChildScrollView(
