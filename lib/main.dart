@@ -1,15 +1,16 @@
-// import 'package:appointnow/Pages/Auth/login.dart';
-// import 'package:appointnow/Pages/Auth/register.dart';
-import 'package:appointnow/pages/auth/login_success_screen.dart';
-import 'package:appointnow/pages/auth/register.dart';
-import 'package:appointnow/pages/auth/register_success_screen.dart';
-import 'package:appointnow/pages/index/homepage.dart';
-import 'package:appointnow/pages/index/screen01.dart';
-import 'package:appointnow/pages/index/screen02.dart';
-import 'package:appointnow/pages/index/screen03.dart';
-import 'package:flutter/material.dart';
 
-void main() {
+import 'package:appointnow/pages/index/homepage.dart';
+import 'package:appointnow/pages/index/screen01.dart'; 
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'firebase_options.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -19,16 +20,24 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        // initialRoute: '/register',
-        // routes: {
-        //   '/register': (context) => const RegisterPage(),
-        //   '/login': (context) => LoginPage(),
-        // },
-        home: HomePage()
-        // Screen01()
-        // RegisterSuccessScreen()
-        // // Change this to Screen02() to test the second scree
-        );
+      debugShowCheckedModeBanner: false,
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+          if (snapshot.hasData && snapshot.data != null) {
+            // User is logged in
+            return const HomePage();
+          } else {
+            // User is not logged in
+            return const Screen01();
+          }
+        },
+      ),
+    );
   }
 }

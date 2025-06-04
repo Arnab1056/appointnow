@@ -34,7 +34,11 @@ class Screen04 extends StatelessWidget {
                         alignment: Alignment.topRight,
                         child: TextButton(
                           onPressed: () {
-                            // Skip action
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const Screen05()),
+                            );
                           },
                           child: const Text("Skip"),
                         ),
@@ -45,11 +49,13 @@ class Screen04 extends StatelessWidget {
 
                   // Doctor Image
                   Expanded(
-                    child: Image.asset(
-                      'assets/MaleDoctor.webP',
-                      fit: BoxFit.contain,
-                      // height: 300,
-                      // width: 300,
+                    child: Center(
+                      child: Image.asset(
+                        'assets/MaleDoctor.png',
+                        fit: BoxFit.contain,
+                        // height: 300,
+                        // width: 300,
+                      ),
                     ),
                   ),
 
