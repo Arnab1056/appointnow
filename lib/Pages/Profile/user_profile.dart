@@ -1,6 +1,11 @@
 import 'package:appointnow/pages/index/homepage.dart';
 import 'package:flutter/material.dart';
 import 'package:appointnow/pages/auth/login.dart';
+// import 'dart:io'; // Removed, not needed without image picker
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
+// import 'package:shared_preferences/shared_preferences.dart'; // Removed, not needed without image picker
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -10,13 +15,37 @@ class UserProfilePage extends StatefulWidget {
 }
 
 class _UserProfilePageState extends State<UserProfilePage> {
-  int _currentIndex = 0;
+  int _currentIndex = 3;
+  String? _userName;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserName();
+  }
+
+  Future<void> _fetchUserName() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      setState(() {
+        _userName = doc.data()?['name'] ?? 'No Name';
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _userName = 'No Name';
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
       backgroundColor: const Color(0xFF00B5A2),
       body: SafeArea(
@@ -35,26 +64,31 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 child: Column(
                   children: [
                     const SizedBox(height: 20),
+                    // Profile image picker removed
                     const CircleAvatar(
-                      radius: 45,
+                      radius: 60,
                       backgroundImage: AssetImage('assets/profile.jpg'),
                     ),
                     const SizedBox(height: 10),
-                    const Text(
-                      'Amelia Renata',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const SizedBox(height: 50),
+                    _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            _userName ?? '',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 25,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
+                    const SizedBox(height: 180),
                   ],
                 ),
               ),
               Container(
                 width: double.infinity,
+                height: 400,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
                 decoration: const BoxDecoration(
@@ -65,6 +99,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   ),
                 ),
                 child: Column(
+                  mainAxisAlignment:
+                      MainAxisAlignment.start, // 👈 Add this line
                   children: [
                     _buildListTile(Icons.favorite_border, 'My Saved',
                         iconSize: 20.0, iconColor: const Color(0xFF00B5A2)),
@@ -83,45 +119,26 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: AppBottomNavigationBar(
         currentIndex: _currentIndex,
-        selectedItemColor: Colors.teal,
-        unselectedItemColor: Colors.grey,
-        showUnselectedLabels: true,
-        backgroundColor: Colors.white,
-        type: BottomNavigationBarType.fixed,
         onTap: (index) {
           setState(() {
             _currentIndex = index;
           });
-
           switch (index) {
             case 0:
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => HomePage()),
+                MaterialPageRoute(builder: (context) => const HomePage()),
               );
               break;
             case 3:
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => UserProfilePage()),
-              );
+              // Already on profile, do nothing or maybe pop to avoid stacking
               break;
             default:
               break;
           }
         },
-        items: const [
-          BottomNavigationBarItem(
-              icon: Center(child: Icon(Icons.home)), label: ''),
-          BottomNavigationBarItem(
-              icon: Center(child: Icon(Icons.mail_outline)), label: ''),
-          BottomNavigationBarItem(
-              icon: Center(child: Icon(Icons.calendar_today)), label: ''),
-          BottomNavigationBarItem(
-              icon: Center(child: Icon(Icons.person)), label: ''),
-        ],
       ),
     );
   }
@@ -136,7 +153,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
           child: Container(
             color: Colors.white,
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
             width: MediaQuery.of(context).size.width * 0.8,
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -144,10 +161,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 CircleAvatar(
                   backgroundColor: Colors.teal.withOpacity(0.1),
                   radius: 30,
-                  child: Icon(Icons.logout, size: 30, color: Colors.teal),
+                  child: const Icon(Icons.logout, size: 30, color: Colors.teal),
                 ),
-                SizedBox(height: 20),
-                Text(
+                const SizedBox(height: 20),
+                const Text(
                   "Are you sure to log out of your account?",
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -156,27 +173,30 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     color: Colors.black,
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop(); // Close the dialog
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => LoginPage()),
+                      MaterialPageRoute(
+                          builder: (context) => const LoginPage()),
                       (route) => false, // Removes all previous routes
                     );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal,
-                    shape: StadiumBorder(),
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                    shape: const StadiumBorder(),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30, vertical: 12),
                   ),
-                  child: Text("Log Out", style: TextStyle(color: Colors.white)),
+                  child: const Text("Log Out",
+                      style: TextStyle(color: Colors.white)),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 GestureDetector(
                   onTap: () => Navigator.of(context).pop(),
-                  child: Text(
+                  child: const Text(
                     "Cancel",
                     style: TextStyle(color: Colors.teal, fontSize: 16),
                   ),
@@ -189,7 +209,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-  // ✅ CHANGED: Logout tile triggers dialog
+  // Logout tile triggers dialog
   Widget _buildListTile(IconData icon, String title,
       {Color color = Colors.black, double iconSize = 24.0, Color? iconColor}) {
     return Padding(
@@ -201,13 +221,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
           width: double.infinity,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(8.0),
+            borderRadius: BorderRadius.circular(24.0),
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withOpacity(0.2),
                 spreadRadius: 2,
                 blurRadius: 5,
-                offset: Offset(0, 3),
+                offset: const Offset(0, 3),
               ),
             ],
           ),
