@@ -4,7 +4,6 @@ import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
 // Make sure the path above is correct and the file 'app_bottom_navigation_bar.dart' defines 'AppBottomNavigationBar'
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 // Converted the HomePage widget to a StatefulWidget
 class HomePage extends StatefulWidget {

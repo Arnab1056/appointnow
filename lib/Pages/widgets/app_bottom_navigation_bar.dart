@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:appointnow/pages/index/homepage.dart';
-import 'package:appointnow/pages/Profile/user_profile.dart';
+
 
 class AppBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
