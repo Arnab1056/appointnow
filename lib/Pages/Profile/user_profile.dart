@@ -142,7 +142,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         child: Align(
                           alignment: Alignment.bottomRight,
                           child: Container(
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               color: Colors.white,
                               shape: BoxShape.circle,
                             ),

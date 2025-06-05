@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../doctor_details_pages/doctor_details.dart';
 
 class CardiologistPage extends StatelessWidget {
   final List<Map<String, String>> cardiologists = [
@@ -37,8 +38,12 @@ class CardiologistPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        centerTitle: true, // Center the title properly
-        title: const Text("Cardiologist", style: TextStyle(color: Colors.black,fontSize:18,fontWeight: FontWeight.bold )),
+        centerTitle: true,
+        title: const Text("Cardiologist",
+            style: TextStyle(
+                color: Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.bold)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -54,13 +59,12 @@ class CardiologistPage extends StatelessWidget {
           final doctor = cardiologists[index];
           return GestureDetector(
             onTap: () {
-              // Navigate to doctor's detail page
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (_) => DoctorDetailPage(doctor: doctor),
-              //   ),
-              // );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const DoctorDetailsPage(),
+                ),
+              );
             },
             child: Container(
               margin: const EdgeInsets.only(bottom: 16),
@@ -78,19 +82,10 @@ class CardiologistPage extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  CircleAvatar(
+                  const CircleAvatar(
                     radius: 50,
                     backgroundImage: AssetImage('assets/images/doctor1.jpg'),
                   ),
-                  //   ClipRRect(
-                  //     borderRadius: BorderRadius.circular(8),
-                  //     child: Image.asset(
-                  //       doctor["image"]!,
-                  //       width: 70,
-                  //       height: 70,
-                  //       fit: BoxFit.cover,
-                  //     ),
-                  //   ),
                   const SizedBox(width: 20),
                   Expanded(
                     child: Column(
@@ -107,22 +102,17 @@ class CardiologistPage extends StatelessWidget {
                           "Cardiologist",
                           style: TextStyle(fontSize: 12, color: Colors.grey),
                         ),
-                        const SizedBox(
-                          height: 4,
-                        ),
-                        // Adjusted the container to fit the star and 4.7 text size
+                        const SizedBox(height: 4),
                         Container(
                           decoration: BoxDecoration(
                             color: Colors.teal.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(
-                                2), // Added rounded corners
+                            borderRadius: BorderRadius.circular(2),
                           ),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 5, vertical: 4), // Adjusted padding
-                          child: Row(
-                            mainAxisSize: MainAxisSize
-                                .min, // Ensures the container wraps its content
-                            children: const [
+                              horizontal: 5, vertical: 4),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
                               Icon(Icons.star, size: 14, color: Colors.teal),
                               SizedBox(width: 2),
                               Text(
@@ -136,9 +126,7 @@ class CardiologistPage extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(
-                          height: 4,
-                        ),
+                        const SizedBox(height: 4),
                         Row(
                           children: [
                             const Icon(Icons.location_on,
@@ -147,9 +135,10 @@ class CardiologistPage extends StatelessWidget {
                             Text(
                               doctor["hospital"]!,
                               style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold),
+                                fontSize: 12,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),

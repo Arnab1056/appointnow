@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'appointment.dart';
 
 // Updated the DoctorDetailsPage to include read more functionality, improved card layout, and added bottom action buttons
 class DoctorDetailsPage extends StatefulWidget {
@@ -95,9 +96,9 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                         ),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 4),
-                        child: Row(
+                        child: const Row(
                           mainAxisSize: MainAxisSize.min,
-                          children: const [
+                          children: [
                             Icon(Icons.star, size: 14, color: Colors.teal),
                             SizedBox(width: 4),
                             Text(
@@ -112,8 +113,8 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Row(
-                        children: const [
+                      const Row(
+                        children: [
                           Icon(Icons.location_on, size: 14, color: Colors.grey),
                           SizedBox(width: 4),
                           Text(
@@ -277,8 +278,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) =>
-                                    const Placeholder(), // Replace with AppointmentsPage
+                                builder: (_) => const AppointmentPage(),
                               ),
                             );
                           }

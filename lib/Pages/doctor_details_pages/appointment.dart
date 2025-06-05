@@ -80,9 +80,9 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                           .withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
-                                    child: Row(
+                                    child: const Row(
                                       mainAxisSize: MainAxisSize.min,
-                                      children: const [
+                                      children: [
                                         Icon(Icons.star,
                                             size: 14, color: Color(0xFF199A8E)),
                                         SizedBox(width: 4),
@@ -392,7 +392,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                     color: Color.fromARGB(255, 240, 238, 238),
                   ),
                   _buildPaymentRow("Total", "315.0 tk",
-                      isBold: true, color: Color(0xFF199A8E)),
+                      isBold: true, color: const Color(0xFF199A8E)),
 
                   const SizedBox(height: 24),
                   const Divider(
@@ -523,16 +523,16 @@ class _AppointmentPageState extends State<AppointmentPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
+                const Column(
                   children: [
-                    const Text(
+                    Text(
                       "Total",
                       style: TextStyle(
                         color: Colors.grey,
                         fontSize: 16,
                       ),
                     ),
-                    const Text(
+                    Text(
                       "315 tk",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,

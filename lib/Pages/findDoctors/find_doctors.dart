@@ -37,7 +37,7 @@ class _FindDoctorsPageState extends State<FindDoctorsPage> {
                 context,
                 MaterialPageRoute(
                     builder: (context) =>
-                        HomePage())); // Navigate to the previous page
+                        const HomePage())); // Navigate to the previous page
           },
         ),
         centerTitle: true, // Center the title properly
@@ -124,7 +124,7 @@ class _FindDoctorsPageState extends State<FindDoctorsPage> {
                               CardiologistPage(), // Replace with actual category page
                         ),
                       );
-                      print("Tapped on " + categories[index]['label']!);
+                      print("Tapped on ${categories[index]['label']!}");
                     },
                     child: Column(
                       children: [
@@ -178,23 +178,23 @@ class _FindDoctorsPageState extends State<FindDoctorsPage> {
                   ),
                   child: Row(
                     children: [
-                      CircleAvatar(
+                      const CircleAvatar(
                         radius: 50,
                         backgroundImage:
                             AssetImage('assets/images/doctor1.jpg'),
                       ),
-                      SizedBox(width: 20),
+                      const SizedBox(width: 20),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Dr. Marcus Horizon",
+                            const Text("Dr. Marcus Horizon",
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16)),
-                            Text("Cardiologist",
+                            const Text("Cardiologist",
                                 style: TextStyle(
                                     fontSize: 12, color: Colors.grey)),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Row(
                               children: [
                                 Container(
@@ -204,7 +204,7 @@ class _FindDoctorsPageState extends State<FindDoctorsPage> {
                                   ),
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 5, vertical: 4),
-                                  child: Row(
+                                  child: const Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(Icons.star,
@@ -221,11 +221,11 @@ class _FindDoctorsPageState extends State<FindDoctorsPage> {
                                     ],
                                   ),
                                 ),
-                                SizedBox(width: 8),
-                                Icon(Icons.location_on,
+                                const SizedBox(width: 8),
+                                const Icon(Icons.location_on,
                                     color: Colors.grey, size: 14),
-                                SizedBox(width: 4),
-                                Text("Epic Healthcare",
+                                const SizedBox(width: 4),
+                                const Text("Epic Healthcare",
                                     style: TextStyle(
                                         fontSize: 12, color: Colors.grey)),
                               ],
