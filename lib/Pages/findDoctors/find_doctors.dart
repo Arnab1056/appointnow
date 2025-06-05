@@ -1,4 +1,4 @@
-import 'package:appointnow/pages/findDoctors/cardiologist_page.dart';
+import 'package:appointnow/Pages/findDoctors/doctor_list_page.dart';
 import 'package:appointnow/pages/index/homepage.dart';
 import 'package:flutter/material.dart';
 
@@ -120,11 +120,11 @@ class _FindDoctorsPageState extends State<FindDoctorsPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              CardiologistPage(), // Replace with actual category page
+                          builder: (context) => DoctorListPage(
+                            category: categories[index]['label']!,
+                          ),
                         ),
                       );
-                      print("Tapped on ${categories[index]['label']!}");
                     },
                     child: Column(
                       children: [
