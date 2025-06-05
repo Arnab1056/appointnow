@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../controllers/auth_controller.dart';
 import 'register.dart'; // Ensure this is the correct path to the file containing RegisterPage
 import 'package:appointnow/pages/index/homepage.dart'; // Ensure this is the correct path to the file containing HomePage
+import 'package:appointnow/Pages/doctor/doctor_home.dart' as doctor;
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -112,15 +113,19 @@ class _LoginPageState extends State<LoginPage> {
                         _passwordController.text,
                       );
                       if (mounted) {
-                        if (userData != null && userData['role'] == 'User') {
+                        final role = userData?['role']?.toString().toLowerCase();
+                        if (role == 'user') {
                           _showLoginSuccessPopup();
+                        } else if (role == 'doctor') {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => const doctor.Doctorhome()),
+                          );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content: Text(
-                                    'Login successful, but not a User role.')),
+                                content: Text('Login successful, but unknown role.')),
                           );
-                          // TODO: Handle other roles if needed
                         }
                       }
                     } catch (e) {

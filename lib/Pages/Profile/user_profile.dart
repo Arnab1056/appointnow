@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:image/image.dart' as img;
+import 'package:appointnow/Pages/doctor/doctor_home.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -205,18 +206,17 @@ class _UserProfilePageState extends State<UserProfilePage> {
       bottomNavigationBar: AppBottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
+          if (index == _currentIndex) return; // Prevent unnecessary navigation
           setState(() {
             _currentIndex = index;
           });
           switch (index) {
             case 0:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const HomePage()),
-              );
+              // If the user is a doctor, go to Doctorhome, else go to HomePage
+              _navigateToHome(context);
               break;
             case 3:
-              // Already on profile, do nothing or maybe pop to avoid stacking
+              // Already on profile, do nothing
               break;
             default:
               break;
@@ -233,20 +233,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
       builder: (BuildContext context) {
         return Dialog(
           insetPadding: const EdgeInsets.symmetric(
-              horizontal: 24,
-              vertical: 24), // Add padding to avoid edge clipping
+              horizontal: 24, vertical: 24),
           shape: RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.circular(24), // Ensure all corners are 24
+            borderRadius: BorderRadius.circular(24),
           ),
           elevation: 0,
-          backgroundColor:
-              Colors.transparent, // Make dialog background transparent
+          backgroundColor: Colors.transparent,
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius:
-                  BorderRadius.circular(24), // Ensure corners are rounded
+              borderRadius: BorderRadius.circular(24),
             ),
             padding: const EdgeInsets.all(20),
             width: MediaQuery.of(context).size.width * 0.8,
@@ -270,8 +266,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     Navigator.of(context).pop(); // Close the dialog
+                    await FirebaseAuth.instance.signOut();
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
@@ -354,6 +351,30 @@ class _UserProfilePageState extends State<UserProfilePage> {
         ),
       ),
     );
+  }
+
+  void _navigateToHome(BuildContext context) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      final role = doc.data()?['role'] as String?;
+      if (role == 'doctor') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const Doctorhome()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      }
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    }
   }
 }
 

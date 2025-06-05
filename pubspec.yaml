@@ -93,6 +93,8 @@ flutter:
     - assets/icon/surgeon.png
     - assets/icon/chat.png
     - assets/VISA.png
+    - assets/icon/chamber.png
+    - assets/icon/ratting.png
 
     # - images/a_dot_burr.jpeg
     # - images/a_dot_ham.jpeg
