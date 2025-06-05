@@ -7,6 +7,7 @@ import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:image/image.dart' as img;
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -67,11 +68,35 @@ class _UserProfilePageState extends State<UserProfilePage> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
     final file = File(pickedFile.path);
+
+    // Resize image to 300x300 before upload
+    final originalBytes = await file.readAsBytes();
+    final decodedImage = img.decodeImage(originalBytes);
+    if (decodedImage == null) return;
+    final resizedImage = img.copyResize(decodedImage, width: 300, height: 300);
+    final resizedBytes = img.encodeJpg(resizedImage);
+    final resizedFile =
+        await File('${file.parent.path}/resized_${file.uri.pathSegments.last}')
+            .writeAsBytes(resizedBytes);
+
+    // Get previous image name from Firestore
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+    final prevImageName = doc.data()?['profileImageName'] as String?;
+    if (prevImageName != null && prevImageName.isNotEmpty) {
+      // Delete previous image from Supabase Storage
+      await supabase.Supabase.instance.client.storage
+          .from('appointnow')
+          .remove([prevImageName]);
+    }
+
     final fileName =
         'profile_${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
     final storagePath = await supabase.Supabase.instance.client.storage
         .from('appointnow')
-        .upload(fileName, file);
+        .upload(fileName, resizedFile);
     if (storagePath.isNotEmpty) {
       final imageUrl = supabase.Supabase.instance.client.storage
           .from('appointnow')
@@ -79,7 +104,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
-          .update({'profileImageUrl': imageUrl});
+          .update({'profileImageUrl': imageUrl, 'profileImageName': fileName});
       setState(() {
         _profileImageUrl = imageUrl;
       });
