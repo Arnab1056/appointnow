@@ -264,7 +264,7 @@ class _RegisterPageState extends State<RegisterPage>
                   ],
                   onChanged: (value) {
                     setState(() {
-                      _selectedRole = value;
+                      _selectedRole = value?.toLowerCase();
                     });
                   },
                 ),
@@ -338,7 +338,7 @@ class _RegisterPageState extends State<RegisterPage>
                         _nameController.text,
                         _emailController.text,
                         _passwordController.text,
-                        _selectedRole,
+                        _selectedRole?.toLowerCase(),
                       );
                       if (mounted) {
                         _showSuccessAndNavigate();

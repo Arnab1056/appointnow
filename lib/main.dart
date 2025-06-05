@@ -1,4 +1,6 @@
-import 'package:appointnow/pages/index/homepage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:appointnow/Pages/doctor/doctor_home.dart' as doctor;
+import 'package:appointnow/pages/index/homepage.dart' as user;
 import 'package:appointnow/pages/index/screen01.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -13,7 +15,8 @@ void main() async {
   );
   await supabase.Supabase.initialize(
     url: 'https://ahxtqzjnvqevxuqxhlyz.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFoeHRxempudnFldnh1cXhobHl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMDE4MDIsImV4cCI6MjA2NDY3NzgwMn0.Q2I8jIn2pAZ-Y5pqscFMICNL4gESky5xidsjKSXDIcs',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFoeHRxempudnFldnh1cXhobHl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMDE4MDIsImV4cCI6MjA2NDY3NzgwMn0.Q2I8jIn2pAZ-Y5pqscFMICNL4gESky5xidsjKSXDIcs',
   );
   runApp(const MyApp());
 }
@@ -34,14 +37,38 @@ class MyApp extends StatelessWidget {
             );
           }
           if (snapshot.hasData && snapshot.data != null) {
-            // User is logged in
-            return const HomePage();
+            // Always fetch the role from Firestore on every app start
+            return FutureBuilder<String?>(
+              future: _getUserRole(snapshot.data!.uid),
+              builder: (context, roleSnapshot) {
+                if (roleSnapshot.connectionState == ConnectionState.waiting) {
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return _getHomePage(roleSnapshot.data);
+              },
+            );
           } else {
-            // User is not logged in
             return const Screen01();
           }
         },
       ),
     );
   }
+}
+
+Widget _getHomePage(String? role) {
+  if (role != null && role.trim().toLowerCase() == 'doctor') {
+    return const doctor.Doctorhome();
+  } else {
+    return const user.HomePage();
+  }
+}
+
+// Helper function to get user role from Firestore
+Future<String?> _getUserRole(String uid) async {
+  final doc =
+      await FirebaseFirestore.instance.collection('users').doc(uid).get();
+  return doc.data()?['role'] as String?;
 }
