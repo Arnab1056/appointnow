@@ -20,10 +20,70 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
   bool _isLoading = true;
   final ImagePicker _picker = ImagePicker();
 
+  // Controllers for form fields
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _registerController = TextEditingController();
+  final TextEditingController _designationController = TextEditingController();
+
+  bool _agreedToTerms = false;
+
   @override
   void initState() {
     super.initState();
     _fetchProfileImageUrl();
+    _fetchDoctorDetails();
+  }
+
+  Future<void> _fetchDoctorDetails() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('doctordetails')
+          .doc(user.uid)
+          .get();
+      final data = doc.data();
+      if (data != null) {
+        _nameController.text = data['name'] ?? '';
+        _emailController.text = data['email'] ?? '';
+        _phoneController.text = data['phone'] ?? '';
+        _registerController.text = data['registerNumber'] ?? '';
+        _designationController.text = data['designation'] ?? '';
+      }
+    }
+  }
+
+  Future<void> _saveDoctorDetails() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    await FirebaseFirestore.instance
+        .collection('doctordetails')
+        .doc(user.uid)
+        .set({
+      'uid': user.uid,
+      'name': _nameController.text.trim(),
+      'email': _emailController.text.trim(),
+      'phone': _phoneController.text.trim(),
+      'registerNumber': _registerController.text.trim(),
+      'designation': _designationController.text.trim(),
+      'profileImageUrl': _profileImageUrl ?? '', // Ensure this is set
+      'profileImageName': _profileImageName ?? '',
+      'timestamp': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Profile saved successfully!')),
+    );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _registerController.dispose();
+    _designationController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchProfileImageUrl() async {
@@ -76,7 +136,8 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
         'profile_${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
     final storageResponse = await supabase.Supabase.instance.client.storage
         .from('appointnow')
-        .uploadBinary(fileName, resizedBytes, fileOptions: const supabase.FileOptions(contentType: 'image/jpeg'));
+        .uploadBinary(fileName, resizedBytes,
+            fileOptions: const supabase.FileOptions(contentType: 'image/jpeg'));
     if (storageResponse.isNotEmpty) {
       final imageUrl = supabase.Supabase.instance.client.storage
           .from('appointnow')
@@ -134,7 +195,8 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
                             shape: BoxShape.circle,
                           ),
                           padding: const EdgeInsets.all(6),
-                          child: const Icon(Icons.camera_alt, color: Color(0xFF00B5A2)),
+                          child: const Icon(Icons.camera_alt,
+                              color: Color(0xFF00B5A2)),
                         ),
                       ),
                     ),
@@ -185,18 +247,44 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
             const SizedBox(height: 20),
 
             // Form Fields
-            const CustomTextField(icon: Icons.person_outline, hint: 'Doctor name'),
-            const CustomTextField(icon: Icons.email_outlined, hint: 'Email'),
-            const CustomTextField(icon: Icons.phone_outlined, hint: 'Phone'),
-            const CustomTextField(icon: Icons.badge_outlined, hint: 'Register Number'),
-            const CustomTextField(icon: Icons.work_outline, hint: 'Designation'),
-
+            CustomTextField(
+              icon: Icons.person_outline,
+              hint: 'Doctor name',
+              controller: _nameController,
+            ),
+            CustomTextField(
+              icon: Icons.email_outlined,
+              hint: 'Email',
+              controller: _emailController,
+            ),
+            CustomTextField(
+              icon: Icons.phone_outlined,
+              hint: 'Phone',
+              controller: _phoneController,
+            ),
+            CustomTextField(
+              icon: Icons.badge_outlined,
+              hint: 'Register Number',
+              controller: _registerController,
+            ),
+            CustomTextField(
+              icon: Icons.work_outline,
+              hint: 'Designation',
+              controller: _designationController,
+            ),
             const SizedBox(height: 10),
 
             // Terms Checkbox
             Row(
               children: [
-                Checkbox(value: false, onChanged: (_) {}),
+                Checkbox(
+                  value: _agreedToTerms,
+                  onChanged: (val) {
+                    setState(() {
+                      _agreedToTerms = val ?? false;
+                    });
+                  },
+                ),
                 const Flexible(
                   child: Text.rich(
                     TextSpan(
@@ -224,7 +312,7 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: _agreedToTerms ? _saveDoctorDetails : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   shape: RoundedRectangleBorder(
@@ -246,14 +334,17 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
 class CustomTextField extends StatelessWidget {
   final IconData icon;
   final String hint;
+  final TextEditingController? controller;
 
-  const CustomTextField({super.key, required this.icon, required this.hint});
+  const CustomTextField(
+      {super.key, required this.icon, required this.hint, this.controller});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: TextField(
+        controller: controller,
         decoration: InputDecoration(
           prefixIcon: Icon(icon),
           hintText: hint,
