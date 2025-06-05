@@ -142,10 +142,15 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
       final imageUrl = supabase.Supabase.instance.client.storage
           .from('appointnow')
           .getPublicUrl(fileName);
+      // Update both users and doctordetails collections
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .update({'profileImageUrl': imageUrl, 'profileImageName': fileName});
+      await FirebaseFirestore.instance
+          .collection('doctordetails')
+          .doc(user.uid)
+          .set({'profileImageUrl': imageUrl, 'profileImageName': fileName}, SetOptions(merge: true));
       setState(() {
         _profileImageUrl = imageUrl;
         _profileImageName = fileName;
