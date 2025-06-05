@@ -1,7 +1,104 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-class DoctorProfileEdit extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+import 'package:image/image.dart' as img;
+
+class DoctorProfileEdit extends StatefulWidget {
   const DoctorProfileEdit({super.key});
+
+  @override
+  State<DoctorProfileEdit> createState() => _DoctorProfileEditState();
+}
+
+class _DoctorProfileEditState extends State<DoctorProfileEdit> {
+  String? _profileImageUrl;
+  String? _profileImageName;
+  bool _isLoading = true;
+  final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchProfileImageUrl();
+  }
+
+  Future<void> _fetchProfileImageUrl() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      setState(() {
+        _profileImageUrl = doc.data()?['profileImageUrl'];
+        _profileImageName = doc.data()?['profileImageName'];
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile == null) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final file = File(pickedFile.path);
+
+    // Resize image to 300x300 before upload
+    final originalBytes = await file.readAsBytes();
+    final decodedImage = img.decodeImage(originalBytes);
+    if (decodedImage == null) return;
+    final resizedImage = img.copyResize(decodedImage, width: 300, height: 300);
+    final resizedBytes = img.encodeJpg(resizedImage);
+
+    // Get previous image name from Firestore
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+    final prevImageName = doc.data()?['profileImageName'] as String?;
+    if (prevImageName != null && prevImageName.isNotEmpty) {
+      // Delete previous image from Supabase Storage
+      await supabase.Supabase.instance.client.storage
+          .from('appointnow')
+          .remove([prevImageName]);
+    }
+
+    final fileName =
+        'profile_${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final storageResponse = await supabase.Supabase.instance.client.storage
+        .from('appointnow')
+        .uploadBinary(fileName, resizedBytes, fileOptions: const supabase.FileOptions(contentType: 'image/jpeg'));
+    if (storageResponse.isNotEmpty) {
+      final imageUrl = supabase.Supabase.instance.client.storage
+          .from('appointnow')
+          .getPublicUrl(fileName);
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'profileImageUrl': imageUrl, 'profileImageName': fileName});
+      setState(() {
+        _profileImageUrl = imageUrl;
+        _profileImageName = fileName;
+      });
+    }
+  }
+
+  ImageProvider _getProfileImageProvider() {
+    if (_profileImageUrl != null && _profileImageUrl!.isNotEmpty) {
+      return NetworkImage(_profileImageUrl!);
+    } else {
+      return const AssetImage('assets/doctor.jpg');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,40 +118,37 @@ class DoctorProfileEdit extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 10),
-
-            // Profile Image
             Center(
               child: Stack(
                 children: [
-                  const CircleAvatar(
-                    radius: 50,
-                    backgroundImage: AssetImage('assets/doctor.jpg'), // Replace with your image
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 4,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.camera_alt,
-                        size: 20,
-                        color: Colors.grey,
+                  GestureDetector(
+                    onTap: _pickAndUploadImage,
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundImage: _getProfileImageProvider(),
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          padding: const EdgeInsets.all(6),
+                          child: const Icon(Icons.camera_alt, color: Color(0xFF00B5A2)),
+                        ),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
-
             const SizedBox(height: 10),
-            const Text(
-              'Doctor Name',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+            _isLoading
+                ? const CircularProgressIndicator(color: Colors.white)
+                : const Text(
+                    'Doctor Name',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
 
             const SizedBox(height: 20),
 

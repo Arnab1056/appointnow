@@ -6,6 +6,8 @@ import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
 import 'package:appointnow/Pages/doctor/doctor_home.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+import 'package:image/image.dart' as img;
 
 class DoctorProfilePage extends StatefulWidget {
   const DoctorProfilePage({super.key});
@@ -20,6 +22,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
   String? _specialization;
   String? _profileImageUrl;
   bool _isLoading = true;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -49,25 +52,59 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
     }
   }
 
-  // Pick and upload new profile image
-  Future<void> _pickProfileImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+  Future<void> _pickAndUploadImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile == null) return;
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
     final file = File(pickedFile.path);
-    // Optionally resize image here if needed
+
+    // Resize image to 300x300 before upload
+    final originalBytes = await file.readAsBytes();
+    final decodedImage = img.decodeImage(originalBytes);
+    if (decodedImage == null) return;
+    final resizedImage = img.copyResize(decodedImage, width: 300, height: 300);
+    final resizedBytes = img.encodeJpg(resizedImage);
+    final resizedFile = await File('${file.parent.path}/resized_${file.uri.pathSegments.last}').writeAsBytes(resizedBytes);
+
+    // Get previous image name from Firestore
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+    final prevImageName = doc.data()?['profileImageName'] as String?;
+    if (prevImageName != null && prevImageName.isNotEmpty) {
+      // Delete previous image from Supabase Storage
+      await supabase.Supabase.instance.client.storage
+          .from('appointnow')
+          .remove([prevImageName]);
+    }
+
     final fileName =
-        'doctor_profile_${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
-    // Upload to your storage (implement as needed)
-    // For now, just update Firestore with a fake URL
-    await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-      'profileImageUrl': file.path, // Replace with real URL after upload
-    });
-    setState(() {
-      _profileImageUrl = file.path;
-    });
+        'profile_${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final storagePath = await supabase.Supabase.instance.client.storage
+        .from('appointnow')
+        .upload(fileName, resizedFile);
+    if (storagePath.isNotEmpty) {
+      final imageUrl = supabase.Supabase.instance.client.storage
+          .from('appointnow')
+          .getPublicUrl(fileName);
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'profileImageUrl': imageUrl, 'profileImageName': fileName});
+      setState(() {
+        _profileImageUrl = imageUrl;
+      });
+    }
+  }
+
+  ImageProvider _getProfileImageProvider() {
+    if (_profileImageUrl != null && _profileImageUrl!.isNotEmpty) {
+      return NetworkImage(_profileImageUrl!);
+    } else {
+      return const AssetImage('assets/profile.jpg');
+    }
   }
 
   // Show dialog to edit profile
@@ -146,33 +183,24 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                     Stack(
                       alignment: Alignment.bottomRight,
                       children: [
-                        CircleAvatar(
-                          radius: 60,
-                          backgroundImage: _profileImageUrl != null
-                              ? NetworkImage(_profileImageUrl!)
-                              : const AssetImage('assets/profile.jpg')
-                                  as ImageProvider,
-                        ),
-                        Positioned(
-                          bottom: 4,
-                          right: 4,
-                          child: GestureDetector(
-                            onTap: _pickProfileImage,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 4,
+                        GestureDetector(
+                          onTap: _pickAndUploadImage,
+                          child: CircleAvatar(
+                            radius: 60,
+                            backgroundImage: _getProfileImageProvider(),
+                            child: _isLoading
+                                ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                                : Align(
+                                    alignment: Alignment.bottomRight,
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      padding: const EdgeInsets.all(6),
+                                      child: const Icon(Icons.camera_alt, color: Color(0xFF00B5A2)),
+                                    ),
                                   ),
-                                ],
-                              ),
-                              padding: const EdgeInsets.all(6),
-                              child: const Icon(Icons.camera_alt,
-                                  color: Colors.teal, size: 24),
-                            ),
                           ),
                         ),
                       ],
@@ -197,8 +225,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                                   const SizedBox(width: 8),
                                   GestureDetector(
                                     onTap: _showEditProfileDialog,
-                                    child: const Icon(Icons.edit,
-                                        color: Colors.white, size: 20),
+                                    child: const Icon(Icons.edit, color: Colors.white, size: 20),
                                   ),
                                 ],
                               ),
