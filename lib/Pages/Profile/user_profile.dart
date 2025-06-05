@@ -1,11 +1,12 @@
 import 'package:appointnow/pages/index/homepage.dart';
 import 'package:flutter/material.dart';
 import 'package:appointnow/pages/auth/login.dart';
-// import 'dart:io'; // Removed, not needed without image picker
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
-// import 'package:shared_preferences/shared_preferences.dart'; // Removed, not needed without image picker
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -17,12 +18,14 @@ class UserProfilePage extends StatefulWidget {
 class _UserProfilePageState extends State<UserProfilePage> {
   int _currentIndex = 3;
   String? _userName;
+  String? _profileImageUrl;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _fetchUserName();
+    _fetchProfileImageUrl();
   }
 
   Future<void> _fetchUserName() async {
@@ -40,6 +43,45 @@ class _UserProfilePageState extends State<UserProfilePage> {
       setState(() {
         _userName = 'No Name';
         _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _fetchProfileImageUrl() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      setState(() {
+        _profileImageUrl = doc.data()?['profileImageUrl'];
+      });
+    }
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile == null) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final file = File(pickedFile.path);
+    final fileName =
+        'profile_${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final storagePath = await supabase.Supabase.instance.client.storage
+        .from('appointnow')
+        .upload(fileName, file);
+    if (storagePath.isNotEmpty) {
+      final imageUrl = supabase.Supabase.instance.client.storage
+          .from('appointnow')
+          .getPublicUrl(fileName);
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'profileImageUrl': imageUrl});
+      setState(() {
+        _profileImageUrl = imageUrl;
       });
     }
   }
@@ -64,10 +106,27 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 child: Column(
                   children: [
                     const SizedBox(height: 20),
-                    // Profile image picker removed
-                    const CircleAvatar(
-                      radius: 60,
-                      backgroundImage: AssetImage('assets/profile.jpg'),
+                    GestureDetector(
+                      onTap: _pickAndUploadImage,
+                      child: CircleAvatar(
+                        radius: 60,
+                        backgroundImage: _profileImageUrl != null
+                            ? NetworkImage(_profileImageUrl!)
+                            : const AssetImage('assets/profile.jpg')
+                                as ImageProvider,
+                        child: Align(
+                          alignment: Alignment.bottomRight,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            padding: const EdgeInsets.all(6),
+                            child: const Icon(Icons.camera_alt,
+                                color: Color(0xFF00B5A2)),
+                          ),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 10),
                     _isLoading
@@ -81,7 +140,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-
                     const SizedBox(height: 180),
                   ],
                 ),
