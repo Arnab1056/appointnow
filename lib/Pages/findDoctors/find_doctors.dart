@@ -56,7 +56,7 @@ class _FindDoctorsPageState extends State<FindDoctorsPage> {
         ),
         centerTitle: true, // Center the title properly
         title: const Text(
-          "Find Doctors",
+          "Find Doctors ",
           style: TextStyle(
               fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
         ),
@@ -101,7 +101,7 @@ class _FindDoctorsPageState extends State<FindDoctorsPage> {
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(
                             vertical: 0, horizontal: 16),
-                        hintText: "Find a doctor",
+                        hintText: "Find a doctor use name/designation/hospital",
                         hintStyle:
                             const TextStyle(fontSize: 14, color: Colors.grey),
                         prefixIcon: const Icon(

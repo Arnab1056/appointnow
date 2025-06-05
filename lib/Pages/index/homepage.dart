@@ -242,11 +242,21 @@ class _HomePageState extends State<HomePage> {
                                       key: ValueKey(
                                           '${doc['profileImageUrl'] ?? ''}_${DateTime.now().millisecondsSinceEpoch}_${doc['id']}'), // Unique key to force refresh
                                       backgroundColor: Colors.grey[200],
-                                      backgroundImage: (doc['profileImageUrl'] != null && doc['profileImageUrl'].toString().isNotEmpty)
+                                      backgroundImage: (doc[
+                                                      'profileImageUrl'] !=
+                                                  null &&
+                                              doc['profileImageUrl']
+                                                  .toString()
+                                                  .isNotEmpty)
                                           ? NetworkImage(doc['profileImageUrl'])
-                                          : (doc['image'] != null && doc['image'].toString().isNotEmpty
-                                              ? NetworkImage(doc['image'])
-                                              : const AssetImage('assets/images/doctor1.jpg')) as ImageProvider,
+                                          : (doc['image'] != null &&
+                                                      doc['image']
+                                                          .toString()
+                                                          .isNotEmpty
+                                                  ? NetworkImage(doc['image'])
+                                                  : const AssetImage(
+                                                      'assets/images/doctor1.jpg'))
+                                              as ImageProvider,
                                       onBackgroundImageError: (_, __) {},
                                     ),
                                     const SizedBox(height: 6),
@@ -349,46 +359,50 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildCategoryCard(String iconPath, String label) {
-    return GestureDetector(
-      onTap: () {
-        if (label == 'Doctor') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const FindDoctorsPage()),
-          );
-        } else {
-          // Handle other card clicks if needed
-        }
-      },
-      child: Column(
-        children: [
-          Container(
-            width: 60.0,
-            height: 60.0,
-            decoration: BoxDecoration(
-              color: Colors.white, // Set background color to white
-              borderRadius: BorderRadius.circular(8.0),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.white,
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: Offset(0, 3), // changes position of shadow
-                ),
-              ],
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8.0),
+        onTap: () {
+          if (label == 'Doctor') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const FindDoctorsPage()),
+            );
+          } else {
+            // Handle other card clicks if needed
+          }
+        },
+        child: Column(
+          children: [
+            Container(
+              width: 60.0,
+              height: 60.0,
+              decoration: BoxDecoration(
+                color: Colors.white, // Set background color to white
+                borderRadius: BorderRadius.circular(8.0),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.white,
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: Offset(0, 3), // changes position of shadow
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Image.asset(iconPath,
+                    width: 32.0, height: 32.0), // Fixed image size to 32x32
+              ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Image.asset(iconPath,
-                  width: 32.0, height: 32.0), // Fixed image size to 32x32
-            ),
-          ),
-          const SizedBox(height: 8.0),
-          Text(label,
-              style: const TextStyle(
-                  color: Color.fromARGB(
-                      255, 103, 102, 102))), // Text color set to black
-        ],
+            const SizedBox(height: 8.0),
+            Text(label,
+                style: const TextStyle(
+                    color: Color.fromARGB(
+                        255, 103, 102, 102))), // Text color set to black
+          ],
+        ),
       ),
     );
   }
