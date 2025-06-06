@@ -61,11 +61,21 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
   @override
   Widget build(BuildContext context) {
     final doctor = widget.doctor;
-    final double avgRating = (doctor['avgRating'] is double)
-        ? doctor['avgRating']
-        : (doctor['avgRating'] is int)
-            ? (doctor['avgRating'] as int).toDouble()
-            : 0.0;
+    // Fix: Support both 'avgRating' and fallback to 'rating' if present
+    double avgRating = 0.0;
+    if (doctor['avgRating'] != null) {
+      avgRating = doctor['avgRating'] is double
+          ? doctor['avgRating']
+          : (doctor['avgRating'] is int
+              ? (doctor['avgRating'] as int).toDouble()
+              : 0.0);
+    } else if (doctor['rating'] != null) {
+      avgRating = doctor['rating'] is double
+          ? doctor['rating']
+          : (doctor['rating'] is int
+              ? (doctor['rating'] as int).toDouble()
+              : 0.0);
+    }
     final int totalRatings = doctor['totalRatings'] ?? 0;
     return Scaffold(
       backgroundColor: Colors.white,

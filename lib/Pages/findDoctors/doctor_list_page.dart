@@ -74,7 +74,13 @@ class DoctorListPage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => DoctorDetailsPage(doctor: doctor),
+                          builder: (_) => DoctorDetailsPage(
+                            doctor: {
+                              ...doctor,
+                              'avgRating': avgRating,
+                              'totalRatings': totalRatings,
+                            },
+                          ),
                         ),
                       );
                     },
