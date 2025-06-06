@@ -1,10 +1,8 @@
-import 'package:appointnow/Pages/doctor/doctorprofile_edit.dart';
 import 'package:appointnow/Pages/hospital/hospitalprofile_edit.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
-import 'package:appointnow/Pages/doctor/doctor_home.dart';
 import 'package:appointnow/Pages/hospital/hospital_home.dart'; // <-- Add this import
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
