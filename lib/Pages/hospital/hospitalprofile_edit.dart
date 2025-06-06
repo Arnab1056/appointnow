@@ -25,6 +25,8 @@ class _HospitalProfileEditPageState extends State<HospitalProfileEditPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _registerController = TextEditingController();
+  final TextEditingController _locationController =
+      TextEditingController(); // <-- Add location controller
 
   bool _hasLab = false;
   bool _hasCabin = false;
@@ -50,6 +52,7 @@ class _HospitalProfileEditPageState extends State<HospitalProfileEditPage> {
         _emailController.text = data['email'] ?? '';
         _phoneController.text = data['phone'] ?? '';
         _registerController.text = data['registerNumber'] ?? '';
+        _locationController.text = data['location'] ?? ''; // <-- Fetch location
         _hasLab = data['hasLab'] ?? false;
         _hasCabin = data['hasCabin'] ?? false;
       }
@@ -69,6 +72,7 @@ class _HospitalProfileEditPageState extends State<HospitalProfileEditPage> {
       'email': _emailController.text.trim(),
       'phone': _phoneController.text.trim(),
       'registerNumber': _registerController.text.trim(),
+      'location': _locationController.text.trim(), // <-- Save location
       'hasLab': _hasLab,
       'hasCabin': _hasCabin,
       'profileImageUrl': _profileImageUrl ?? '',
@@ -86,6 +90,7 @@ class _HospitalProfileEditPageState extends State<HospitalProfileEditPage> {
     _emailController.dispose();
     _phoneController.dispose();
     _registerController.dispose();
+    _locationController.dispose(); // <-- Dispose location controller
     super.dispose();
   }
 
@@ -268,6 +273,10 @@ class _HospitalProfileEditPageState extends State<HospitalProfileEditPage> {
                 icon: Icons.badge_outlined,
                 hint: 'Register Number',
                 controller: _registerController),
+            CustomTextField(
+                icon: Icons.location_on_outlined, // <-- Location icon
+                hint: 'Location',
+                controller: _locationController), // <-- Location field
             const SizedBox(height: 10),
             Row(
               children: [

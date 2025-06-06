@@ -2,6 +2,7 @@ import 'package:appointnow/pages/Profile/user_profile.dart';
 import 'package:appointnow/pages/findDoctors/find_doctors.dart';
 import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
 import 'package:appointnow/Pages/doctor_details_pages/doctor_details.dart'; // <-- Add this import
+import 'package:appointnow/Pages/findDoctors/hospitallist.dart'; // Add this import
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -326,10 +327,118 @@ class _HomePageState extends State<HomePage> {
 
                 // Top Hospitals
                 const SizedBox(height: 16.0),
-                _buildSectionHeader('Top Hospitals', onViewAll: () {}),
+                _buildSectionHeader('Top Hospitals', onViewAll: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          HospitallistPage(category: 'hospital'),
+                    ),
+                  );
+                }),
                 const SizedBox(height: 8.0),
-                _buildHorizontalList(
-                    ['Hospital A', 'Hospital B', 'Hospital C']),
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('hospitaldetails')
+                      .orderBy('rating', descending: true)
+                      .limit(5)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const Text("No top hospitals found");
+                    }
+                    final hospitals = snapshot.data!.docs;
+                    return SizedBox(
+                      height: 140,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: hospitals.length,
+                        separatorBuilder: (context, idx) =>
+                            const SizedBox(width: 12),
+                        itemBuilder: (context, idx) {
+                          final hospital =
+                              hospitals[idx].data() as Map<String, dynamic>;
+                          return Container(
+                            width: 140,
+                            margin: const EdgeInsets.symmetric(vertical: 4.0),
+                            padding: const EdgeInsets.all(10.0),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16.0),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircleAvatar(
+                                  radius: 28,
+                                  backgroundColor: Colors.grey[200],
+                                  backgroundImage:
+                                      (hospital['profileImageUrl'] != null &&
+                                              hospital['profileImageUrl']
+                                                  .toString()
+                                                  .isNotEmpty)
+                                          ? NetworkImage(
+                                              hospital['profileImageUrl'])
+                                          : const AssetImage(
+                                                  'assets/hospital.jpg')
+                                              as ImageProvider,
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  hospital['name'] ?? '',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13),
+                                ),
+                                Text(
+                                  hospital['location'] ?? '',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      fontSize: 11, color: Colors.grey),
+                                ),
+                                const SizedBox(height: 2),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.star,
+                                        size: 13, color: Color(0xFF199A8E)),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      hospital['rating'] != null
+                                          ? (hospital['rating'] is num
+                                              ? hospital['rating']
+                                                  .toStringAsFixed(1)
+                                              : hospital['rating'].toString())
+                                          : 'No rating',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 11,
+                                        color: Color(0xFF199A8E),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
 
                 // Top Ambulance Service
                 const SizedBox(height: 16.0),
@@ -382,6 +491,13 @@ class _HomePageState extends State<HomePage> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const FindDoctorsPage()),
+            );
+          } else if (label == 'Hospital') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HospitallistPage(category: 'hospital'),
+              ),
             );
           } else {
             // Handle other card clicks if needed

@@ -91,13 +91,13 @@ class _HospitalProfilePageState extends State<HospitalProfilePage> {
       final imageUrl = supabase.Supabase.instance.client.storage
           .from('appointnow')
           .getPublicUrl(fileName);
-      // Update both users and doctordetails collections
+      // Update both users and hospitaldetails collections
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .update({'profileImageUrl': imageUrl, 'profileImageName': fileName});
       await FirebaseFirestore.instance
-          .collection('doctordetails')
+          .collection('hospitaldetails')
           .doc(user.uid)
           .set({'profileImageUrl': imageUrl, 'profileImageName': fileName},
               SetOptions(merge: true));

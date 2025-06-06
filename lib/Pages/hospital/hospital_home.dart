@@ -89,23 +89,23 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
                     ? const Center(child: CircularProgressIndicator())
                     : Row(
                         children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: _hospitalImageUrl != null &&
-                                    _hospitalImageUrl!.isNotEmpty
-                                ? Image.network(
+                          _hospitalImageUrl != null &&
+                                  _hospitalImageUrl!.isNotEmpty
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(40),
+                                  child: Image.network(
                                     _hospitalImageUrl!,
                                     width: 80,
                                     height: 80,
                                     fit: BoxFit.cover,
-                                  )
-                                : Image.asset(
-                                    'assets/hospital.jpg',
-                                    width: 80,
-                                    height: 80,
-                                    fit: BoxFit.cover,
                                   ),
-                          ),
+                                )
+                              : const CircleAvatar(
+                                  radius: 40,
+                                  backgroundColor: Color(0xFFE0F2F1),
+                                  child: Icon(Icons.local_hospital,
+                                      color: Colors.teal, size: 40),
+                                ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
