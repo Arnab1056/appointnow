@@ -29,14 +29,48 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
 
   bool _agreedToTerms = false;
 
+  List<bool> _selectedDays = List.generate(6, (i) => false); // Mon-Sat
+  List<bool> _selectedTimes = [];
+  final List<String> _weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  final List<String> _timeSlots = [
+    '09:00 AM',
+    '09:30 AM',
+    '10:00 AM',
+    '10:30 AM',
+    '11:00 AM',
+    '11:30 AM',
+    '12:00 PM',
+    '12:30 PM',
+    '01:00 PM',
+    '01:30 PM',
+    '02:00 PM',
+    '02:30 PM',
+    '03:00 PM',
+    '03:30 PM',
+    '04:00 PM',
+    '04:30 PM',
+    '05:00 PM',
+    '05:30 PM',
+    '06:00 PM',
+    '06:30 PM',
+    '07:00 PM',
+    '07:30 PM',
+    '08:00 PM',
+    '08:30 PM',
+    '09:00 PM',
+    '09:30 PM',
+    '10:00 PM',
+  ];
+
   @override
   void initState() {
     super.initState();
     _fetchProfileImageUrl();
-    _fetchDoctorDetails();
+    _fetchDoctorDetailsAndAvailability();
+    _selectedTimes = List.generate(_timeSlots.length, (i) => false);
   }
 
-  Future<void> _fetchDoctorDetails() async {
+  Future<void> _fetchDoctorDetailsAndAvailability() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final doc = await FirebaseFirestore.instance
@@ -50,6 +84,22 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
         _phoneController.text = data['phone'] ?? '';
         _registerController.text = data['registerNumber'] ?? '';
         _designationController.text = data['designation'] ?? '';
+        // Restore available days
+        if (data['availableDays'] != null && data['availableDays'] is List) {
+          final List days = data['availableDays'];
+          for (int i = 0; i < _weekDays.length; i++) {
+            _selectedDays[i] = days.contains(_weekDays[i]);
+          }
+        }
+        // Restore available time slots
+        if (data['availableTimeSlots'] != null &&
+            data['availableTimeSlots'] is List) {
+          final List times = data['availableTimeSlots'];
+          for (int i = 0; i < _timeSlots.length; i++) {
+            _selectedTimes[i] = times.contains(_timeSlots[i]);
+          }
+        }
+        setState(() {});
       }
     }
   }
@@ -57,6 +107,17 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
   Future<void> _saveDoctorDetails() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
+
+    // Prepare selected days and times
+    final selectedDays = <String>[];
+    for (int i = 0; i < _selectedDays.length; i++) {
+      if (_selectedDays[i]) selectedDays.add(_weekDays[i]);
+    }
+    final selectedTimeSlots = <String>[];
+    for (int i = 0; i < _selectedTimes.length; i++) {
+      if (_selectedTimes[i]) selectedTimeSlots.add(_timeSlots[i]);
+    }
+
     await FirebaseFirestore.instance
         .collection('doctordetails')
         .doc(user.uid)
@@ -67,8 +128,10 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
       'phone': _phoneController.text.trim(),
       'registerNumber': _registerController.text.trim(),
       'designation': _designationController.text.trim(),
-      'profileImageUrl': _profileImageUrl ?? '', // Ensure this is set
+      'profileImageUrl': _profileImageUrl ?? '',
       'profileImageName': _profileImageName ?? '',
+      'availableDays': selectedDays,
+      'availableTimeSlots': selectedTimeSlots,
       'timestamp': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
     ScaffoldMessenger.of(context).showSnackBar(
@@ -150,7 +213,8 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
       await FirebaseFirestore.instance
           .collection('doctordetails')
           .doc(user.uid)
-          .set({'profileImageUrl': imageUrl, 'profileImageName': fileName}, SetOptions(merge: true));
+          .set({'profileImageUrl': imageUrl, 'profileImageName': fileName},
+              SetOptions(merge: true));
       setState(() {
         _profileImageUrl = imageUrl;
         _profileImageName = fileName;
@@ -164,6 +228,50 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
     } else {
       return const AssetImage('assets/doctor.jpg');
     }
+  }
+
+  Widget _buildDaySelector() {
+    return Wrap(
+      spacing: 10,
+      children: List.generate(_weekDays.length, (i) {
+        return ChoiceChip(
+          label: Text(_weekDays[i]),
+          selected: _selectedDays[i],
+          selectedColor: Colors.teal,
+          labelStyle: TextStyle(
+            color: _selectedDays[i] ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+          onSelected: (selected) {
+            setState(() {
+              _selectedDays[i] = selected;
+            });
+          },
+        );
+      }),
+    );
+  }
+
+  Widget _buildTimeSelector() {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: List.generate(_timeSlots.length, (i) {
+        return FilterChip(
+          label: Text(_timeSlots[i]),
+          selected: _selectedTimes[i],
+          selectedColor: Colors.teal,
+          labelStyle: TextStyle(
+            color: _selectedTimes[i] ? Colors.white : Colors.black,
+          ),
+          onSelected: (selected) {
+            setState(() {
+              _selectedTimes[i] = selected;
+            });
+          },
+        );
+      }),
+    );
   }
 
   @override
@@ -313,7 +421,29 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
 
             const SizedBox(height: 10),
 
-            // Save Button
+            // Free Time & Day Section
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Available Days',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ),
+            const SizedBox(height: 8),
+            _buildDaySelector(),
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Available Time Slots',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ),
+            const SizedBox(height: 8),
+            _buildTimeSelector(),
+            const SizedBox(height: 30),
+
+            // Save Button at the end
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -324,11 +454,14 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
                     borderRadius: BorderRadius.circular(30),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 16),
+                  foregroundColor: Colors.white, // Ensures button text is white
+                  textStyle: const TextStyle(color: Colors.white),
                 ),
-                child: const Text('Save', style: TextStyle(fontSize: 16)),
+                child: const Text('Save',
+                    style: TextStyle(fontSize: 16, color: Colors.white)),
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
           ],
         ),
       ),

@@ -1,6 +1,8 @@
 import 'package:appointnow/Pages/doctor/doctor_profile.dart';
 import 'package:appointnow/pages/findDoctors/find_doctors.dart';
 import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
+import 'package:appointnow/Pages/doctor/schedule_requests_page.dart';
+import 'package:appointnow/Pages/findDoctors/hospitallist.dart';
 // Make sure the path above is correct and the file 'app_bottom_navigation_bar.dart' defines 'AppBottomNavigationBar'
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -101,9 +103,9 @@ class _DoctorhomeState extends State<Doctorhome> {
                   children: [
                     _buildCategoryCard(
                         'assets/icon/Doctor.png', 'Appointments'),
+                    _buildCategoryCard('assets/icon/Pharmacy.png', 'Pharmacy'),
                     _buildCategoryCard('assets/icon/Hospital.png', 'Hospital'),
-                    _buildCategoryCard('assets/icon/ratting.png', 'Ratting'),
-                    _buildCategoryCard('assets/icon/chamber.png', 'Ambulance'),
+                    _buildCategoryCard('assets/icon/Ambulance.png', 'Requests'),
                   ],
                 ),
                 const SizedBox(height: 16.0),
@@ -225,14 +227,27 @@ class _DoctorhomeState extends State<Doctorhome> {
   Widget _buildCategoryCard(String iconPath, String label) {
     return GestureDetector(
       onTap: () {
-        if (label == 'Doctor') {
+        if (label == 'Doctor' || label == 'Appointments') {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const FindDoctorsPage()),
           );
-        } else {
-          // Handle other card clicks if needed
+        } else if (label == 'Hospital') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HospitallistPage(category: 'hospital'),
+            ),
+          );
+        } else if (label == 'Requests') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ScheduleRequestsPage(),
+            ),
+          );
         }
+        // else: handle other cards if needed
       },
       child: Column(
         children: [
@@ -240,28 +255,18 @@ class _DoctorhomeState extends State<Doctorhome> {
             width: 60.0,
             height: 60.0,
             decoration: BoxDecoration(
-              color: Colors.white, // Set background color to white
+              color: Colors.teal.withOpacity(0.2),
               borderRadius: BorderRadius.circular(8.0),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.white,
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: Offset(0, 3), // changes position of shadow
-                ),
-              ],
             ),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Image.asset(iconPath,
-                  width: 32.0, height: 32.0), // Fixed image size to 32x32
+              child: Image.asset(iconPath, width: 32.0, height: 32.0),
             ),
           ),
           const SizedBox(height: 8.0),
           Text(label,
-              style: const TextStyle(
-                  color: Color.fromARGB(
-                      255, 103, 102, 102))), // Text color set to black
+              style:
+                  const TextStyle(color: Color.fromARGB(255, 103, 102, 102))),
         ],
       ),
     );

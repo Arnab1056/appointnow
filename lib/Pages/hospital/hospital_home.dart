@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
 import 'package:appointnow/Pages/hospital/hospitalprofile.dart';
+import 'package:appointnow/Pages/hospital/add_doctor_page.dart'; // Import AddDoctorPage from the correct path
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -189,9 +190,17 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
                 childAspectRatio: 0.9,
               ),
               itemBuilder: (context, index) {
+                final label = items[index]['label']!;
                 return GestureDetector(
                   onTap: () {
-                    // Navigate or handle tap
+                    if (label == "Add Doctor") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const AddDoctorPage()),
+                      );
+                    }
+                    // Navigate or handle tap for other items
                   },
                   child: Container(
                     decoration: BoxDecoration(
