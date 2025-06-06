@@ -49,7 +49,7 @@ class PatientDetailsPage extends StatelessWidget {
             const SizedBox(height: 20),
             Center(
               child: Text(
-                patient['name'] ?? 'Patient Name',
+                patient['patientName'] ?? 'Patient Name',
                 style: GoogleFonts.poppins(
                     fontSize: 20, fontWeight: FontWeight.bold),
               ),
