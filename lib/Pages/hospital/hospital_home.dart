@@ -1,7 +1,10 @@
+import 'package:appointnow/Pages/hospital/doctorlistforappointments.dart';
 import 'package:flutter/material.dart';
 import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
 import 'package:appointnow/Pages/hospital/hospitalprofile.dart';
 import 'package:appointnow/Pages/hospital/add_doctor_page.dart'; // Import AddDoctorPage from the correct path
+import 'package:appointnow/Pages/hospital/doctor_list_for_hospital.dart'; // <-- Add this import (update the path if needed)
+// Make sure the file doctor_list_for_hospital.dart exports DoctorListPageForHospital
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -66,6 +69,8 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
       {"label": "Doctors list"},
       {"label": "Laboratory list"},
       {"label": "Lab Reports"},
+      {"label": "Appointments"},
+      // <-- Add this line
     ];
 
     return Scaffold(
@@ -206,7 +211,32 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
                             builder: (context) => const AddDoctorPage()),
                       );
                     }
-                    // Navigate or handle tap for other items
+                    if (label == "Doctors list") {
+                      final hospitalUid =
+                          FirebaseAuth.instance.currentUser?.uid;
+                      if (hospitalUid != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DoctorListForHospitalPage(
+                                hospitalUid: hospitalUid),
+                          ),
+                        );
+                      }
+                    }
+                    if (label == "Appointments") {
+                      final hospitalUid =
+                          FirebaseAuth.instance.currentUser?.uid;
+                      if (hospitalUid != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DoctorListForAppointmentsPage(
+                                hospitalUid: hospitalUid),
+                          ),
+                        );
+                      }
+                    }
                   },
                   child: Container(
                     decoration: BoxDecoration(

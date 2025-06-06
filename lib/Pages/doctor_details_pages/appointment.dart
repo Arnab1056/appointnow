@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class AppointmentPage extends StatefulWidget {
@@ -522,7 +523,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
                   width: 200,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      await _addSerialToDatabase();
                       _showSuccessPopup(); // Show the success popup
                     },
                     style: ElevatedButton.styleFrom(
@@ -543,6 +545,22 @@ class _AppointmentPageState extends State<AppointmentPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _addSerialToDatabase() async {
+    final serialData = {
+      'doctorId': widget.doctor['id'] ?? widget.doctor['uid'] ?? '',
+      'doctorName': widget.doctor['name'] ?? '',
+      'doctorDesignation': widget.doctor['designation'] ?? '',
+      'hospitalName': widget.hospitalName,
+      'date': widget.date,
+      'day': widget.day,
+      'time': widget.time,
+      'reason': reason ?? '',
+      'paymentMethod': selectedPaymentMethod,
+      'createdAt': FieldValue.serverTimestamp(),
+    };
+    await FirebaseFirestore.instance.collection('serial').add(serialData);
   }
 
   /// Helper for building payment rows

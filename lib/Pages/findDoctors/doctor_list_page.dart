@@ -5,7 +5,7 @@ import '../../Pages/doctor_details_pages/doctor_details.dart'; // Import the Doc
 
 class DoctorListPage extends StatelessWidget {
   final String category;
-  const DoctorListPage({super.key, required this.category});
+  DoctorListPage({super.key, required this.category});
 
   Stream<QuerySnapshot> getDoctorsByCategory() {
     return FirebaseFirestore.instance
@@ -232,7 +232,7 @@ class DoctorListPage extends StatelessWidget {
                                                     {'rating': selectedRating});
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
-                                              const SnackBar(
+                                              SnackBar(
                                                   content: Text(
                                                       'Thank you for rating!')),
                                             );
