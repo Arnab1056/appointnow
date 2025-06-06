@@ -8,6 +8,7 @@ class AppointmentPage extends StatefulWidget {
   final String time;
   final String hospitalName;
   final String hospitalId; // Add hospitalId from previous page
+  final String patientName; // Add this
 
   const AppointmentPage({
     super.key,
@@ -17,6 +18,7 @@ class AppointmentPage extends StatefulWidget {
     required this.time,
     required this.hospitalName,
     required this.hospitalId, // Add hospitalId to constructor
+    required this.patientName, // Add this
   });
 
   @override
@@ -562,6 +564,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
       'reason': reason ?? '',
       'paymentMethod': selectedPaymentMethod,
       'createdAt': FieldValue.serverTimestamp(),
+      'patientName': widget.patientName, // Save patient name
     };
     await FirebaseFirestore.instance.collection('serial').add(serialData);
   }

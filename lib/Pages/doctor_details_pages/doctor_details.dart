@@ -5,7 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 // Updated the DoctorDetailsPage to include read more functionality, improved card layout, and added bottom action buttons
 class DoctorDetailsPage extends StatefulWidget {
   final Map<String, dynamic> doctor;
-  const DoctorDetailsPage({super.key, required this.doctor});
+  final String userName;
+  const DoctorDetailsPage(
+      {super.key, required this.doctor, required this.userName});
 
   @override
   State<DoctorDetailsPage> createState() => _DoctorDetailsPageState();
@@ -137,17 +139,6 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
             }
             final List<Map<String, dynamic>> acceptedAppointments =
                 snapshot.data ?? [];
-            final slots = getAvailableSlots();
-            // Find the first hospitalName from accepted appointments if any
-            String? acceptedHospitalName;
-            for (final slot in slots) {
-              final apptHospitalName =
-                  getHospitalNameForSlot(slot['day'], acceptedAppointments);
-              if (apptHospitalName.isNotEmpty) {
-                acceptedHospitalName = apptHospitalName;
-                break;
-              }
-            }
             // Flatten appointments so each day gets its own card
             List<Map<String, dynamic>> dayWiseAppointments = [];
             for (final appt in acceptedAppointments) {
@@ -507,8 +498,8 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                                       date: date,
                                       time: time,
                                       hospitalName: appt['hospital'],
-                                      hospitalId: appt['hospitalId'] ??
-                                          '', // Always use hospitalId from DB
+                                      hospitalId: appt['hospitalId'] ?? '',
+                                      patientName: widget.userName,
                                     ),
                                   ),
                                 );

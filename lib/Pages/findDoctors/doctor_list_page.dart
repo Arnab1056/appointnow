@@ -80,6 +80,7 @@ class DoctorListPage extends StatelessWidget {
                               'avgRating': avgRating,
                               'totalRatings': totalRatings,
                             },
+                            userName: FirebaseAuth.instance.currentUser?.displayName ?? '',
                           ),
                         ),
                       );

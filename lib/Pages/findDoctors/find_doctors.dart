@@ -140,7 +140,7 @@ class _FindDoctorsPageState extends State<FindDoctorsPage> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (_) =>
-                                          DoctorDetailsPage(doctor: data),
+                                          DoctorDetailsPage(doctor: data, userName: ''), // TODO: Replace '' with actual user name if available
                                     ),
                                   );
                                 },
@@ -336,7 +336,7 @@ class _FindDoctorsPageState extends State<FindDoctorsPage> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (_) =>
-                                        DoctorDetailsPage(doctor: topDoctor),
+                                        DoctorDetailsPage(doctor: topDoctor, userName: ''), // TODO: Replace '' with actual user name if available
                                   ),
                                 );
                               },

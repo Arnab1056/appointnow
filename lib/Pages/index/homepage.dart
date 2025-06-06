@@ -6,6 +6,7 @@ import 'package:appointnow/Pages/findDoctors/hospitallist.dart'; // Add this imp
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // Converted the HomePage widget to a StatefulWidget
 class HomePage extends StatefulWidget {
@@ -17,6 +18,26 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0; // Added variable to track the current index
+  String? _userName;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserName();
+  }
+
+  Future<void> _fetchUserName() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      setState(() {
+        _userName = doc.data()?['name'] ?? 'No Name';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -222,8 +243,10 @@ class _HomePageState extends State<HomePage> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) =>
-                                          DoctorDetailsPage(doctor: doc),
+                                      builder: (_) => DoctorDetailsPage(
+                                        doctor: doc,
+                                        userName: _userName ?? '',
+                                      ),
                                     ),
                                   );
                                 },
