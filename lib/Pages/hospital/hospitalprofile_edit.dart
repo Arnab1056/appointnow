@@ -1,7 +1,173 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+import 'package:image/image.dart' as img;
 
-class HospitalProfileEditPage extends StatelessWidget {
+class HospitalProfileEditPage extends StatefulWidget {
   const HospitalProfileEditPage({super.key});
+
+  @override
+  State<HospitalProfileEditPage> createState() =>
+      _HospitalProfileEditPageState();
+}
+
+class _HospitalProfileEditPageState extends State<HospitalProfileEditPage> {
+  String? _profileImageUrl;
+  String? _profileImageName;
+  bool _isLoading = true;
+  final ImagePicker _picker = ImagePicker();
+
+  // Controllers for form fields
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _registerController = TextEditingController();
+
+  bool _hasLab = false;
+  bool _hasCabin = false;
+  bool _agreedToTerms = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchProfileImageUrl();
+    _fetchHospitalDetails();
+  }
+
+  Future<void> _fetchHospitalDetails() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('hospitaldetails')
+          .doc(user.uid)
+          .get();
+      final data = doc.data();
+      if (data != null) {
+        _nameController.text = data['name'] ?? '';
+        _emailController.text = data['email'] ?? '';
+        _phoneController.text = data['phone'] ?? '';
+        _registerController.text = data['registerNumber'] ?? '';
+        _hasLab = data['hasLab'] ?? false;
+        _hasCabin = data['hasCabin'] ?? false;
+      }
+      setState(() {});
+    }
+  }
+
+  Future<void> _saveHospitalDetails() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    await FirebaseFirestore.instance
+        .collection('hospitaldetails')
+        .doc(user.uid)
+        .set({
+      'uid': user.uid,
+      'name': _nameController.text.trim(),
+      'email': _emailController.text.trim(),
+      'phone': _phoneController.text.trim(),
+      'registerNumber': _registerController.text.trim(),
+      'hasLab': _hasLab,
+      'hasCabin': _hasCabin,
+      'profileImageUrl': _profileImageUrl ?? '',
+      'profileImageName': _profileImageName ?? '',
+      'timestamp': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Profile saved successfully!')),
+    );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _registerController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchProfileImageUrl() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      setState(() {
+        _profileImageUrl = doc.data()?['profileImageUrl'];
+        _profileImageName = doc.data()?['profileImageName'];
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile == null) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final file = File(pickedFile.path);
+
+    // Resize image to 300x300 before upload
+    final originalBytes = await file.readAsBytes();
+    final decodedImage = img.decodeImage(originalBytes);
+    if (decodedImage == null) return;
+    final resizedImage = img.copyResize(decodedImage, width: 300, height: 300);
+    final resizedBytes = img.encodeJpg(resizedImage);
+
+    // Get previous image name from Firestore
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+    final prevImageName = doc.data()?['profileImageName'] as String?;
+    if (prevImageName != null && prevImageName.isNotEmpty) {
+      await supabase.Supabase.instance.client.storage
+          .from('appointnow')
+          .remove([prevImageName]);
+    }
+
+    final fileName =
+        'profile_${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final storageResponse = await supabase.Supabase.instance.client.storage
+        .from('appointnow')
+        .uploadBinary(fileName, resizedBytes,
+            fileOptions: const supabase.FileOptions(contentType: 'image/jpeg'));
+    if (storageResponse.isNotEmpty) {
+      final imageUrl = supabase.Supabase.instance.client.storage
+          .from('appointnow')
+          .getPublicUrl(fileName);
+      // Update both users and hospitaldetails collections
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'profileImageUrl': imageUrl, 'profileImageName': fileName});
+      await FirebaseFirestore.instance
+          .collection('hospitaldetails')
+          .doc(user.uid)
+          .set({'profileImageUrl': imageUrl, 'profileImageName': fileName},
+              SetOptions(merge: true));
+      setState(() {
+        _profileImageUrl = imageUrl;
+        _profileImageName = fileName;
+      });
+    }
+  }
+
+  ImageProvider _getProfileImageProvider() {
+    if (_profileImageUrl != null && _profileImageUrl!.isNotEmpty) {
+      return NetworkImage(_profileImageUrl!);
+    } else {
+      return const AssetImage('assets/hospital_avatar.jpg');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -10,7 +176,7 @@ class HospitalProfileEditPage extends StatelessWidget {
         leading: const BackButton(color: Colors.black),
         centerTitle: true,
         title: const Text(
-          'Doctor Profile',
+          'Hospital Profile',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
         ),
         backgroundColor: Colors.white,
@@ -21,44 +187,42 @@ class HospitalProfileEditPage extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 10),
-
-            // Profile Image with camera icon
             Center(
               child: Stack(
                 children: [
-                  const CircleAvatar(
-                    radius: 50,
-                    backgroundImage: AssetImage('assets/hospital_avatar.jpg'),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 4,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                      ),
-                      child: const Icon(
-                        Icons.camera_alt,
-                        size: 20,
-                        color: Colors.grey,
+                  GestureDetector(
+                    onTap: _pickAndUploadImage,
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundImage: _getProfileImageProvider(),
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          padding: const EdgeInsets.all(6),
+                          child: const Icon(Icons.camera_alt,
+                              color: Color(0xFF00B5A2)),
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-
             const SizedBox(height: 10),
-            const Text(
-              'Hospital Name',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-
+            _isLoading
+                ? const CircularProgressIndicator(color: Colors.teal)
+                : Text(
+                    _nameController.text.isNotEmpty
+                        ? _nameController.text
+                        : 'Hospital Name',
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
             const SizedBox(height: 20),
-
-            // About + Change row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: const [
@@ -87,36 +251,58 @@ class HospitalProfileEditPage extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
-
-            // Input Fields
-            const CustomTextField(
-                icon: Icons.local_hospital_outlined, hint: 'Hospital name'),
-            const CustomTextField(icon: Icons.email_outlined, hint: 'Email'),
-            const CustomTextField(
-                icon: Icons.phone_forwarded_outlined, hint: 'Hot-Line Number'),
-            const CustomTextField(
-                icon: Icons.badge_outlined, hint: 'Register Number'),
-
+            CustomTextField(
+                icon: Icons.local_hospital_outlined,
+                hint: 'Hospital name',
+                controller: _nameController),
+            CustomTextField(
+                icon: Icons.email_outlined,
+                hint: 'Email',
+                controller: _emailController),
+            CustomTextField(
+                icon: Icons.phone_forwarded_outlined,
+                hint: 'Hot-Line Number',
+                controller: _phoneController),
+            CustomTextField(
+                icon: Icons.badge_outlined,
+                hint: 'Register Number',
+                controller: _registerController),
             const SizedBox(height: 10),
-
-            // Checkboxes
             Row(
               children: [
-                Checkbox(value: false, onChanged: (_) {}),
+                Checkbox(
+                  value: _hasLab,
+                  onChanged: (val) {
+                    setState(() {
+                      _hasLab = val ?? false;
+                    });
+                  },
+                ),
                 const Text("Laboratory"),
                 const SizedBox(width: 20),
-                Checkbox(value: false, onChanged: (_) {}),
+                Checkbox(
+                  value: _hasCabin,
+                  onChanged: (val) {
+                    setState(() {
+                      _hasCabin = val ?? false;
+                    });
+                  },
+                ),
                 const Text("Cabin/Seat"),
               ],
             ),
-
-            // Terms checkbox
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Checkbox(value: false, onChanged: (_) {}),
+                Checkbox(
+                  value: _agreedToTerms,
+                  onChanged: (val) {
+                    setState(() {
+                      _agreedToTerms = val ?? false;
+                    });
+                  },
+                ),
                 const Expanded(
                   child: Text.rich(
                     TextSpan(
@@ -137,14 +323,11 @@ class HospitalProfileEditPage extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 10),
-
-            // Save button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: _agreedToTerms ? _saveHospitalDetails : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   shape: RoundedRectangleBorder(
@@ -166,14 +349,17 @@ class HospitalProfileEditPage extends StatelessWidget {
 class CustomTextField extends StatelessWidget {
   final IconData icon;
   final String hint;
+  final TextEditingController? controller;
 
-  const CustomTextField({super.key, required this.icon, required this.hint});
+  const CustomTextField(
+      {super.key, required this.icon, required this.hint, this.controller});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: TextField(
+        controller: controller,
         decoration: InputDecoration(
           prefixIcon: Icon(icon),
           hintText: hint,

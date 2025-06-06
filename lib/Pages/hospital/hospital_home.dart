@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
 import 'package:appointnow/Pages/hospital/hospitalprofile.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HospitalHomePage extends StatefulWidget {
   const HospitalHomePage({super.key});
@@ -11,6 +13,45 @@ class HospitalHomePage extends StatefulWidget {
 
 class _HospitalHomePageState extends State<HospitalHomePage> {
   int _currentIndex = 0;
+
+  // Add state for hospital details
+  String? _hospitalName;
+  String? _hospitalLocation;
+  String? _hospitalImageUrl;
+  double? _hospitalRating;
+  String? _hospitalDistance;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchHospitalDetails();
+  }
+
+  Future<void> _fetchHospitalDetails() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('hospitaldetails')
+          .doc(user.uid)
+          .get();
+      final data = doc.data();
+      setState(() {
+        _hospitalName = data?['name'] ?? 'Hospital Name';
+        _hospitalLocation = data?['location'] ?? 'Location';
+        _hospitalImageUrl = data?['profileImageUrl'];
+        _hospitalRating = (data?['rating'] is num)
+            ? (data?['rating'] as num).toDouble()
+            : 5.0;
+        _hospitalDistance = data?['distance'] ?? '800m away';
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,51 +85,71 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
               elevation: 2,
               child: Padding(
                 padding: const EdgeInsets.all(12),
-                child: Row(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
-                        'assets/hospital.jpg', // Replace with your image
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            'Epic Healthcare',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: _hospitalImageUrl != null &&
+                                    _hospitalImageUrl!.isNotEmpty
+                                ? Image.network(
+                                    _hospitalImageUrl!,
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Image.asset(
+                                    'assets/hospital.jpg',
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover,
+                                  ),
                           ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Chattogram',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                          SizedBox(height: 6),
-                          Row(
-                            children: [
-                              Icon(Icons.star, size: 16, color: Colors.teal),
-                              SizedBox(width: 4),
-                              Text('5.0', style: TextStyle(color: Colors.teal)),
-                              SizedBox(width: 12),
-                              Icon(Icons.location_on,
-                                  size: 16, color: Colors.grey),
-                              SizedBox(width: 4),
-                              Text('800m away',
-                                  style: TextStyle(color: Colors.grey)),
-                            ],
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _hospitalName ?? 'Hospital Name',
+                                  style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _hospitalLocation ?? 'Location',
+                                  style: const TextStyle(color: Colors.grey),
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.star,
+                                        size: 16, color: Colors.teal),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      (_hospitalRating?.toStringAsFixed(1) ??
+                                          '5.0'),
+                                      style:
+                                          const TextStyle(color: Colors.teal),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    const Icon(Icons.location_on,
+                                        size: 16, color: Colors.grey),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      _hospitalDistance ?? '800m away',
+                                      style:
+                                          const TextStyle(color: Colors.grey),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
                           )
                         ],
                       ),
-                    )
-                  ],
-                ),
               ),
             ),
 
