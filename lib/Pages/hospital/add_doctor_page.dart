@@ -15,6 +15,7 @@ class _AddDoctorPageState extends State<AddDoctorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // <-- Set background color to white
       appBar: AppBar(
         title: const Text('Add Doctor', style: TextStyle(color: Colors.black)),
         backgroundColor: Colors.white,
@@ -23,9 +24,11 @@ class _AddDoctorPageState extends State<AddDoctorPage> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(10.0),
             child: TextField(
+              
               decoration: InputDecoration(
+                
                 hintText: 'Search by name or designation',
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(

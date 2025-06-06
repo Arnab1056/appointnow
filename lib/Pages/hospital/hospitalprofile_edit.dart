@@ -27,6 +27,7 @@ class _HospitalProfileEditPageState extends State<HospitalProfileEditPage> {
   final TextEditingController _registerController = TextEditingController();
   final TextEditingController _locationController =
       TextEditingController(); // <-- Add location controller
+  final TextEditingController _aboutController = TextEditingController();
 
   bool _hasLab = false;
   bool _hasCabin = false;
@@ -53,6 +54,7 @@ class _HospitalProfileEditPageState extends State<HospitalProfileEditPage> {
         _phoneController.text = data['phone'] ?? '';
         _registerController.text = data['registerNumber'] ?? '';
         _locationController.text = data['location'] ?? ''; // <-- Fetch location
+        _aboutController.text = data['about'] ?? '';
         _hasLab = data['hasLab'] ?? false;
         _hasCabin = data['hasCabin'] ?? false;
       }
@@ -72,7 +74,8 @@ class _HospitalProfileEditPageState extends State<HospitalProfileEditPage> {
       'email': _emailController.text.trim(),
       'phone': _phoneController.text.trim(),
       'registerNumber': _registerController.text.trim(),
-      'location': _locationController.text.trim(), // <-- Save location
+      'location': _locationController.text.trim(),
+      'about': _aboutController.text.trim(),
       'hasLab': _hasLab,
       'hasCabin': _hasCabin,
       'profileImageUrl': _profileImageUrl ?? '',
@@ -91,6 +94,7 @@ class _HospitalProfileEditPageState extends State<HospitalProfileEditPage> {
     _phoneController.dispose();
     _registerController.dispose();
     _locationController.dispose(); // <-- Dispose location controller
+    _aboutController.dispose();
     super.dispose();
   }
 
@@ -228,32 +232,26 @@ class _HospitalProfileEditPageState extends State<HospitalProfileEditPage> {
                         fontSize: 20, fontWeight: FontWeight.bold),
                   ),
             const SizedBox(height: 20),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'About',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                Text(
-                  'Change',
-                  style: TextStyle(color: Colors.teal),
-                ),
-              ],
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'About',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
             ),
-            const SizedBox(height: 8),
-            const Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text:
-                        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ',
-                  ),
-                  TextSpan(
-                    text: 'Read more',
-                    style: TextStyle(color: Colors.teal),
-                  ),
-                ],
+            TextField(
+              controller: _aboutController,
+              maxLines: 4,
+              decoration: InputDecoration(
+                hintText: 'Write about your hospital...',
+                filled: true,
+                fillColor: Colors.grey[100],
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
               ),
             ),
             const SizedBox(height: 20),

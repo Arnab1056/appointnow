@@ -21,6 +21,7 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
   String? _hospitalImageUrl;
   double? _hospitalRating;
   String? _hospitalDistance;
+  String? _hospitalAbout; // <-- Add about field
   bool _isLoading = true;
 
   @override
@@ -45,6 +46,7 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
             ? (data?['rating'] as num).toDouble()
             : 5.0;
         _hospitalDistance = data?['distance'] ?? '800m away';
+        _hospitalAbout = data?['about'] ?? ''; // <-- Fetch about
         _isLoading = false;
       });
     } else {
@@ -171,10 +173,14 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
               ],
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam...',
-              style: TextStyle(color: Colors.grey),
-            ),
+            _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Text(
+                    (_hospitalAbout != null && _hospitalAbout!.isNotEmpty)
+                        ? _hospitalAbout!
+                        : 'No description available.',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
 
             const SizedBox(height: 20),
 
