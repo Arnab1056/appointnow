@@ -489,10 +489,23 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                       child: ElevatedButton(
                         onPressed: selectedSlot >= 0
                             ? () {
+                                // Find selected day/time
+                                final appt =
+                                    dayWiseAppointments[selectedSlot ~/ 10];
+                                final String day = appt['day'];
+                                final String date = getNextDateForDay(day);
+                                final String time =
+                                    appt['times'][selectedSlot % 10];
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => const AppointmentPage(),
+                                    builder: (_) => AppointmentPage(
+                                      doctor: doctor,
+                                      day: day,
+                                      date: date,
+                                      time: time,
+                                      hospitalName: appt['hospital'],
+                                    ),
                                   ),
                                 );
                               }

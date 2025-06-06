@@ -1,16 +1,28 @@
 import 'package:flutter/material.dart';
 
 class AppointmentPage extends StatefulWidget {
-  const AppointmentPage({super.key});
+  final Map<String, dynamic> doctor;
+  final String day;
+  final String date;
+  final String time;
+  final String hospitalName;
+
+  const AppointmentPage({
+    super.key,
+    required this.doctor,
+    required this.day,
+    required this.date,
+    required this.time,
+    required this.hospitalName,
+  });
 
   @override
   _AppointmentPageState createState() => _AppointmentPageState();
 }
 
 class _AppointmentPageState extends State<AppointmentPage> {
-  String? reason; // Declared in the state class for proper state management
-  String selectedPaymentMethod =
-      "VISA"; // Moved here for proper state management
+  String? reason;
+  String selectedPaymentMethod = "VISA";
 
   @override
   Widget build(BuildContext context) {
@@ -46,28 +58,36 @@ class _AppointmentPageState extends State<AppointmentPage> {
                     ),
                     child: Row(
                       children: [
-                        const CircleAvatar(
+                        CircleAvatar(
                           radius: 36,
-                          backgroundImage:
-                              AssetImage('assets/images/doctor1.jpg'),
+                          backgroundImage: widget.doctor['profileImageUrl'] !=
+                                      null &&
+                                  widget.doctor['profileImageUrl'] != ''
+                              ? NetworkImage(widget.doctor['profileImageUrl'])
+                              : (widget.doctor['image'] != null &&
+                                          widget.doctor['image'] != ''
+                                      ? NetworkImage(widget.doctor['image'])
+                                      : const AssetImage(
+                                          'assets/images/doctor1.jpg'))
+                                  as ImageProvider,
                         ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                "Dr. Marcus Horizon",
-                                style: TextStyle(
+                              Text(
+                                widget.doctor['name'] ?? '',
+                                style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              const Text(
-                                "Cardiologist",
-                                style:
-                                    TextStyle(fontSize: 13, color: Colors.grey),
+                              Text(
+                                widget.doctor['designation'] ?? '',
+                                style: const TextStyle(
+                                    fontSize: 13, color: Colors.grey),
                               ),
                               const SizedBox(height: 8.0),
                               Row(
@@ -80,15 +100,18 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                           .withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
-                                    child: const Row(
+                                    child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(Icons.star,
+                                        const Icon(Icons.star,
                                             size: 14, color: Color(0xFF199A8E)),
-                                        SizedBox(width: 4),
+                                        const SizedBox(width: 4),
                                         Text(
-                                          "4.7",
-                                          style: TextStyle(
+                                          (widget.doctor['avgRating'] ??
+                                                  widget.doctor['rating'] ??
+                                                  '0')
+                                              .toString(),
+                                          style: const TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w500,
                                             color: Color(0xFF199A8E),
@@ -101,9 +124,9 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                   const Icon(Icons.location_on,
                                       size: 14, color: Colors.grey),
                                   const SizedBox(width: 4),
-                                  const Text(
-                                    "Epic Healthcare",
-                                    style: TextStyle(
+                                  Text(
+                                    widget.doctor['hospital'] ?? '',
+                                    style: const TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,
                                       color: Colors.black87,
@@ -134,125 +157,36 @@ class _AppointmentPageState extends State<AppointmentPage> {
                             color: Colors.black,
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  backgroundColor: Colors.white,
-                                  title: const Text("Appointment Details"),
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      TextField(
-                                        decoration: const InputDecoration(
-                                          labelText: "Select Date",
-                                          prefixIcon:
-                                              Icon(Icons.calendar_today),
-                                        ),
-                                        onTap: () {
-                                          // Add date picker logic here
-                                        },
-                                      ),
-                                      TextField(
-                                        decoration: const InputDecoration(
-                                          labelText: "Select Time",
-                                          prefixIcon: Icon(Icons.access_time),
-                                        ),
-                                        onTap: () {
-                                          // Add time picker logic here
-                                        },
-                                      ),
-                                      TextField(
-                                        decoration: const InputDecoration(
-                                          labelText: "Select Day",
-                                          prefixIcon: Icon(Icons.event),
-                                        ),
-                                        onTap: () {
-                                          // Add day picker logic here
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text("Cancel"),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        // Save changes logic
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text("Save"),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                          child: const Text(
-                            "Change",
-                            style: TextStyle(
-                                color: Colors.grey,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12),
-                          ),
-                        ),
+                        // Removed Change button
                       ],
                     ),
                     subtitle: Row(
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text("Current Appointment"),
-                                  content: const Text(
-                                    "Day: Monday\nDate: 12/12/2023\nTime: 10:00 AM",
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text("Close"),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(top: 12),
-                            padding: const EdgeInsets.all(8),
-                            width: 45,
-                            height: 45,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE5F8F6),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Icon(
-                              Icons.calendar_month_outlined,
-                              color: Color(0xFF199A8E),
-                              size: 30,
-                            ),
+                        Container(
+                          margin: const EdgeInsets.only(top: 12),
+                          padding: const EdgeInsets.all(8),
+                          width: 45,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE5F8F6),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Icon(
+                            Icons.calendar_month_outlined,
+                            color: Color(0xFF199A8E),
+                            size: 30,
                           ),
                         ),
                         const SizedBox(width: 10),
-                        // const Text(
-                        //   "Appointment Details",
-                        //   style: TextStyle(
-                        //     fontSize: 12,
-                        //     fontWeight: FontWeight.w500,
-                        //     color: Colors.black,
-                        // Reason is now managed in the state class
-                        // ),
+                        Text(
+                          _getFullDateTimeString(
+                              widget.day, widget.date, widget.time),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -262,6 +196,61 @@ class _AppointmentPageState extends State<AppointmentPage> {
                     height: 32,
                     color: Color.fromARGB(255, 240, 238, 238),
                   ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Hospital",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        // No change button for hospital
+                      ],
+                    ),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Row(
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(top: 12),
+                            width: 45,
+                            height: 45,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE5F8F6),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Icon(
+                              Icons.local_hospital,
+                              color: Color(0xFF199A8E),
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              widget.hospitalName,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.teal,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Divider(
+                    height: 32,
+                    color: Color.fromARGB(255, 240, 238, 238),
+                  ),
+                  const SizedBox(height: 10),
 
                   /// Reason
                   // Removed misplaced declaration of 'reason'
@@ -280,19 +269,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                             color: Colors.black,
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            // Optional change dialog if needed
-                          },
-                          child: const Text(
-                            "Change",
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
+                        // Removed Change button
                       ],
                     ),
                     subtitle: Padding(
@@ -356,8 +333,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
                             child: Text(
                               reason ?? "No reason provided",
                               style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
+                                fontSize: 16, // Increased font size
+                                fontWeight: FontWeight.w600,
                                 color: Colors.black87,
                               ),
                             ),
@@ -656,5 +633,54 @@ class _AppointmentPageState extends State<AppointmentPage> {
     Future.delayed(const Duration(seconds: 5), () {
       Navigator.of(context).pop();
     });
+  }
+
+  String _getFullDateTimeString(String day, String date, String time) {
+    final now = DateTime.now();
+    int dayNum = int.tryParse(date) ?? now.day;
+    final fullDate = DateTime(now.year, now.month, dayNum);
+    final formatted =
+        "${_getWeekdayName(day)}, ${fullDate.day.toString().padLeft(2, '0')} ${_getMonthName(fullDate.month)} ${fullDate.year}, $time";
+    return formatted;
+  }
+
+  String _getWeekdayName(String shortDay) {
+    switch (shortDay) {
+      case 'Mon':
+        return 'Monday';
+      case 'Tue':
+        return 'Tuesday';
+      case 'Wed':
+        return 'Wednesday';
+      case 'Thu':
+        return 'Thursday';
+      case 'Fri':
+        return 'Friday';
+      case 'Sat':
+        return 'Saturday';
+      case 'Sun':
+        return 'Sunday';
+      default:
+        return shortDay;
+    }
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      '',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
+    return months[month];
   }
 }
