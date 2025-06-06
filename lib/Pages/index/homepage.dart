@@ -1,7 +1,7 @@
 import 'package:appointnow/pages/Profile/user_profile.dart';
 import 'package:appointnow/pages/findDoctors/find_doctors.dart';
 import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
-// Make sure the path above is correct and the file 'app_bottom_navigation_bar.dart' defines 'AppBottomNavigationBar'
+import 'package:appointnow/Pages/doctor_details_pages/doctor_details.dart'; // <-- Add this import
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -216,90 +216,104 @@ class _HomePageState extends State<HomePage> {
                                 const SizedBox(width: 12),
                             itemBuilder: (context, idx) {
                               final doc = topDoctors[idx];
-                              return Container(
-                                width:
-                                    140.0, // Reduced width to prevent overflow
-                                margin:
-                                    const EdgeInsets.symmetric(vertical: 4.0),
-                                padding: const EdgeInsets.all(
-                                    10.0), // Slightly reduced padding
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.15),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 3),
+                              return InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          DoctorDetailsPage(doctor: doc),
                                     ),
-                                  ],
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 28, // Slightly smaller avatar
-                                      key: ValueKey(
-                                          '${doc['profileImageUrl'] ?? ''}_${DateTime.now().millisecondsSinceEpoch}_${doc['id']}'), // Unique key to force refresh
-                                      backgroundColor: Colors.grey[200],
-                                      backgroundImage: (doc[
-                                                      'profileImageUrl'] !=
-                                                  null &&
-                                              doc['profileImageUrl']
-                                                  .toString()
-                                                  .isNotEmpty)
-                                          ? NetworkImage(doc['profileImageUrl'])
-                                          : (doc['image'] != null &&
-                                                      doc['image']
-                                                          .toString()
-                                                          .isNotEmpty
-                                                  ? NetworkImage(doc['image'])
-                                                  : const AssetImage(
-                                                      'assets/images/doctor1.jpg'))
-                                              as ImageProvider,
-                                      onBackgroundImageError: (_, __) {},
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(doc['name'] ?? '',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 13)),
-                                    Text(doc['designation'] ?? '',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                            fontSize: 11, color: Colors.grey)),
-                                    const SizedBox(height: 2),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(Icons.star,
-                                            size: 13, color: Color(0xFF199A8E)),
-                                        const SizedBox(width: 2),
-                                        Text(
-                                          doc['avgRating'] > 0
-                                              ? doc['avgRating']
-                                                  .toStringAsFixed(1)
-                                              : 'No rating',
+                                  );
+                                },
+                                child: Container(
+                                  width:
+                                      140.0, // Reduced width to prevent overflow
+                                  margin:
+                                      const EdgeInsets.symmetric(vertical: 4.0),
+                                  padding: const EdgeInsets.all(
+                                      10.0), // Slightly reduced padding
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.15),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 28, // Slightly smaller avatar
+                                        key: ValueKey(
+                                            '${doc['profileImageUrl'] ?? ''}_${DateTime.now().millisecondsSinceEpoch}_${doc['id']}'), // Unique key to force refresh
+                                        backgroundColor: Colors.grey[200],
+                                        backgroundImage: (doc[
+                                                        'profileImageUrl'] !=
+                                                    null &&
+                                                doc['profileImageUrl']
+                                                    .toString()
+                                                    .isNotEmpty)
+                                            ? NetworkImage(
+                                                doc['profileImageUrl'])
+                                            : (doc['image'] != null &&
+                                                        doc['image']
+                                                            .toString()
+                                                            .isNotEmpty
+                                                    ? NetworkImage(doc['image'])
+                                                    : const AssetImage(
+                                                        'assets/images/doctor1.jpg'))
+                                                as ImageProvider,
+                                        onBackgroundImageError: (_, __) {},
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(doc['name'] ?? '',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 11,
-                                            color: Color(0xFF199A8E),
-                                          ),
-                                        ),
-                                        if (doc['totalRatings'] > 0) ...[
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13)),
+                                      Text(doc['designation'] ?? '',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey)),
+                                      const SizedBox(height: 2),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(Icons.star,
+                                              size: 13,
+                                              color: Color(0xFF199A8E)),
                                           const SizedBox(width: 2),
-                                          Text('(${doc['totalRatings']})',
-                                              style: const TextStyle(
-                                                  fontSize: 9,
-                                                  color: Colors.grey)),
-                                        ]
-                                      ],
-                                    ),
-                                  ],
+                                          Text(
+                                            doc['avgRating'] > 0
+                                                ? doc['avgRating']
+                                                    .toStringAsFixed(1)
+                                                : 'No rating',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 11,
+                                              color: Color(0xFF199A8E),
+                                            ),
+                                          ),
+                                          if (doc['totalRatings'] > 0) ...[
+                                            const SizedBox(width: 2),
+                                            Text('(${doc['totalRatings']})',
+                                                style: const TextStyle(
+                                                    fontSize: 9,
+                                                    color: Colors.grey)),
+                                          ]
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               );
                             },

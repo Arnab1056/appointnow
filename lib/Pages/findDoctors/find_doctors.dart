@@ -1,7 +1,9 @@
+import 'package:appointnow/Pages/doctor_details_pages/doctor_details.dart';
 import 'package:appointnow/Pages/findDoctors/doctor_list_page.dart';
 import 'package:appointnow/pages/index/homepage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
 
 class FindDoctorsPage extends StatefulWidget {
   const FindDoctorsPage({super.key});
@@ -132,68 +134,81 @@ class _FindDoctorsPageState extends State<FindDoctorsPage> {
                             ]
                           : filteredDocs.map((doc) {
                               final data = doc.data() as Map<String, dynamic>;
-                              return Container(
-                                margin: const EdgeInsets.symmetric(vertical: 8),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      blurRadius: 6,
-                                      color: Colors.grey.withOpacity(0.1),
-                                      offset: const Offset(0, 3),
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          DoctorDetailsPage(doctor: data),
                                     ),
-                                  ],
-                                ),
-                                child: Row(
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 32,
-                                      backgroundImage: data[
-                                                      'profileImageUrl'] !=
-                                                  null &&
-                                              data['profileImageUrl'] != ''
-                                          ? NetworkImage(
-                                                  data['profileImageUrl'])
-                                              as ImageProvider
-                                          : (data['image'] != null &&
-                                                  data['image'] != ''
-                                              ? NetworkImage(data['image'])
-                                                  as ImageProvider
-                                              : const AssetImage(
-                                                  'assets/images/doctor1.jpg')),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(data['name'] ?? '',
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 16)),
-                                          Text(data['designation'] ?? '',
-                                              style: const TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.grey)),
-                                          const SizedBox(height: 4),
-                                          Row(
-                                            children: [
-                                              const Icon(Icons.location_on,
-                                                  size: 14, color: Colors.grey),
-                                              const SizedBox(width: 4),
-                                              Text(data['hospital'] ?? '',
-                                                  style: const TextStyle(
-                                                      fontSize: 12,
-                                                      color: Colors.grey)),
-                                            ],
-                                          ),
-                                        ],
+                                  );
+                                },
+                                child: Container(
+                                  margin:
+                                      const EdgeInsets.symmetric(vertical: 8),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        blurRadius: 6,
+                                        color: Colors.grey.withOpacity(0.1),
+                                        offset: const Offset(0, 3),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 32,
+                                        backgroundImage: data[
+                                                        'profileImageUrl'] !=
+                                                    null &&
+                                                data['profileImageUrl'] != ''
+                                            ? NetworkImage(
+                                                    data['profileImageUrl'])
+                                                as ImageProvider
+                                            : (data['image'] != null &&
+                                                    data['image'] != ''
+                                                ? NetworkImage(data['image'])
+                                                    as ImageProvider
+                                                : const AssetImage(
+                                                    'assets/images/doctor1.jpg')),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(data['name'] ?? '',
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16)),
+                                            Text(data['designation'] ?? '',
+                                                style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey)),
+                                            const SizedBox(height: 4),
+                                            Row(
+                                              children: [
+                                                const Icon(Icons.location_on,
+                                                    size: 14,
+                                                    color: Colors.grey),
+                                                const SizedBox(width: 4),
+                                                Text(data['hospital'] ?? '',
+                                                    style: const TextStyle(
+                                                        fontSize: 12,
+                                                        color: Colors.grey)),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               );
                             }).toList(),
@@ -315,113 +330,130 @@ class _FindDoctorsPageState extends State<FindDoctorsPage> {
                               const SizedBox(width: 16),
                           itemBuilder: (context, idx) {
                             final topDoctor = topDoctors[idx];
-                            return Container(
-                              width: 320,
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.2),
-                                    spreadRadius: 1,
-                                    blurRadius: 5,
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        DoctorDetailsPage(doctor: topDoctor),
                                   ),
-                                ],
-                              ),
-                              child: Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 50,
-                                    backgroundImage: topDoctor[
-                                                    'profileImageUrl'] !=
-                                                null &&
-                                            topDoctor['profileImageUrl'] != ''
-                                        ? NetworkImage(
-                                                topDoctor['profileImageUrl'])
-                                            as ImageProvider
-                                        : (topDoctor['image'] != null &&
-                                                topDoctor['image'] != ''
-                                            ? NetworkImage(topDoctor['image'])
-                                                as ImageProvider
-                                            : const AssetImage(
-                                                'assets/images/doctor1.jpg')),
-                                  ),
-                                  const SizedBox(width: 20),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(topDoctor['name'] ?? '',
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16)),
-                                        Text(topDoctor['designation'] ?? '',
-                                            style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey)),
-                                        const SizedBox(height: 4),
-                                        Row(
-                                          children: [
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                color: Colors.teal
-                                                    .withOpacity(0.1),
-                                                borderRadius:
-                                                    BorderRadius.circular(2),
-                                              ),
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 5,
-                                                      vertical: 4),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  const Icon(Icons.star,
-                                                      size: 14,
-                                                      color: Color(0xFF199A8E)),
-                                                  const SizedBox(width: 4),
-                                                  Text(
-                                                    topDoctor['avgRating'] > 0
-                                                        ? topDoctor['avgRating']
-                                                            .toStringAsFixed(1)
-                                                        : 'No rating',
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 12,
-                                                      color: Color(0xFF199A8E),
-                                                    ),
-                                                  ),
-                                                  if (topDoctor[
-                                                          'totalRatings'] >
-                                                      0) ...[
+                                );
+                              },
+                              child: Container(
+                                width: 320,
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.2),
+                                      spreadRadius: 1,
+                                      blurRadius: 5,
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 50,
+                                      backgroundImage: topDoctor[
+                                                      'profileImageUrl'] !=
+                                                  null &&
+                                              topDoctor['profileImageUrl'] != ''
+                                          ? NetworkImage(
+                                                  topDoctor['profileImageUrl'])
+                                              as ImageProvider
+                                          : (topDoctor['image'] != null &&
+                                                  topDoctor['image'] != ''
+                                              ? NetworkImage(topDoctor['image'])
+                                                  as ImageProvider
+                                              : const AssetImage(
+                                                  'assets/images/doctor1.jpg')),
+                                    ),
+                                    const SizedBox(width: 20),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(topDoctor['name'] ?? '',
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16)),
+                                          Text(topDoctor['designation'] ?? '',
+                                              style: const TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey)),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                  color: Colors.teal
+                                                      .withOpacity(0.1),
+                                                  borderRadius:
+                                                      BorderRadius.circular(2),
+                                                ),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 5,
+                                                        vertical: 4),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    const Icon(Icons.star,
+                                                        size: 14,
+                                                        color:
+                                                            Color(0xFF199A8E)),
                                                     const SizedBox(width: 4),
                                                     Text(
-                                                        '(${topDoctor['totalRatings']})',
-                                                        style: const TextStyle(
-                                                            fontSize: 10,
-                                                            color:
-                                                                Colors.grey)),
-                                                  ]
-                                                ],
+                                                      topDoctor['avgRating'] > 0
+                                                          ? topDoctor[
+                                                                  'avgRating']
+                                                              .toStringAsFixed(
+                                                                  1)
+                                                          : 'No rating',
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 12,
+                                                        color:
+                                                            Color(0xFF199A8E),
+                                                      ),
+                                                    ),
+                                                    if (topDoctor[
+                                                            'totalRatings'] >
+                                                        0) ...[
+                                                      const SizedBox(width: 4),
+                                                      Text(
+                                                          '(${topDoctor['totalRatings']})',
+                                                          style:
+                                                              const TextStyle(
+                                                                  fontSize: 10,
+                                                                  color: Colors
+                                                                      .grey)),
+                                                    ]
+                                                  ],
+                                                ),
                                               ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            const Icon(Icons.location_on,
-                                                color: Colors.grey, size: 14),
-                                            const SizedBox(width: 4),
-                                            Text(topDoctor['hospital'] ?? '',
-                                                style: const TextStyle(
-                                                    fontSize: 12,
-                                                    color: Colors.grey)),
-                                          ],
-                                        ),
-                                      ],
+                                              const SizedBox(width: 8),
+                                              const Icon(Icons.location_on,
+                                                  color: Colors.grey, size: 14),
+                                              const SizedBox(width: 4),
+                                              Text(topDoctor['hospital'] ?? '',
+                                                  style: const TextStyle(
+                                                      fontSize: 12,
+                                                      color: Colors.grey)),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             );
                           },

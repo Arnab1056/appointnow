@@ -3,7 +3,8 @@ import 'appointment.dart';
 
 // Updated the DoctorDetailsPage to include read more functionality, improved card layout, and added bottom action buttons
 class DoctorDetailsPage extends StatefulWidget {
-  const DoctorDetailsPage({super.key});
+  final Map<String, dynamic> doctor;
+  const DoctorDetailsPage({super.key, required this.doctor});
 
   @override
   State<DoctorDetailsPage> createState() => _DoctorDetailsPageState();
@@ -40,14 +41,38 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
     },
   ];
 
+  // Add this helper for star rating
+  Widget _buildStarRating(double rating, {double size = 14}) {
+    int fullStars = rating.floor();
+    bool hasHalfStar = (rating - fullStars) >= 0.5;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (int i = 0; i < fullStars; i++)
+          Icon(Icons.star, size: size, color: const Color(0xFF199A8E)),
+        if (hasHalfStar)
+          Icon(Icons.star_half, size: size, color: const Color(0xFF199A8E)),
+        for (int i = 0; i < (5 - fullStars - (hasHalfStar ? 1 : 0)); i++)
+          Icon(Icons.star_border, size: size, color: const Color(0xFF199A8E)),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final doctor = widget.doctor;
+    final double avgRating = (doctor['avgRating'] is double)
+        ? doctor['avgRating']
+        : (doctor['avgRating'] is int)
+            ? (doctor['avgRating'] as int).toDouble()
+            : 0.0;
+    final int totalRatings = doctor['totalRatings'] ?? 0;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title:
-            const Text("Doctor Detail", style: TextStyle(color: Colors.black)),
+        title: Text(doctor['name'] ?? 'Doctor Detail',
+            style: const TextStyle(color: Colors.black)),
         centerTitle: true,
         elevation: 0,
         leading: const BackButton(color: Colors.black),
@@ -68,25 +93,32 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
           children: [
             Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 50,
-                  backgroundImage: AssetImage('assets/images/doctor1.jpg'),
+                  backgroundImage: doctor['profileImageUrl'] != null &&
+                          doctor['profileImageUrl'] != ''
+                      ? NetworkImage(doctor['profileImageUrl'])
+                      : (doctor['image'] != null && doctor['image'] != ''
+                              ? NetworkImage(doctor['image'])
+                              : const AssetImage('assets/images/doctor1.jpg'))
+                          as ImageProvider,
                 ),
                 const SizedBox(width: 20),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Dr. Marcus Horizon",
-                        style: TextStyle(
+                      Text(
+                        doctor['name'] ?? '',
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const Text(
-                        "Cardiologist",
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      Text(
+                        doctor['designation'] ?? '',
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                       const SizedBox(height: 4),
                       Container(
@@ -96,30 +128,41 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                         ),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 4),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.star, size: 14, color: Colors.teal),
-                            SizedBox(width: 4),
+                            _buildStarRating(avgRating, size: 14),
+                            const SizedBox(width: 4),
                             Text(
-                              "4.7",
-                              style: TextStyle(
+                              avgRating > 0
+                                  ? avgRating.toStringAsFixed(1)
+                                  : 'No rating',
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
                                 color: Color(0xFF199A8E),
                               ),
                             ),
+                            if (totalRatings > 0) ...[
+                              const SizedBox(width: 4),
+                              Text(
+                                '($totalRatings)',
+                                style: const TextStyle(
+                                    fontSize: 11, color: Colors.grey),
+                              ),
+                            ]
                           ],
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Row(
+                      Row(
                         children: [
-                          Icon(Icons.location_on, size: 14, color: Colors.grey),
-                          SizedBox(width: 4),
+                          const Icon(Icons.location_on,
+                              size: 14, color: Colors.grey),
+                          const SizedBox(width: 4),
                           Text(
-                            "Epic Healthcare",
-                            style: TextStyle(
+                            doctor['hospital'] ?? '',
+                            style: const TextStyle(
                               fontSize: 12,
                               color: Colors.black,
                               fontWeight: FontWeight.bold,
@@ -138,8 +181,10 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
             const SizedBox(height: 8),
             Text(
               showFullAbout
-                  ? "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua..."
-                  : "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod...",
+                  ? (doctor['about'] ?? "No details available.")
+                  : ((doctor['about'] != null && doctor['about'].length > 60)
+                      ? doctor['about'].substring(0, 60) + '...'
+                      : (doctor['about'] ?? "No details available.")),
             ),
             GestureDetector(
               onTap: () {
