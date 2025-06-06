@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class HospitalProfilePage extends StatelessWidget {
-  const HospitalProfilePage({super.key});
+class HospitalProfileEditPage extends StatelessWidget {
+  const HospitalProfileEditPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -91,10 +91,13 @@ class HospitalProfilePage extends StatelessWidget {
             const SizedBox(height: 20),
 
             // Input Fields
-            const CustomTextField(icon: Icons.local_hospital_outlined, hint: 'Hospital name'),
+            const CustomTextField(
+                icon: Icons.local_hospital_outlined, hint: 'Hospital name'),
             const CustomTextField(icon: Icons.email_outlined, hint: 'Email'),
-            const CustomTextField(icon: Icons.phone_forwarded_outlined, hint: 'Hot-Line Number'),
-            const CustomTextField(icon: Icons.badge_outlined, hint: 'Register Number'),
+            const CustomTextField(
+                icon: Icons.phone_forwarded_outlined, hint: 'Hot-Line Number'),
+            const CustomTextField(
+                icon: Icons.badge_outlined, hint: 'Register Number'),
 
             const SizedBox(height: 10),
 

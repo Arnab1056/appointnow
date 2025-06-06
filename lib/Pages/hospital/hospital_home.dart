@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
-import 'package:appointnow/Pages/doctor/doctor_profile.dart';
+import 'package:appointnow/Pages/hospital/hospitalprofile.dart';
 
 class HospitalHomePage extends StatefulWidget {
   const HospitalHomePage({super.key});
@@ -168,7 +168,7 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => const DoctorProfilePage()),
+                  builder: (context) => const HospitalProfilePage()),
             );
           }
           // Add navigation logic for other tabs if needed
