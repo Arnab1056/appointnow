@@ -225,16 +225,24 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
                       }
                     }
                     if (label == "Appointments") {
-                      final hospitalUid =
-                          FirebaseAuth.instance.currentUser?.uid;
-                      if (hospitalUid != null) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DoctorListForAppointmentsPage(
-                                hospitalUid: hospitalUid),
-                          ),
-                        );
+                      final user = FirebaseAuth.instance.currentUser;
+                      if (user != null) {
+                        FirebaseFirestore.instance
+                            .collection('hospitaldetails')
+                            .doc(user.uid)
+                            .get()
+                            .then((doc) {
+                          final hospitalId = doc
+                              .id; // Always use the Firestore doc id as hospitalId
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  DoctorListForAppointmentsPage(
+                                      hospitalUid: hospitalId),
+                            ),
+                          );
+                        });
                       }
                     }
                   },

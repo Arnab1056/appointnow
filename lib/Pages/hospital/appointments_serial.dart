@@ -9,6 +9,7 @@ class AppointmentsSerialPage extends StatefulWidget {
   final double avgRating;
   final int totalRatings;
   final Color primaryColor;
+  final String hospitalId; // Renamed from hospitalName
 
   AppointmentsSerialPage({
     Key? key,
@@ -17,6 +18,7 @@ class AppointmentsSerialPage extends StatefulWidget {
     required this.doctorImage,
     required this.avgRating,
     required this.totalRatings,
+    required this.hospitalId, // Renamed from hospitalName
     this.primaryColor = const Color(0xFF009E7F),
   }) : super(key: key);
 
@@ -38,11 +40,14 @@ class _AppointmentsSerialPageState extends State<AppointmentsSerialPage> {
   }
 
   Future<void> _fetchAppointments() async {
-    final doctorId =
-        widget.doctorName; // Use a unique doctor identifier if available
+    final doctorId = widget.doctorName;
+    final hospitalId = widget.hospitalId;
+    // Only show appointments for the currently logged-in hospital
     final query = await FirebaseFirestore.instance
         .collection('serial')
         .where('doctorName', isEqualTo: doctorId)
+        .where('hospitalId',
+            isEqualTo: hospitalId) // Only for logged-in hospital
         .get();
     final docs =
         query.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();

@@ -155,11 +155,13 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
               final List times = appt['selectedTimes'] ??
                   (appt['selectedTime'] != null ? [appt['selectedTime']] : []);
               final hospital = appt['hospitalName'] ?? hospitalName;
+              final hospitalId = appt['hospitalId'] ?? '';
               for (final day in days) {
                 dayWiseAppointments.add({
                   'day': day,
                   'times': times,
                   'hospital': hospital,
+                  'hospitalId': hospitalId, // Attach hospitalId from DB
                   'originalAppt': appt,
                 });
               }
@@ -505,6 +507,8 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                                       date: date,
                                       time: time,
                                       hospitalName: appt['hospital'],
+                                      hospitalId: appt['hospitalId'] ??
+                                          '', // Always use hospitalId from DB
                                     ),
                                   ),
                                 );

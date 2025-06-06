@@ -75,63 +75,80 @@ class DoctorListForAppointmentsPage extends StatelessWidget {
             itemBuilder: (context, index) {
               final doctor = doctors[index];
               final docId = doctor['id'];
-              return StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('doctordetails')
-                    .doc(docId)
-                    .collection('ratings')
-                    .snapshots(),
-                builder: (context, ratingSnapshot) {
-                  double avgRating = 0.0;
-                  int totalRatings = 0;
-                  if (ratingSnapshot.hasData &&
-                      ratingSnapshot.data!.docs.isNotEmpty) {
-                    final ratings = ratingSnapshot.data!.docs;
-                    double sum = 0;
-                    for (var r in ratings) {
-                      final data = r.data() as Map<String, dynamic>;
-                      sum += (data['rating'] ?? 0).toDouble();
-                    }
-                    avgRating = sum / ratings.length;
-                    totalRatings = ratings.length;
+              return FutureBuilder<QuerySnapshot>(
+                future: FirebaseFirestore.instance
+                    .collection('appointments')
+                    .where('doctorId', isEqualTo: docId)
+                    .limit(1)
+                    .get(),
+                builder: (context, appointmentSnapshot) {
+                  String hospitalId = '';
+                  if (appointmentSnapshot.hasData &&
+                      appointmentSnapshot.data!.docs.isNotEmpty) {
+                    final appointmentData = appointmentSnapshot.data!.docs.first
+                        .data() as Map<String, dynamic>;
+                    hospitalId = appointmentData['hospitalId'] ?? '';
                   }
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => AppointmentsSerialPage(
-                            doctorName: doctor['name'] ?? 'Doctor Name',
-                            doctorDesignation: doctor['designation'] ?? '',
-                            doctorImage: doctor['profileImageUrl'] ??
-                                doctor['image'] ??
-                                '',
-                            avgRating: avgRating,
-                            totalRatings: totalRatings,
+                  return StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('doctordetails')
+                        .doc(docId)
+                        .collection('ratings')
+                        .snapshots(),
+                    builder: (context, ratingSnapshot) {
+                      double avgRating = 0.0;
+                      int totalRatings = 0;
+                      if (ratingSnapshot.hasData &&
+                          ratingSnapshot.data!.docs.isNotEmpty) {
+                        final ratings = ratingSnapshot.data!.docs;
+                        double sum = 0;
+                        for (var r in ratings) {
+                          final data = r.data() as Map<String, dynamic>;
+                          sum += (data['rating'] ?? 0).toDouble();
+                        }
+                        avgRating = sum / ratings.length;
+                        totalRatings = ratings.length;
+                      }
+                      return GestureDetector(
+                        onTap: () {
+                          // Always use hospitalUid from the home page (passed as a parameter)
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => AppointmentsSerialPage(
+                                doctorName: doctor['name'] ?? 'Doctor Name',
+                                doctorDesignation: doctor['designation'] ?? '',
+                                doctorImage: doctor['profileImageUrl'] ??
+                                    doctor['image'] ??
+                                    '',
+                                avgRating: avgRating,
+                                totalRatings: totalRatings,
+                                hospitalId:
+                                    hospitalUid, // Use hospitalUid from home page
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                blurRadius: 6,
+                                color: Colors.grey.withOpacity(0.1),
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
                           ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            blurRadius: 6,
-                            color: Colors.grey.withOpacity(0.1),
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 40,
-                            backgroundImage:
-                                doctor['profileImageUrl'] != null &&
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 40,
+                                backgroundImage: doctor['profileImageUrl'] !=
+                                            null &&
                                         doctor['profileImageUrl'] != ''
                                     ? NetworkImage(doctor['profileImageUrl'])
                                     : (doctor['image'] != null &&
@@ -140,49 +157,51 @@ class DoctorListForAppointmentsPage extends StatelessWidget {
                                             : const AssetImage(
                                                 'assets/images/doctor1.jpg'))
                                         as ImageProvider,
-                          ),
-                          const SizedBox(width: 20),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  doctor['name'] ?? 'Doctor Name',
-                                  style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  doctor['designation'] ?? '',
-                                  style: const TextStyle(
-                                      fontSize: 14, color: Colors.grey),
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
+                              ),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Icon(Icons.star,
-                                        size: 14, color: Colors.teal),
-                                    const SizedBox(width: 4),
                                     Text(
-                                      avgRating.toStringAsFixed(1),
+                                      doctor['name'] ?? 'Doctor Name',
                                       style: const TextStyle(
-                                          fontSize: 13, color: Colors.teal),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
                                     ),
-                                    const SizedBox(width: 8),
+                                    const SizedBox(height: 4),
                                     Text(
-                                      '($totalRatings reviews)',
+                                      doctor['designation'] ?? '',
                                       style: const TextStyle(
-                                          fontSize: 12, color: Colors.grey),
+                                          fontSize: 14, color: Colors.grey),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.star,
+                                            size: 14, color: Colors.teal),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          avgRating.toStringAsFixed(1),
+                                          style: const TextStyle(
+                                              fontSize: 13, color: Colors.teal),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          '($totalRatings reviews)',
+                                          style: const TextStyle(
+                                              fontSize: 12, color: Colors.grey),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
+                              )
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
               );

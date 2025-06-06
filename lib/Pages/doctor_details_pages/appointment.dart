@@ -7,6 +7,7 @@ class AppointmentPage extends StatefulWidget {
   final String date;
   final String time;
   final String hospitalName;
+  final String hospitalId; // Add hospitalId from previous page
 
   const AppointmentPage({
     super.key,
@@ -15,6 +16,7 @@ class AppointmentPage extends StatefulWidget {
     required this.date,
     required this.time,
     required this.hospitalName,
+    required this.hospitalId, // Add hospitalId to constructor
   });
 
   @override
@@ -553,6 +555,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
       'doctorName': widget.doctor['name'] ?? '',
       'doctorDesignation': widget.doctor['designation'] ?? '',
       'hospitalName': widget.hospitalName,
+      'hospitalId': widget.hospitalId, // Use hospitalId from previous page
       'date': widget.date,
       'day': widget.day,
       'time': widget.time,
