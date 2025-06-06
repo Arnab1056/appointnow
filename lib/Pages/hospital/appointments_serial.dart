@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:appointnow/Pages/hospital/patient_details_page.dart';
 
 class AppointmentsSerialPage extends StatefulWidget {
   final String doctorName;
@@ -249,11 +250,26 @@ class _AppointmentsSerialPageState extends State<AppointmentsSerialPage> {
         itemBuilder: (context, index) {
           int serial = index + 1;
           bool selected = serial == selectedSerial;
+          final patient = filtered[index];
           return GestureDetector(
             onTap: () {
               setState(() {
                 selectedSerial = serial;
               });
+            },
+            onLongPress: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PatientDetailsPage(
+                    patient: patient,
+                    serialNumber: serial,
+                    appointmentDate: patient['date'] ?? '',
+                    appointmentDay: patient['day'] ?? '',
+                    appointmentTime: patient['time'] ?? '',
+                  ),
+                ),
+              );
             },
             child: Container(
               decoration: BoxDecoration(
