@@ -13,8 +13,8 @@ class ScheduleTimePage extends StatefulWidget {
 class _ScheduleTimePageState extends State<ScheduleTimePage> {
   List<String> _availableDays = [];
   List<String> _availableTimeSlots = [];
-  List<int> _selectedDays = [];
-  List<int> _selectedTimes = [];
+  final List<int> _selectedDays = [];
+  final List<int> _selectedTimes = [];
 
   @override
   void initState() {
@@ -299,9 +299,9 @@ class _ScheduleTimePageState extends State<ScheduleTimePage> {
                 offset: const Offset(0, 4))
           ],
         ),
-        child: Column(
+        child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
+          children: [
             Icon(Icons.medical_services_outlined, size: 40, color: Colors.teal),
             SizedBox(height: 12),
             Text(

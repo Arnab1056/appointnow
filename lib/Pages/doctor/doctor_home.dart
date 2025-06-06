@@ -189,8 +189,9 @@ class _DoctorhomeState extends State<Doctorhome> {
         bottomNavigationBar: AppBottomNavigationBar(
           currentIndex: _currentIndex,
           onTap: (index) {
-            if (index == _currentIndex)
+            if (index == _currentIndex) {
               return; // Prevent unnecessary navigation
+            }
             setState(() {
               _currentIndex = index;
             });

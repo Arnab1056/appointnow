@@ -5,7 +5,7 @@ import '../../Pages/doctor_details_pages/doctor_details.dart'; // Import the Doc
 
 class HospitallistPage extends StatelessWidget {
   final String category;
-  HospitallistPage({super.key, required this.category});
+  const HospitallistPage({super.key, required this.category});
 
   Stream<QuerySnapshot> getDoctorsByCategory() {
     if (category == 'hospital') {
@@ -445,7 +445,7 @@ class HospitallistPage extends StatelessWidget {
                                                     {'rating': selectedRating});
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
-                                              SnackBar(
+                                              const SnackBar(
                                                   content: Text(
                                                       'Thank you for rating!')),
                                             );

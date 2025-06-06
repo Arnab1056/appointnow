@@ -29,7 +29,7 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
 
   bool _agreedToTerms = false;
 
-  List<bool> _selectedDays = List.generate(6, (i) => false); // Mon-Sat
+  final List<bool> _selectedDays = List.generate(6, (i) => false); // Mon-Sat
   List<bool> _selectedTimes = [];
   final List<String> _weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   final List<String> _timeSlots = [
@@ -328,9 +328,9 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
             const SizedBox(height: 20),
 
             // About Section
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
+              children: [
                 Text(
                   'About',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -422,7 +422,7 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
             const SizedBox(height: 10),
 
             // Free Time & Day Section
-            Align(
+            const Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'Available Days',
@@ -432,7 +432,7 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
             const SizedBox(height: 8),
             _buildDaySelector(),
             const SizedBox(height: 16),
-            Align(
+            const Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'Available Time Slots',

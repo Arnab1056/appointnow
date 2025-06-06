@@ -157,9 +157,9 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
             const SizedBox(height: 20),
 
             // About Section
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
+              children: [
                 Text(
                   'About',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),

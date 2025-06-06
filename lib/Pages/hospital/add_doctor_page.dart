@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../hospital/appointment_time.dart'; // Import the ScheduleTimePage from the correct file
 
 class AddDoctorPage extends StatefulWidget {
-  const AddDoctorPage({Key? key}) : super(key: key);
+  const AddDoctorPage({super.key});
 
   @override
   State<AddDoctorPage> createState() => _AddDoctorPageState();

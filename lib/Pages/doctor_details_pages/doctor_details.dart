@@ -88,7 +88,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
         .where('doctorId', isEqualTo: doctorId)
         .where('status', isEqualTo: 'accepted')
         .get();
-    return query.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+    return query.docs.map((doc) => doc.data()).toList();
   }
 
   Future<String?> _fetchHospitalNameForDoctor(String doctorId) async {
@@ -168,9 +168,9 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
               backgroundColor: Colors.white,
               appBar: AppBar(
                 backgroundColor: Colors.white,
-                title: Text(
-                  hospitalName,
-                  style: const TextStyle(color: Colors.black),
+                title: const Text(
+                  'DoctorDetails',
+                  style: TextStyle(color: Colors.black),
                 ),
                 centerTitle: true,
                 elevation: 0,
@@ -320,17 +320,15 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                           final List times = appt['times'] ?? [];
                           final hospital = appt['hospital'] ?? hospitalName;
                           return Card(
-                            elevation: selectedSlot == index ? 4 : 1,
-                            color: selectedSlot == index
-                                ? Colors.teal.withOpacity(0.08)
-                                : Colors.white,
+                            elevation:
+                                1, // Remove elevation change based on selectedSlot
+                            color: Colors
+                                .white, // Remove color change based on selectedSlot
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15),
                               side: BorderSide(
-                                color: selectedSlot == index
-                                    ? Colors.teal
-                                    : Colors.white.withOpacity(0.1),
-                                width: selectedSlot == index ? 1.5 : 1,
+                                color: Colors.white.withOpacity(0.1),
+                                width: 1,
                               ),
                             ),
                             margin: const EdgeInsets.only(bottom: 12),
@@ -356,6 +354,16 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,
                                             fontSize: 13,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          getNextDateForDay(day),
+                                          style: const TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
                                           ),
                                           textAlign: TextAlign.center,
                                         ),
@@ -447,56 +455,58 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                       ),
                     ],
                     const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment
-                          .spaceAround, // Align items to the edges
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            print("Chat icon clicked");
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.only(left: 10, right: 10),
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.teal.withOpacity(0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Image.asset(
-                              'assets/icon/chat.png',
-                              width: 24,
-                              height: 24,
-                            ),
-                          ),
+                  ],
+                ),
+              ),
+              bottomNavigationBar: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        print("Chat icon clicked");
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.only(left: 10, right: 10),
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.teal.withOpacity(0.1),
+                          shape: BoxShape.circle,
                         ),
-                        SizedBox(
-                          width: 250, // Set button width to 266 pixels
-                          height: 45, // Set button height to 50 pixels
-                          child: ElevatedButton(
-                            onPressed: selectedSlot >= 0
-                                ? () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => const AppointmentPage(),
-                                      ),
-                                    );
-                                  }
-                                : null,
-                            style: ElevatedButton.styleFrom(
-                              shape: const StadiumBorder(),
-                              backgroundColor: Colors.teal,
-                            ),
-                            child: const Text(
-                              "Book Appointment",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 14),
-                            ),
-                          ),
+                        child: Image.asset(
+                          'assets/icon/chat.png',
+                          width: 24,
+                          height: 24,
                         ),
-                      ],
-                    )
+                      ),
+                    ),
+                    SizedBox(
+                      width: 250,
+                      height: 45,
+                      child: ElevatedButton(
+                        onPressed: selectedSlot >= 0
+                            ? () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const AppointmentPage(),
+                                  ),
+                                );
+                              }
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          shape: const StadiumBorder(),
+                          backgroundColor: Colors.teal,
+                        ),
+                        child: const Text(
+                          "Book Appointment",
+                          style: TextStyle(color: Colors.white, fontSize: 14),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

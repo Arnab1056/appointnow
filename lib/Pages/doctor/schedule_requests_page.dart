@@ -45,7 +45,7 @@ class ScheduleRequestsPage extends StatelessWidget {
                   leading: const Icon(Icons.local_hospital, color: Colors.teal),
                   title: Text(req['hospitalName'] ?? 'Hospital'),
                   subtitle:
-                      Text('Days: ' + (req['selectedDays'] as List).join(', ')),
+                      Text('Days: ${(req['selectedDays'] as List).join(', ')}'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 18),
                   onTap: () {
                     Navigator.push(

@@ -228,9 +228,9 @@ class _HospitalProfileEditPageState extends State<HospitalProfileEditPage> {
                         fontSize: 20, fontWeight: FontWeight.bold),
                   ),
             const SizedBox(height: 20),
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
+              children: [
                 Text(
                   'About',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
