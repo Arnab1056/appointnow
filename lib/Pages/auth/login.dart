@@ -3,6 +3,7 @@ import '../controllers/auth_controller.dart';
 import 'register.dart'; // Ensure this is the correct path to the file containing RegisterPage
 import 'package:appointnow/pages/index/homepage.dart'; // Ensure this is the correct path to the file containing HomePage
 import 'package:appointnow/Pages/doctor/doctor_home.dart' as doctor;
+import 'package:appointnow/Pages/hospital/hospital_home.dart'; // Add this import
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -113,18 +114,28 @@ class _LoginPageState extends State<LoginPage> {
                         _passwordController.text,
                       );
                       if (mounted) {
-                        final role = userData?['role']?.toString().toLowerCase();
+                        final role =
+                            userData?['role']?.toString().toLowerCase();
                         if (role == 'user') {
                           _showLoginSuccessPopup();
                         } else if (role == 'doctor') {
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(builder: (context) => const doctor.Doctorhome()),
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const doctor.Doctorhome()),
+                          );
+                        } else if (role == 'hospital') {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const HospitalHomePage()),
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content: Text('Login successful, but unknown role.')),
+                                content: Text(
+                                    'Login successful, but unknown role.')),
                           );
                         }
                       }
