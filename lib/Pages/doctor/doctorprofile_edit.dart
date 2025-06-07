@@ -26,6 +26,31 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _registerController = TextEditingController();
   final TextEditingController _designationController = TextEditingController();
+  final TextEditingController _aboutController = TextEditingController();
+  String? _selectedDesignation;
+  final List<String> _designationOptions = [
+    'General',
+    'Lungs',
+    'Dentist',
+    'Psychiatrist',
+    'Covid-19',
+    'Surgeon',
+    'Cardiologist',
+    'Allergy',
+    'Neurologist',
+    'Orthopedic',
+    'Pediatrician',
+    'Dermatologist',
+    'ENT',
+    'Ophthalmologist',
+    'Gynecologist',
+    'Urologist',
+    'Oncologist',
+    'Nephrologist',
+    'Gastroenterologist',
+    'Endocrinologist',
+    'Other',
+  ];
 
   bool _agreedToTerms = false;
 
@@ -84,6 +109,13 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
         _phoneController.text = data['phone'] ?? '';
         _registerController.text = data['registerNumber'] ?? '';
         _designationController.text = data['designation'] ?? '';
+        _aboutController.text = data['about'] ?? '';
+        final designation = data['designation'];
+        if (_designationOptions.contains(designation)) {
+          _selectedDesignation = designation;
+        } else {
+          _selectedDesignation = null;
+        }
         // Restore available days
         if (data['availableDays'] != null && data['availableDays'] is List) {
           final List days = data['availableDays'];
@@ -127,7 +159,8 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
       'email': _emailController.text.trim(),
       'phone': _phoneController.text.trim(),
       'registerNumber': _registerController.text.trim(),
-      'designation': _designationController.text.trim(),
+      'designation': _selectedDesignation ?? _designationController.text.trim(),
+      'about': _aboutController.text.trim(),
       'profileImageUrl': _profileImageUrl ?? '',
       'profileImageName': _profileImageName ?? '',
       'availableDays': selectedDays,
@@ -146,6 +179,7 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
     _phoneController.dispose();
     _registerController.dispose();
     _designationController.dispose();
+    _aboutController.dispose();
     super.dispose();
   }
 
@@ -328,33 +362,63 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
             const SizedBox(height: 20),
 
             // About Section
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   'About',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
-                Text(
-                  'Change',
-                  style: TextStyle(color: Colors.teal),
+                TextButton(
+                  onPressed: () async {
+                    final about = await showDialog<String>(
+                      context: context,
+                      builder: (context) {
+                        final controller =
+                            TextEditingController(text: _aboutController.text);
+                        return AlertDialog(
+                          title: const Text('Edit About'),
+                          content: TextField(
+                            controller: controller,
+                            maxLines: 5,
+                            decoration: const InputDecoration(
+                              hintText:
+                                  'Write about yourself, specialization, etc.',
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Cancel'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () =>
+                                  Navigator.pop(context, controller.text),
+                              child: const Text('Save'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                    if (about != null) {
+                      setState(() {
+                        _aboutController.text = about;
+                      });
+                    }
+                  },
+                  child: const Text(
+                    'Change',
+                    style: TextStyle(color: Colors.teal),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            const Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text:
-                        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ',
-                  ),
-                  TextSpan(
-                    text: 'Read more',
-                    style: TextStyle(color: Colors.teal),
-                  ),
-                ],
-              ),
+            Text(
+              _aboutController.text.isNotEmpty
+                  ? _aboutController.text
+                  : 'Write about yourself, specialization, etc.',
+              style: const TextStyle(fontSize: 14, color: Colors.black87),
             ),
 
             const SizedBox(height: 20),
@@ -380,10 +444,33 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
               hint: 'Register Number',
               controller: _registerController,
             ),
-            CustomTextField(
-              icon: Icons.work_outline,
-              hint: 'Designation',
-              controller: _designationController,
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: DropdownButtonFormField<String>(
+                value: _selectedDesignation,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.work_outline),
+                  hintText: 'Designation',
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  contentPadding: const EdgeInsets.symmetric(vertical: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                items: _designationOptions
+                    .map((designation) => DropdownMenuItem(
+                          value: designation,
+                          child: Text(designation),
+                        ))
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedDesignation = value;
+                  });
+                },
+              ),
             ),
             const SizedBox(height: 10),
 

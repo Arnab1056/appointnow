@@ -4,7 +4,7 @@ import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
 import 'package:appointnow/Pages/doctor/schedule_requests_page.dart';
 import 'package:appointnow/Pages/findDoctors/hospitallist.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// Make sure the path above is correct and the file 'app_bottom_navigation_bar.dart' defines 'AppBottomNavigationBar'
+import 'package:appointnow/Pages/doctor_details_pages/about_doctor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -171,7 +171,8 @@ class _DoctorhomeState extends State<Doctorhome> {
                       .collection('doctordetails')
                       .snapshots(),
                   builder: (context, doctorSnapshot) {
-                    if (doctorSnapshot.connectionState == ConnectionState.waiting) {
+                    if (doctorSnapshot.connectionState ==
+                        ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     }
                     final allDocs = doctorSnapshot.data?.docs ?? [];
@@ -199,73 +200,121 @@ class _DoctorhomeState extends State<Doctorhome> {
                         };
                       }).toList()),
                       builder: (context, ratingSnapshot) {
-                        if (!ratingSnapshot.hasData || ratingSnapshot.data!.isEmpty) {
+                        if (!ratingSnapshot.hasData ||
+                            ratingSnapshot.data!.isEmpty) {
                           return const Text("No top doctors found");
                         }
-                        final sorted = List<Map<String, dynamic>>.from(ratingSnapshot.data!);
-                        sorted.sort((a, b) => (b['avgRating'] as double).compareTo(a['avgRating'] as double));
+                        final sorted = List<Map<String, dynamic>>.from(
+                            ratingSnapshot.data!);
+                        sorted.sort((a, b) => (b['avgRating'] as double)
+                            .compareTo(a['avgRating'] as double));
                         final topDoctors = sorted.take(5).toList();
                         return SizedBox(
                           height: 170.0,
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
                             itemCount: topDoctors.length,
-                            separatorBuilder: (context, idx) => const SizedBox(width: 12),
+                            separatorBuilder: (context, idx) =>
+                                const SizedBox(width: 12),
                             itemBuilder: (context, idx) {
                               final doc = topDoctors[idx];
-                              return Container(
-                                width: 140.0,
-                                margin: const EdgeInsets.symmetric(vertical: 4.0),
-                                padding: const EdgeInsets.all(10.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.15),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 3),
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AboutDoctorPage(
+                                        doctorName: doc['name'] ?? '',
+                                        designation: doc['designation'] ?? '',
+                                        about: doc['about'] ?? '',
+                                        imageUrl: doc['profileImageUrl'] ?? '',
+                                        hospital: doc['hospital'] ?? '',
+                                      ),
                                     ),
-                                  ],
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 28,
-                                      backgroundColor: Colors.grey[200],
-                                      backgroundImage: (doc['profileImageUrl'] != null && doc['profileImageUrl'].toString().isNotEmpty)
-                                          ? NetworkImage(doc['profileImageUrl'])
-                                          : (doc['image'] != null && doc['image'].toString().isNotEmpty
-                                              ? NetworkImage(doc['image'])
-                                              : const AssetImage('assets/images/doctor1.jpg')) as ImageProvider,
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(doc['name'] ?? '',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                                    Text(doc['designation'] ?? '',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(fontSize: 11, color: Colors.grey)),
-                                    const SizedBox(height: 2),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(Icons.star, size: 13, color: Color(0xFF199A8E)),
-                                        const SizedBox(width: 2),
-                                        Text(
-                                          doc['avgRating'] > 0 ? doc['avgRating'].toStringAsFixed(1) : 'No rating',
-                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFF199A8E)),
-                                        ),
-                                        if (doc['totalRatings'] > 0) ...[
+                                  );
+                                },
+                                child: Container(
+                                  width: 140.0,
+                                  margin:
+                                      const EdgeInsets.symmetric(vertical: 4.0),
+                                  padding: const EdgeInsets.all(10.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.15),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 28,
+                                        backgroundColor: Colors.grey[200],
+                                        backgroundImage: (doc[
+                                                        'profileImageUrl'] !=
+                                                    null &&
+                                                doc['profileImageUrl']
+                                                    .toString()
+                                                    .isNotEmpty)
+                                            ? NetworkImage(
+                                                doc['profileImageUrl'])
+                                            : (doc['image'] != null &&
+                                                        doc['image']
+                                                            .toString()
+                                                            .isNotEmpty
+                                                    ? NetworkImage(doc['image'])
+                                                    : const AssetImage(
+                                                        'assets/images/doctor1.jpg'))
+                                                as ImageProvider,
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(doc['name'] ?? '',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13)),
+                                      Text(doc['designation'] ?? '',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey)),
+                                      const SizedBox(height: 2),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(Icons.star,
+                                              size: 13,
+                                              color: Color(0xFF199A8E)),
                                           const SizedBox(width: 2),
-                                          Text('(${doc['totalRatings']})', style: const TextStyle(fontSize: 9, color: Colors.grey)),
-                                        ]
-                                      ],
-                                    ),
-                                  ],
+                                          Text(
+                                            doc['avgRating'] > 0
+                                                ? doc['avgRating']
+                                                    .toStringAsFixed(1)
+                                                : 'No rating',
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 11,
+                                                color: Color(0xFF199A8E)),
+                                          ),
+                                          if (doc['totalRatings'] > 0) ...[
+                                            const SizedBox(width: 2),
+                                            Text('(${doc['totalRatings']})',
+                                                style: const TextStyle(
+                                                    fontSize: 9,
+                                                    color: Colors.grey)),
+                                          ]
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               );
                             },
@@ -299,9 +348,11 @@ class _DoctorhomeState extends State<Doctorhome> {
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         itemCount: hospitals.length,
-                        separatorBuilder: (context, idx) => const SizedBox(width: 12),
+                        separatorBuilder: (context, idx) =>
+                            const SizedBox(width: 12),
                         itemBuilder: (context, idx) {
-                          final hospital = hospitals[idx].data() as Map<String, dynamic>;
+                          final hospital =
+                              hospitals[idx].data() as Map<String, dynamic>;
                           return Container(
                             width: 140,
                             margin: const EdgeInsets.symmetric(vertical: 4.0),
@@ -323,36 +374,51 @@ class _DoctorhomeState extends State<Doctorhome> {
                                 CircleAvatar(
                                   radius: 28,
                                   backgroundColor: Colors.grey[200],
-                                  backgroundImage: (hospital['profileImageUrl'] != null && hospital['profileImageUrl'].toString().isNotEmpty)
-                                      ? NetworkImage(hospital['profileImageUrl'])
-                                      : const AssetImage('assets/hospital.jpg') as ImageProvider,
+                                  backgroundImage:
+                                      (hospital['profileImageUrl'] != null &&
+                                              hospital['profileImageUrl']
+                                                  .toString()
+                                                  .isNotEmpty)
+                                          ? NetworkImage(
+                                              hospital['profileImageUrl'])
+                                          : const AssetImage(
+                                                  'assets/hospital.jpg')
+                                              as ImageProvider,
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
                                   hospital['name'] ?? '',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13),
                                 ),
                                 Text(
                                   hospital['location'] ?? '',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                  style: const TextStyle(
+                                      fontSize: 11, color: Colors.grey),
                                 ),
                                 const SizedBox(height: 2),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Icon(Icons.star, size: 13, color: Color(0xFF199A8E)),
+                                    const Icon(Icons.star,
+                                        size: 13, color: Color(0xFF199A8E)),
                                     const SizedBox(width: 2),
                                     Text(
                                       hospital['rating'] != null
                                           ? (hospital['rating'] is num
-                                              ? hospital['rating'].toStringAsFixed(1)
+                                              ? hospital['rating']
+                                                  .toStringAsFixed(1)
                                               : hospital['rating'].toString())
                                           : 'No rating',
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFF199A8E)),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 11,
+                                          color: Color(0xFF199A8E)),
                                     ),
                                   ],
                                 ),
