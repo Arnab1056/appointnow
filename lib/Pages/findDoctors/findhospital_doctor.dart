@@ -182,6 +182,7 @@ class FindHospitalDoctorsPage extends StatelessWidget {
                   category: labels[index],
                   fromPage: 'hospital',
                   hospitalName: hospital['name'] ?? '',
+                  hospitalId: hospital['id'] ?? '', // Pass hospitalId
                 ),
               ),
             );

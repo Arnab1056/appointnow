@@ -7,12 +7,43 @@ class DoctorListPage extends StatelessWidget {
   final String category;
   final String fromPage; // Add this line
   final String? hospitalName;
+  final String? hospitalId; // Add hospitalId
   DoctorListPage({
     super.key,
     required this.category,
     this.fromPage = '',
     this.hospitalName,
-  }); // Add fromPage with default value
+    this.hospitalId, // Add hospitalId
+  });
+
+  // New: Get doctor IDs with appointments in this hospital for the category
+  Future<List<String>> _getDoctorIdsWithAppointments() async {
+    if (hospitalId == null) return [];
+    final appts = await FirebaseFirestore.instance
+        .collection('appointments')
+        .where('hospitalId', isEqualTo: hospitalId)
+        .get();
+    final doctorIds =
+        appts.docs.map((d) => d['doctorId'].toString()).toSet().toList();
+    return doctorIds.cast<String>();
+  }
+
+  Stream<QuerySnapshot?> getDoctorsByCategoryAndHospital() async* {
+    if (hospitalId == null) {
+      yield* getDoctorsByCategory();
+      return;
+    }
+    final doctorIds = await _getDoctorIdsWithAppointments();
+    if (doctorIds.isEmpty) {
+      yield null;
+      return;
+    }
+    yield* FirebaseFirestore.instance
+        .collection('doctordetails')
+        .where('designation', isEqualTo: category)
+        .where(FieldPath.documentId, whereIn: doctorIds)
+        .snapshots();
+  }
 
   Stream<QuerySnapshot> getDoctorsByCategory() {
     return FirebaseFirestore.instance
@@ -51,13 +82,17 @@ class DoctorListPage extends StatelessWidget {
                   style: const TextStyle(fontSize: 12, color: Colors.teal)),
             ),
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: getDoctorsByCategory(),
+            child: StreamBuilder<QuerySnapshot?>(
+              stream: hospitalId != null
+                  ? getDoctorsByCategoryAndHospital()
+                  : getDoctorsByCategory(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                if (!snapshot.hasData ||
+                    snapshot.data == null ||
+                    snapshot.data!.docs.isEmpty) {
                   return Center(child: Text('No doctors found for $category'));
                 }
                 final doctors = snapshot.data!.docs;

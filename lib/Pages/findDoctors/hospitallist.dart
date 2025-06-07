@@ -87,7 +87,7 @@ class HospitallistPage extends StatelessWidget {
                         builder: (_) => FindHospitalDoctorsPage(
                           hospital: {
                             ...hospital,
-                            'id': docId,
+                            'id': docId, // hospital UID
                             'hasCabin': hospitalData['hasCabin'],
                             'hasLab': hospitalData['hasLab'],
                           },
