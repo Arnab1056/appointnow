@@ -74,13 +74,7 @@ class DoctorListPage extends StatelessWidget {
       body: Column(
         children: [
           if (fromPage.isNotEmpty)
-            Container(
-              width: double.infinity,
-              color: Colors.teal.withOpacity(0.1),
-              padding: const EdgeInsets.all(8),
-              child: Text('Navigated from: $fromPage',
-                  style: const TextStyle(fontSize: 12, color: Colors.teal)),
-            ),
+            
           Expanded(
             child: StreamBuilder<QuerySnapshot?>(
               stream: hospitalId != null
