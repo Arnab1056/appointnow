@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,14 +6,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'package:image/image.dart' as img;
 
-class DoctorProfileEdit extends StatefulWidget {
-  const DoctorProfileEdit({super.key});
+class HospitalProfileEditPage extends StatefulWidget {
+  const HospitalProfileEditPage({super.key});
 
   @override
-  State<DoctorProfileEdit> createState() => _DoctorProfileEditState();
+  State<HospitalProfileEditPage> createState() =>
+      _HospitalProfileEditPageState();
 }
 
-class _DoctorProfileEditState extends State<DoctorProfileEdit> {
+class _HospitalProfileEditPageState extends State<HospitalProfileEditPage> {
   String? _profileImageUrl;
   String? _profileImageName;
   bool _isLoading = true;
@@ -25,56 +25,26 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _registerController = TextEditingController();
-  final TextEditingController _designationController = TextEditingController();
+  final TextEditingController _locationController =
+      TextEditingController(); // <-- Add location controller
+  final TextEditingController _aboutController = TextEditingController();
 
+  bool _hasLab = false;
+  bool _hasCabin = false;
   bool _agreedToTerms = false;
-
-  final List<bool> _selectedDays = List.generate(6, (i) => false); // Mon-Sat
-  List<bool> _selectedTimes = [];
-  final List<String> _weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  final List<String> _timeSlots = [
-    '09:00 AM',
-    '09:30 AM',
-    '10:00 AM',
-    '10:30 AM',
-    '11:00 AM',
-    '11:30 AM',
-    '12:00 PM',
-    '12:30 PM',
-    '01:00 PM',
-    '01:30 PM',
-    '02:00 PM',
-    '02:30 PM',
-    '03:00 PM',
-    '03:30 PM',
-    '04:00 PM',
-    '04:30 PM',
-    '05:00 PM',
-    '05:30 PM',
-    '06:00 PM',
-    '06:30 PM',
-    '07:00 PM',
-    '07:30 PM',
-    '08:00 PM',
-    '08:30 PM',
-    '09:00 PM',
-    '09:30 PM',
-    '10:00 PM',
-  ];
 
   @override
   void initState() {
     super.initState();
     _fetchProfileImageUrl();
-    _fetchDoctorDetailsAndAvailability();
-    _selectedTimes = List.generate(_timeSlots.length, (i) => false);
+    _fetchHospitalDetails();
   }
 
-  Future<void> _fetchDoctorDetailsAndAvailability() async {
+  Future<void> _fetchHospitalDetails() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final doc = await FirebaseFirestore.instance
-          .collection('doctordetails')
+          .collection('hospitaldetails')
           .doc(user.uid)
           .get();
       final data = doc.data();
@@ -83,43 +53,20 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
         _emailController.text = data['email'] ?? '';
         _phoneController.text = data['phone'] ?? '';
         _registerController.text = data['registerNumber'] ?? '';
-        _designationController.text = data['designation'] ?? '';
-        // Restore available days
-        if (data['availableDays'] != null && data['availableDays'] is List) {
-          final List days = data['availableDays'];
-          for (int i = 0; i < _weekDays.length; i++) {
-            _selectedDays[i] = days.contains(_weekDays[i]);
-          }
-        }
-        // Restore available time slots
-        if (data['availableTimeSlots'] != null &&
-            data['availableTimeSlots'] is List) {
-          final List times = data['availableTimeSlots'];
-          for (int i = 0; i < _timeSlots.length; i++) {
-            _selectedTimes[i] = times.contains(_timeSlots[i]);
-          }
-        }
-        setState(() {});
+        _locationController.text = data['location'] ?? ''; // <-- Fetch location
+        _aboutController.text = data['about'] ?? '';
+        _hasLab = data['hasLab'] ?? false;
+        _hasCabin = data['hasCabin'] ?? false;
       }
+      setState(() {});
     }
   }
 
-  Future<void> _saveDoctorDetails() async {
+  Future<void> _saveHospitalDetails() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-
-    // Prepare selected days and times
-    final selectedDays = <String>[];
-    for (int i = 0; i < _selectedDays.length; i++) {
-      if (_selectedDays[i]) selectedDays.add(_weekDays[i]);
-    }
-    final selectedTimeSlots = <String>[];
-    for (int i = 0; i < _selectedTimes.length; i++) {
-      if (_selectedTimes[i]) selectedTimeSlots.add(_timeSlots[i]);
-    }
-
     await FirebaseFirestore.instance
-        .collection('doctordetails')
+        .collection('hospitaldetails')
         .doc(user.uid)
         .set({
       'uid': user.uid,
@@ -127,11 +74,12 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
       'email': _emailController.text.trim(),
       'phone': _phoneController.text.trim(),
       'registerNumber': _registerController.text.trim(),
-      'designation': _designationController.text.trim(),
+      'location': _locationController.text.trim(),
+      'about': _aboutController.text.trim(),
+      'hasLab': _hasLab,
+      'hasCabin': _hasCabin,
       'profileImageUrl': _profileImageUrl ?? '',
       'profileImageName': _profileImageName ?? '',
-      'availableDays': selectedDays,
-      'availableTimeSlots': selectedTimeSlots,
       'timestamp': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
     ScaffoldMessenger.of(context).showSnackBar(
@@ -145,7 +93,8 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
     _emailController.dispose();
     _phoneController.dispose();
     _registerController.dispose();
-    _designationController.dispose();
+    _locationController.dispose(); // <-- Dispose location controller
+    _aboutController.dispose();
     super.dispose();
   }
 
@@ -189,7 +138,6 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
         .get();
     final prevImageName = doc.data()?['profileImageName'] as String?;
     if (prevImageName != null && prevImageName.isNotEmpty) {
-      // Delete previous image from Supabase Storage
       await supabase.Supabase.instance.client.storage
           .from('appointnow')
           .remove([prevImageName]);
@@ -205,13 +153,13 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
       final imageUrl = supabase.Supabase.instance.client.storage
           .from('appointnow')
           .getPublicUrl(fileName);
-      // Update both users and doctordetails collections
+      // Update both users and hospitaldetails collections
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .update({'profileImageUrl': imageUrl, 'profileImageName': fileName});
       await FirebaseFirestore.instance
-          .collection('doctordetails')
+          .collection('hospitaldetails')
           .doc(user.uid)
           .set({'profileImageUrl': imageUrl, 'profileImageName': fileName},
               SetOptions(merge: true));
@@ -226,63 +174,19 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
     if (_profileImageUrl != null && _profileImageUrl!.isNotEmpty) {
       return NetworkImage(_profileImageUrl!);
     } else {
-      return const AssetImage('assets/doctor.jpg');
+      return const AssetImage('assets/hospital_avatar.jpg');
     }
-  }
-
-  Widget _buildDaySelector() {
-    return Wrap(
-      spacing: 10,
-      children: List.generate(_weekDays.length, (i) {
-        return ChoiceChip(
-          label: Text(_weekDays[i]),
-          selected: _selectedDays[i],
-          selectedColor: Colors.teal,
-          labelStyle: TextStyle(
-            color: _selectedDays[i] ? Colors.white : Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-          onSelected: (selected) {
-            setState(() {
-              _selectedDays[i] = selected;
-            });
-          },
-        );
-      }),
-    );
-  }
-
-  Widget _buildTimeSelector() {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: List.generate(_timeSlots.length, (i) {
-        return FilterChip(
-          label: Text(_timeSlots[i]),
-          selected: _selectedTimes[i],
-          selectedColor: Colors.teal,
-          labelStyle: TextStyle(
-            color: _selectedTimes[i] ? Colors.white : Colors.black,
-          ),
-          onSelected: (selected) {
-            setState(() {
-              _selectedTimes[i] = selected;
-            });
-          },
-        );
-      }),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(),
+        leading: const BackButton(color: Colors.black),
         centerTitle: true,
         title: const Text(
-          'Doctor Profile',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          'Hospital Profile',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -319,76 +223,84 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
             ),
             const SizedBox(height: 10),
             _isLoading
-                ? const CircularProgressIndicator(color: Colors.white)
-                : const Text(
-                    'Doctor Name',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ? const CircularProgressIndicator(color: Colors.teal)
+                : Text(
+                    _nameController.text.isNotEmpty
+                        ? _nameController.text
+                        : 'Hospital Name',
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-
             const SizedBox(height: 20),
-
-            // About Section
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'About',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                Text(
-                  'Change',
-                  style: TextStyle(color: Colors.teal),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            const Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text:
-                        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ',
-                  ),
-                  TextSpan(
-                    text: 'Read more',
-                    style: TextStyle(color: Colors.teal),
-                  ),
-                ],
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'About',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
-
+            TextField(
+              controller: _aboutController,
+              maxLines: 4,
+              decoration: InputDecoration(
+                hintText: 'Write about your hospital...',
+                filled: true,
+                fillColor: Colors.grey[100],
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
             const SizedBox(height: 20),
-
-            // Form Fields
             CustomTextField(
-              icon: Icons.person_outline,
-              hint: 'Doctor name',
-              controller: _nameController,
-            ),
+                icon: Icons.local_hospital_outlined,
+                hint: 'Hospital name',
+                controller: _nameController),
             CustomTextField(
-              icon: Icons.email_outlined,
-              hint: 'Email',
-              controller: _emailController,
-            ),
+                icon: Icons.email_outlined,
+                hint: 'Email',
+                controller: _emailController),
             CustomTextField(
-              icon: Icons.phone_outlined,
-              hint: 'Phone',
-              controller: _phoneController,
-            ),
+                icon: Icons.phone_forwarded_outlined,
+                hint: 'Hot-Line Number',
+                controller: _phoneController),
             CustomTextField(
-              icon: Icons.badge_outlined,
-              hint: 'Register Number',
-              controller: _registerController,
-            ),
+                icon: Icons.badge_outlined,
+                hint: 'Register Number',
+                controller: _registerController),
             CustomTextField(
-              icon: Icons.work_outline,
-              hint: 'Designation',
-              controller: _designationController,
-            ),
+                icon: Icons.location_on_outlined, // <-- Location icon
+                hint: 'Location',
+                controller: _locationController), // <-- Location field
             const SizedBox(height: 10),
-
-            // Terms Checkbox
             Row(
+              children: [
+                Checkbox(
+                  value: _hasLab,
+                  onChanged: (val) {
+                    setState(() {
+                      _hasLab = val ?? false;
+                    });
+                  },
+                ),
+                const Text("Laboratory"),
+                const SizedBox(width: 20),
+                Checkbox(
+                  value: _hasCabin,
+                  onChanged: (val) {
+                    setState(() {
+                      _hasCabin = val ?? false;
+                    });
+                  },
+                ),
+                const Text("Cabin/Seat"),
+              ],
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Checkbox(
                   value: _agreedToTerms,
@@ -398,7 +310,7 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
                     });
                   },
                 ),
-                const Flexible(
+                const Expanded(
                   child: Text.rich(
                     TextSpan(
                       children: [
@@ -418,50 +330,22 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
                 ),
               ],
             ),
-
             const SizedBox(height: 10),
-
-            // Free Time & Day Section
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Available Days',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-            ),
-            const SizedBox(height: 8),
-            _buildDaySelector(),
-            const SizedBox(height: 16),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Available Time Slots',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-            ),
-            const SizedBox(height: 8),
-            _buildTimeSelector(),
-            const SizedBox(height: 30),
-
-            // Save Button at the end
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _agreedToTerms ? _saveDoctorDetails : null,
+                onPressed: _agreedToTerms ? _saveHospitalDetails : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  foregroundColor: Colors.white, // Ensures button text is white
-                  textStyle: const TextStyle(color: Colors.white),
                 ),
-                child: const Text('Save',
-                    style: TextStyle(fontSize: 16, color: Colors.white)),
+                child: const Text('Save', style: TextStyle(fontSize: 16)),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
           ],
         ),
       ),

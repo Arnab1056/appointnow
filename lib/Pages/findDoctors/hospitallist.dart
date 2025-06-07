@@ -1,0 +1,538 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../Pages/doctor_details_pages/doctor_details.dart'; // Import the DoctorDetailsPage
+import 'findhospital_doctor.dart'; // Only keep the correct import
+
+class HospitallistPage extends StatelessWidget {
+  final String category;
+  const HospitallistPage({super.key, required this.category});
+
+  Stream<QuerySnapshot> getDoctorsByCategory() {
+    if (category == 'hospital') {
+      // Fetch all hospitals, order by name (not rating)
+      return FirebaseFirestore.instance
+          .collection('hospitaldetails')
+          .orderBy('name')
+          .snapshots();
+    }
+    return FirebaseFirestore.instance
+        .collection('doctordetails')
+        .where('designation', isEqualTo: category)
+        .snapshots();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(
+          category == 'hospital' ? 'Hospitals' : category,
+          style: const TextStyle(
+              color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: getDoctorsByCategory(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return Center(
+                child: Text(category == 'hospital'
+                    ? 'No hospitals found'
+                    : 'No doctors found for $category'));
+          }
+          final docs = snapshot.data!.docs;
+          if (category == 'hospital') {
+            // Sort hospitals: rated first (by rating desc), then unrated
+            List<QueryDocumentSnapshot> sortedDocs = List.from(docs);
+            sortedDocs.sort((a, b) {
+              final aRating = (a.data() as Map<String, dynamic>)['rating'];
+              final bRating = (b.data() as Map<String, dynamic>)['rating'];
+              if (aRating == null && bRating == null) return 0;
+              if (aRating == null) return 1;
+              if (bRating == null) return -1;
+              return (bRating as num).compareTo(aRating as num);
+            });
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: sortedDocs.length,
+              itemBuilder: (context, index) {
+                final hospital =
+                    sortedDocs[index].data() as Map<String, dynamic>;
+                final docId = sortedDocs[index].id;
+                final rating = hospital['rating'];
+                return GestureDetector(
+                  onTap: () async {
+                    // Fetch latest hasCabin and hasLab from Firestore for this hospital
+                    final docSnap = await FirebaseFirestore.instance
+                        .collection('hospitaldetails')
+                        .doc(docId)
+                        .get();
+                    final hospitalData = docSnap.data() ?? {};
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => FindHospitalDoctorsPage(
+                          hospital: {
+                            ...hospital,
+                            'id': docId, // hospital UID
+                            'hasCabin': hospitalData['hasCabin'],
+                            'hasLab': hospitalData['hasLab'],
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 6,
+                          color: Colors.grey.withOpacity(0.1),
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 40,
+                          backgroundImage:
+                              hospital['profileImageUrl'] != null &&
+                                      hospital['profileImageUrl'] != ''
+                                  ? NetworkImage(hospital['profileImageUrl'])
+                                      as ImageProvider
+                                  : const AssetImage('assets/hospital.jpg'),
+                        ),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                hospital['name'] ?? '',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                hospital['location'] ?? '',
+                                style: const TextStyle(
+                                    fontSize: 12, color: Colors.grey),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () async {
+                                      final user =
+                                          FirebaseAuth.instance.currentUser;
+                                      if (user == null) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  'You must be logged in to rate.')),
+                                        );
+                                        return;
+                                      }
+                                      double? selectedRating =
+                                          await showDialog<double>(
+                                        context: context,
+                                        builder: (context) {
+                                          double tempRating =
+                                              rating is num && rating > 0
+                                                  ? rating.toDouble()
+                                                  : 5.0;
+                                          return AlertDialog(
+                                            title: const Text(
+                                                'Rate this hospital'),
+                                            content: StatefulBuilder(
+                                              builder: (context, setState) {
+                                                return Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: List.generate(5,
+                                                          (starIdx) {
+                                                        return IconButton(
+                                                          icon: Icon(
+                                                            tempRating >=
+                                                                    starIdx + 1
+                                                                ? Icons.star
+                                                                : Icons
+                                                                    .star_border,
+                                                            color: Colors.amber,
+                                                          ),
+                                                          onPressed: () {
+                                                            setState(() {
+                                                              tempRating =
+                                                                  (starIdx + 1)
+                                                                      .toDouble();
+                                                            });
+                                                          },
+                                                        );
+                                                      }),
+                                                    ),
+                                                    Text(
+                                                        'Your rating: ${tempRating.toStringAsFixed(1)}'),
+                                                  ],
+                                                );
+                                              },
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
+                                                child: const Text('Cancel'),
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: () => Navigator.pop(
+                                                    context, tempRating),
+                                                child: const Text('Submit'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                      if (selectedRating != null) {
+                                        // Save the rating to a subcollection
+                                        await FirebaseFirestore.instance
+                                            .collection('hospitaldetails')
+                                            .doc(docId)
+                                            .collection('ratings')
+                                            .doc(user.uid)
+                                            .set({'rating': selectedRating});
+                                        // Calculate new average
+                                        final ratingsSnap =
+                                            await FirebaseFirestore.instance
+                                                .collection('hospitaldetails')
+                                                .doc(docId)
+                                                .collection('ratings')
+                                                .get();
+                                        double avg = 0.0;
+                                        if (ratingsSnap.docs.isNotEmpty) {
+                                          double sum = 0;
+                                          for (var r in ratingsSnap.docs) {
+                                            final data = r.data();
+                                            sum += (data['rating'] ?? 0)
+                                                .toDouble();
+                                          }
+                                          avg = sum / ratingsSnap.docs.length;
+                                        }
+                                        await FirebaseFirestore.instance
+                                            .collection('hospitaldetails')
+                                            .doc(docId)
+                                            .update({'rating': avg});
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  'Thank you for rating!')),
+                                        );
+                                      }
+                                    },
+                                    child: const Icon(Icons.star,
+                                        size: 14, color: Colors.teal),
+                                  ),
+                                  const SizedBox(width: 2),
+                                  Text(
+                                    rating != null
+                                        ? (rating is num
+                                            ? rating.toStringAsFixed(1)
+                                            : rating.toString())
+                                        : 'No rating',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                      color: Color(0xFF199A8E),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          }
+          final doctors = snapshot.data!.docs;
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: doctors.length,
+            itemBuilder: (context, index) {
+              final doctor = doctors[index].data() as Map<String, dynamic>;
+              final docId = doctors[index].id;
+              return StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('doctordetails')
+                    .doc(docId)
+                    .collection('ratings')
+                    .snapshots(),
+                builder: (context, ratingSnapshot) {
+                  double avgRating = 0.0;
+                  int totalRatings = 0;
+                  if (ratingSnapshot.hasData &&
+                      ratingSnapshot.data!.docs.isNotEmpty) {
+                    final ratings = ratingSnapshot.data!.docs;
+                    double sum = 0;
+                    for (var r in ratings) {
+                      final data = r.data() as Map<String, dynamic>;
+                      sum += (data['rating'] ?? 0).toDouble();
+                    }
+                    avgRating = sum / ratings.length;
+                    totalRatings = ratings.length;
+                  }
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => DoctorDetailsPage(
+                            doctor: {
+                              ...doctor,
+                              'avgRating': avgRating,
+                              'totalRatings': totalRatings,
+                            },
+                            userName: FirebaseAuth
+                                    .instance.currentUser?.displayName ??
+                                '',
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            blurRadius: 6,
+                            color: Colors.grey.withOpacity(0.1),
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 40,
+                            backgroundImage: doctor['profileImageUrl'] !=
+                                        null &&
+                                    doctor['profileImageUrl'] != ''
+                                ? NetworkImage(doctor['profileImageUrl'])
+                                    as ImageProvider
+                                : (doctor['image'] != null &&
+                                        doctor['image'] != ''
+                                    ? NetworkImage(doctor['image'])
+                                        as ImageProvider
+                                    : const AssetImage(
+                                        'assets/images/doctor1.jpg')),
+                          ),
+                          const SizedBox(width: 20),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  doctor['name'] ?? '',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  doctor['designation'] ?? '',
+                                  style: const TextStyle(
+                                      fontSize: 12, color: Colors.grey),
+                                ),
+                                const SizedBox(height: 4),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.teal.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 5, vertical: 4),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () async {
+                                          final user =
+                                              FirebaseAuth.instance.currentUser;
+                                          if (user == null) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                  content: Text(
+                                                      'You must be logged in to rate.')),
+                                            );
+                                            return;
+                                          }
+                                          double? selectedRating =
+                                              await showDialog<double>(
+                                            context: context,
+                                            builder: (context) {
+                                              double tempRating = avgRating > 0
+                                                  ? avgRating
+                                                  : 5.0;
+                                              return AlertDialog(
+                                                title: const Text(
+                                                    'Rate this doctor'),
+                                                content: StatefulBuilder(
+                                                  builder: (context, setState) {
+                                                    return Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          children:
+                                                              List.generate(5,
+                                                                  (starIdx) {
+                                                            return IconButton(
+                                                              icon: Icon(
+                                                                tempRating >=
+                                                                        starIdx +
+                                                                            1
+                                                                    ? Icons.star
+                                                                    : Icons
+                                                                        .star_border,
+                                                                color: Colors
+                                                                    .amber,
+                                                              ),
+                                                              onPressed: () {
+                                                                setState(() {
+                                                                  tempRating =
+                                                                      (starIdx +
+                                                                              1)
+                                                                          .toDouble();
+                                                                });
+                                                              },
+                                                            );
+                                                          }),
+                                                        ),
+                                                        Text(
+                                                            'Your rating: 	${tempRating.toStringAsFixed(1)}'),
+                                                      ],
+                                                    );
+                                                  },
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.pop(context),
+                                                    child: const Text('Cancel'),
+                                                  ),
+                                                  ElevatedButton(
+                                                    onPressed: () =>
+                                                        Navigator.pop(context,
+                                                            tempRating),
+                                                    child: const Text('Submit'),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                          if (selectedRating != null) {
+                                            await FirebaseFirestore.instance
+                                                .collection('doctordetails')
+                                                .doc(docId)
+                                                .collection('ratings')
+                                                .doc(user.uid)
+                                                .set(
+                                                    {'rating': selectedRating});
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                  content: Text(
+                                                      'Thank you for rating!')),
+                                            );
+                                          }
+                                        },
+                                        child: const Icon(Icons.star,
+                                            size: 14, color: Colors.teal),
+                                      ),
+                                      const SizedBox(width: 2),
+                                      Text(
+                                        avgRating > 0
+                                            ? avgRating.toStringAsFixed(1)
+                                            : 'No rating',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          color: Color(0xFF199A8E),
+                                        ),
+                                      ),
+                                      if (totalRatings > 0) ...[
+                                        const SizedBox(width: 4),
+                                        Text('($totalRatings)',
+                                            style: const TextStyle(
+                                                fontSize: 10,
+                                                color: Colors.grey)),
+                                      ]
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.location_on,
+                                        size: 14, color: Colors.grey),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      doctor['hospital'] ?? '',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}

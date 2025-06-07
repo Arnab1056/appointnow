@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'firebase_options.dart';
+import 'package:appointnow/Pages/hospital/hospital_home.dart' as hospital;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,6 +62,8 @@ class MyApp extends StatelessWidget {
 Widget _getHomePage(String? role) {
   if (role != null && role.trim().toLowerCase() == 'doctor') {
     return const doctor.Doctorhome();
+  } else if (role != null && role.trim().toLowerCase() == 'hospital') {
+    return const hospital.HospitalHomePage();
   } else {
     return const user.HomePage();
   }
