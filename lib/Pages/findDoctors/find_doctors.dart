@@ -1,4 +1,5 @@
 import 'package:appointnow/Pages/doctor_details_pages/doctor_details.dart';
+import 'package:appointnow/Pages/findDoctors/doctor_category.dart';
 import 'package:appointnow/Pages/findDoctors/doctor_list_page.dart';
 import 'package:appointnow/pages/index/homepage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -253,7 +254,7 @@ class _FindDoctorsPageState extends State<FindDoctorsPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => DoctorListPage(
+                              builder: (context) => DoctorCategoryPage(
                                 category: categories[index]['label']!,
                               ),
                             ),
