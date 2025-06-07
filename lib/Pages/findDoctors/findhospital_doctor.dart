@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'doctor_list_page.dart'; // Import the DoctorListPage
 
 class FindHospitalDoctorsPage extends StatelessWidget {
   final Map<String, dynamic> hospital;
@@ -41,23 +43,33 @@ class FindHospitalDoctorsPage extends StatelessWidget {
               style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey[700]),
             ),
             SizedBox(height: 24),
-            _buildSectionHeader("Doctors Category"),
-            SizedBox(height: 12),
-            _buildIconGrid([
-              'General',
-              'Lungs Specialist',
-              'Dentist',
-              'Psychiatrist',
-              'Covid-19',
-              'Surgeon',
-              'Cardiologist',
-              'Alargy',
-            ]),
+            FutureBuilder<List<String>>(
+              future: _fetchDoctorCategoriesForHospital(hospital['id']),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final categories = snapshot.data ?? [];
+                if (categories.isEmpty) {
+                  return Text('No doctor categories with appointments.',
+                      style: GoogleFonts.poppins(
+                          fontSize: 13, color: Colors.grey[700]));
+                }
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionHeader("Doctors Category"),
+                    SizedBox(height: 12),
+                    _buildIconGrid(context, categories),
+                  ],
+                );
+              },
+            ),
             SizedBox(height: 24),
             if (hospital['hasLab'] == true) ...[
               _buildSectionHeader("Laboratory"),
               SizedBox(height: 12),
-              _buildIconGrid([
+              _buildIconGrid(context, [
                 'X-Ray',
                 'MRI',
                 'ECO',
@@ -153,7 +165,7 @@ class FindHospitalDoctorsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildIconGrid(List<String> labels) {
+  Widget _buildIconGrid(BuildContext context, List<String> labels) {
     return GridView.count(
       crossAxisCount: 4,
       mainAxisSpacing: 20,
@@ -161,24 +173,60 @@ class FindHospitalDoctorsPage extends StatelessWidget {
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       children: List.generate(labels.length, (index) {
-        return Column(
-          children: [
-            Container(
-              height: 46,
-              width: 46,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: primaryColor.withOpacity(0.1),
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => DoctorListPage(
+                  category: labels[index],
+                  fromPage: 'hospital',
+                  hospitalName: hospital['name'] ?? '',
+                ),
               ),
-              child: Icon(Icons.medical_services_outlined, color: primaryColor),
-            ),
-            SizedBox(height: 6),
-            Text(labels[index],
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(fontSize: 11)),
-          ],
+            );
+          },
+          child: Column(
+            children: [
+              Container(
+                height: 46,
+                width: 46,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: primaryColor.withOpacity(0.1),
+                ),
+                child:
+                    Icon(Icons.medical_services_outlined, color: primaryColor),
+              ),
+              SizedBox(height: 6),
+              Text(labels[index],
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(fontSize: 11)),
+            ],
+          ),
         );
       }),
     );
+  }
+
+  // Helper to fetch unique doctor designations with appointments in this hospital
+  Future<List<String>> _fetchDoctorCategoriesForHospital(
+      String hospitalId) async {
+    final appts = await FirebaseFirestore.instance
+        .collection('appointments')
+        .where('hospitalId', isEqualTo: hospitalId)
+        .get();
+    final doctorIds = appts.docs.map((d) => d['doctorId']).toSet().toList();
+    if (doctorIds.isEmpty) return [];
+    final doctorsSnap = await FirebaseFirestore.instance
+        .collection('doctordetails')
+        .where(FieldPath.documentId, whereIn: doctorIds)
+        .get();
+    final designations = doctorsSnap.docs
+        .map((d) => d['designation']?.toString() ?? '')
+        .where((d) => d.isNotEmpty)
+        .toSet()
+        .toList();
+    return designations;
   }
 }
