@@ -95,6 +95,91 @@ class HospitallistPage extends StatelessWidget {
                       ),
                     );
                   },
+                  onLongPress: () async {
+                    final user = FirebaseAuth.instance.currentUser;
+                    if (user == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('You must be logged in to rate.')),
+                      );
+                      return;
+                    }
+                    double? selectedRating = await showDialog<double>(
+                      context: context,
+                      builder: (context) {
+                        double tempRating = rating is num && rating > 0 ? rating.toDouble() : 5.0;
+                        return AlertDialog(
+                          title: const Text('Rate this hospital'),
+                          content: StatefulBuilder(
+                            builder: (context, setState) {
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: List.generate(5, (starIdx) {
+                                      return IconButton(
+                                        icon: Icon(
+                                          tempRating >= starIdx + 1 ? Icons.star : Icons.star_border,
+                                          color: Colors.amber,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            tempRating = (starIdx + 1).toDouble();
+                                          });
+                                        },
+                                      );
+                                    }),
+                                  ),
+                                  Text('Your rating: 	${tempRating.toStringAsFixed(1)}'),
+                                ],
+                              );
+                            },
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Cancel'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(context, tempRating),
+                              child: const Text('Submit'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                    if (selectedRating != null) {
+                      // Save the rating to a subcollection
+                      await FirebaseFirestore.instance
+                          .collection('hospitaldetails')
+                          .doc(docId)
+                          .collection('ratings')
+                          .doc(user.uid)
+                          .set({'rating': selectedRating});
+                      // Calculate new average
+                      final ratingsSnap = await FirebaseFirestore.instance
+                          .collection('hospitaldetails')
+                          .doc(docId)
+                          .collection('ratings')
+                          .get();
+                      double avg = 0.0;
+                      if (ratingsSnap.docs.isNotEmpty) {
+                        double sum = 0;
+                        for (var r in ratingsSnap.docs) {
+                          final data = r.data();
+                          sum += (data['rating'] ?? 0).toDouble();
+                        }
+                        avg = sum / ratingsSnap.docs.length;
+                      }
+                      await FirebaseFirestore.instance
+                          .collection('hospitaldetails')
+                          .doc(docId)
+                          .update({'rating': avg});
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Thank you for rating!')),
+                      );
+                    }
+                  },
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 16),
                     padding: const EdgeInsets.all(12),
