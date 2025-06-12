@@ -5,6 +5,8 @@ import 'package:appointnow/Pages/doctor/schedule_requests_page.dart';
 import 'package:appointnow/Pages/findDoctors/hospitallist.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:appointnow/Pages/doctor_details_pages/about_doctor.dart';
+import 'package:appointnow/Pages/doctor_details_pages/about_hospital.dart';
+import 'package:appointnow/Pages/doctor/doctor_appointment_hospitals.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -353,76 +355,95 @@ class _DoctorhomeState extends State<Doctorhome> {
                         itemBuilder: (context, idx) {
                           final hospital =
                               hospitals[idx].data() as Map<String, dynamic>;
-                          return Container(
-                            width: 140,
-                            margin: const EdgeInsets.symmetric(vertical: 4.0),
-                            padding: const EdgeInsets.all(10.0),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16.0),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.15),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 3),
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => AboutHospitalPage(
+                                    hospitalId: hospitals[idx].id,
+                                    hospitalName: hospital['name'] ?? '',
+                                    location: hospital['location'] ?? '',
+                                    about: hospital['about'] ?? '',
+                                    imageUrl: hospital['profileImageUrl'] ?? '',
+                                    rating: hospital['rating'] is num
+                                        ? (hospital['rating'] as num).toDouble()
+                                        : null,
+                                  ),
                                 ),
-                              ],
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                CircleAvatar(
-                                  radius: 28,
-                                  backgroundColor: Colors.grey[200],
-                                  backgroundImage:
-                                      (hospital['profileImageUrl'] != null &&
-                                              hospital['profileImageUrl']
-                                                  .toString()
-                                                  .isNotEmpty)
-                                          ? NetworkImage(
-                                              hospital['profileImageUrl'])
-                                          : const AssetImage(
-                                                  'assets/hospital.jpg')
-                                              as ImageProvider,
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  hospital['name'] ?? '',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13),
-                                ),
-                                Text(
-                                  hospital['location'] ?? '',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                      fontSize: 11, color: Colors.grey),
-                                ),
-                                const SizedBox(height: 2),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(Icons.star,
-                                        size: 13, color: Color(0xFF199A8E)),
-                                    const SizedBox(width: 2),
-                                    Text(
-                                      hospital['rating'] != null
-                                          ? (hospital['rating'] is num
-                                              ? hospital['rating']
-                                                  .toStringAsFixed(1)
-                                              : hospital['rating'].toString())
-                                          : 'No rating',
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 11,
-                                          color: Color(0xFF199A8E)),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                              );
+                            },
+                            child: Container(
+                              width: 140,
+                              margin: const EdgeInsets.symmetric(vertical: 4.0),
+                              padding: const EdgeInsets.all(10.0),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16.0),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.15),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CircleAvatar(
+                                    radius: 28,
+                                    backgroundColor: Colors.grey[200],
+                                    backgroundImage:
+                                        (hospital['profileImageUrl'] != null &&
+                                                hospital['profileImageUrl']
+                                                    .toString()
+                                                    .isNotEmpty)
+                                            ? NetworkImage(
+                                                hospital['profileImageUrl'])
+                                            : const AssetImage(
+                                                    'assets/hospital.jpg')
+                                                as ImageProvider,
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    hospital['name'] ?? '',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13),
+                                  ),
+                                  Text(
+                                    hospital['location'] ?? '',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        fontSize: 11, color: Colors.grey),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(Icons.star,
+                                          size: 13, color: Color(0xFF199A8E)),
+                                      const SizedBox(width: 2),
+                                      Text(
+                                        hospital['rating'] != null
+                                            ? (hospital['rating'] is num
+                                                ? hospital['rating']
+                                                    .toStringAsFixed(1)
+                                                : hospital['rating'].toString())
+                                            : 'No rating',
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 11,
+                                            color: Color(0xFF199A8E)),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         },
@@ -480,7 +501,7 @@ class _DoctorhomeState extends State<Doctorhome> {
         if (label == 'Doctor' || label == 'Appointments') {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const FindDoctorsPage()),
+            MaterialPageRoute(builder: (context) => const DoctorAppointmentsHospitalsPage()),
           );
         } else if (label == 'Hospital') {
           Navigator.push(

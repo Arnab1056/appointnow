@@ -47,7 +47,16 @@ class AboutDoctorPage extends StatelessWidget {
         }
         return Scaffold(
           appBar: AppBar(
-            title: const Text('About Doctor'),
+            title: const Text(
+              'About',
+              style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            centerTitle: true,
             backgroundColor: Colors.white,
             foregroundColor: Colors.black,
             elevation: 0,
