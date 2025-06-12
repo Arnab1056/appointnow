@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:appointnow/Pages/doctor_details_pages/doctor_details.dart';
 
 class DoctorListForHospitalPage extends StatelessWidget {
   final String hospitalUid;

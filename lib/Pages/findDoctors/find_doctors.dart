@@ -1,6 +1,5 @@
 import 'package:appointnow/Pages/doctor_details_pages/doctor_details.dart';
 import 'package:appointnow/Pages/findDoctors/doctor_category.dart';
-import 'package:appointnow/Pages/findDoctors/doctor_list_page.dart';
 import 'package:appointnow/pages/index/homepage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';

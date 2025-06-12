@@ -105,6 +105,27 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
     return null;
   }
 
+  // Fetch all time slots for the doctor from the appointments collection
+  Future<List<dynamic>> getDoctorTimeSlotsFromAppointments(String doctorId) async {
+    final query = await FirebaseFirestore.instance
+        .collection('appointments')
+        .where('doctorId', isEqualTo: doctorId)
+        .get();
+    List<dynamic> allTimeSlots = [];
+    for (final doc in query.docs) {
+      final data = doc.data();
+      // Handle different possible time slot fields
+      if (data.containsKey('selectedTimes') && data['selectedTimes'] is List) {
+        allTimeSlots.addAll(List.from(data['selectedTimes']));
+      } else if (data.containsKey('selectedTime')) {
+        allTimeSlots.add(data['selectedTime']);
+      } else if (data.containsKey('selectedTimeRange')) {
+        allTimeSlots.add(data['selectedTimeRange']);
+      }
+    }
+    return allTimeSlots;
+  }
+
   @override
   Widget build(BuildContext context) {
     final doctor = widget.doctor;
@@ -142,9 +163,16 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
             // Flatten appointments so each day gets its own card
             List<Map<String, dynamic>> dayWiseAppointments = [];
             for (final appt in acceptedAppointments) {
-              final List days = appt['selectedDays'] ?? [];
-              final List times = appt['selectedTimes'] ??
-                  (appt['selectedTime'] != null ? [appt['selectedTime']] : []);
+              final List days = appt['selectedDays'] ?? (appt['selectedDay'] != null ? [appt['selectedDay']] : []);
+              // Handle selectedTimeRange as a string slot
+              String? timeRangeStr;
+              if (appt['selectedTimeRange'] != null &&
+                  appt['selectedTimeRange']['from'] != null &&
+                  appt['selectedTimeRange']['to'] != null) {
+                timeRangeStr = "${appt['selectedTimeRange']['from']} - ${appt['selectedTimeRange']['to']}";
+              }
+              final List times =
+                  timeRangeStr != null ? [timeRangeStr] : (appt['selectedTimes'] ?? (appt['selectedTime'] != null ? [appt['selectedTime']] : []));
               final hospital = appt['hospitalName'] ?? hospitalName;
               final hospitalId = appt['hospitalId'] ?? '';
               for (final day in days) {

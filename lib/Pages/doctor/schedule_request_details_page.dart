@@ -9,8 +9,12 @@ class ScheduleRequestDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hospitalName = requestData['hospitalName'] ?? '';
-    final selectedDays = (requestData['selectedDays'] as List?)?.join(', ') ?? '';
-    final selectedTimes = (requestData['selectedTimes'] as List?)?.join(', ') ?? '';
+    final selectedDay = requestData['selectedDay'] ?? '';
+    final selectedTimeRange = requestData['selectedTimeRange'];
+    String timeRangeStr = '';
+    if (selectedTimeRange != null && selectedTimeRange['from'] != null && selectedTimeRange['to'] != null) {
+      timeRangeStr = '${selectedTimeRange['from']} - ${selectedTimeRange['to']}';
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Request Details'),
@@ -25,9 +29,9 @@ class ScheduleRequestDetailsPage extends StatelessWidget {
           children: [
             Text('Hospital: $hospitalName', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
-            Text('Requested Days: $selectedDays', style: const TextStyle(fontSize: 16)),
+            Text('Requested Day: $selectedDay', style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 8),
-            Text('Requested Times: $selectedTimes', style: const TextStyle(fontSize: 16)),
+            Text('Requested Time: $timeRangeStr', style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 32),
             Row(
               children: [
@@ -64,26 +68,36 @@ class ScheduleRequestDetailsPage extends StatelessWidget {
   Future<void> _acceptRequest(BuildContext context) async {
     final docRef = FirebaseFirestore.instance.collection('scheduleRequests').doc(requestId);
     final doctorId = requestData['doctorId'];
-    final selectedDays = List<String>.from(requestData['selectedDays'] ?? []);
-    final selectedTimes = List<String>.from(requestData['selectedTimes'] ?? []);
+    final selectedDay = requestData['selectedDay'];
+    final selectedTimeRange = requestData['selectedTimeRange'];
     // 1. Add to appointments
     await FirebaseFirestore.instance.collection('appointments').add({
       ...requestData,
       'status': 'accepted',
       'acceptedAt': FieldValue.serverTimestamp(),
     });
-    // 2. Update doctor availability (remove selected times)
+    // 2. Update doctor availability (remove selected slot from that day)
     final doctorDoc = FirebaseFirestore.instance.collection('doctordetails').doc(doctorId);
     final doctorSnap = await doctorDoc.get();
     if (doctorSnap.exists) {
       final data = doctorSnap.data() as Map<String, dynamic>;
       List<String> availableDays = List<String>.from(data['availableDays'] ?? []);
-      List<String> availableTimeSlots = List<String>.from(data['availableTimeSlots'] ?? []);
-      availableDays.removeWhere((d) => selectedDays.contains(d));
-      availableTimeSlots.removeWhere((t) => selectedTimes.contains(t));
+      Map<String, dynamic> availableTimeRangesPerDay = Map<String, dynamic>.from(data['availableTimeRangesPerDay'] ?? {});
+      if (availableTimeRangesPerDay[selectedDay] is List) {
+        List slots = List.from(availableTimeRangesPerDay[selectedDay]);
+        slots.removeWhere((slot) =>
+          slot['from'] == selectedTimeRange['from'] && slot['to'] == selectedTimeRange['to']
+        );
+        availableTimeRangesPerDay[selectedDay] = slots;
+        // If no slots left for the day, remove the day from availableDays
+        if (slots.isEmpty) {
+          availableDays.remove(selectedDay);
+        }
+      }
+      // If request is accepted, delete availableDays and availableTimeRangesPerDay from doctor
       await doctorDoc.update({
-        'availableDays': availableDays,
-        'availableTimeSlots': availableTimeSlots,
+        'availableDays': FieldValue.delete(),
+        'availableTimeRangesPerDay': FieldValue.delete(),
       });
     }
     // 3. Mark request as accepted (or delete)

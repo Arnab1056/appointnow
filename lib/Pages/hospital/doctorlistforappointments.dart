@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:appointnow/Pages/doctor_details_pages/doctor_details.dart';
 import 'package:appointnow/Pages/hospital/appointments_serial.dart';
 
 class DoctorListForAppointmentsPage extends StatelessWidget {

@@ -12,20 +12,20 @@ class ScheduleTimePage extends StatefulWidget {
 
 class _ScheduleTimePageState extends State<ScheduleTimePage> {
   List<String> _availableDays = [];
-  List<String> _availableTimeSlots = [];
-  final List<int> _selectedDays = [];
-  final List<int> _selectedTimes = [];
+  Map<String, dynamic> _availableTimeRangesPerDay = {};
+  int? _selectedDayIndex;
+  int? _selectedSlotIndex;
 
   @override
   void initState() {
     super.initState();
-    // Load available days and times from doctor object
+    // Load available days and time ranges from doctor object
     final doc = widget.doctor;
     if (doc['availableDays'] is List) {
       _availableDays = List<String>.from(doc['availableDays']);
     }
-    if (doc['availableTimeSlots'] is List) {
-      _availableTimeSlots = List<String>.from(doc['availableTimeSlots']);
+    if (doc['availableTimeRangesPerDay'] is Map) {
+      _availableTimeRangesPerDay = Map<String, dynamic>.from(doc['availableTimeRangesPerDay']);
     }
   }
 
@@ -52,24 +52,33 @@ class _ScheduleTimePageState extends State<ScheduleTimePage> {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _doctorCard(),
-              const SizedBox(height: 20),
-              _daysStrip(),
-              const SizedBox(height: 12),
-              const Divider(thickness: 1),
-              const SizedBox(height: 12),
-              _timeGrid(context),
-              const SizedBox(height: 24),
-              _assignAssistantCard(),
-              const SizedBox(height: 40),
-              _saveButton(),
-            ],
-          ),
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _doctorCard(),
+                    const SizedBox(height: 20),
+                    _daysStrip(),
+                    const SizedBox(height: 12),
+                    const Divider(thickness: 1),
+                    const SizedBox(height: 12),
+                    _timeRangeDisplay(),
+                    const SizedBox(height: 24),
+                    _assignAssistantCard(),
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: _saveButton(),
+            ),
+          ],
         ),
       ),
     );
@@ -175,7 +184,7 @@ class _ScheduleTimePageState extends State<ScheduleTimePage> {
                   Text(
                     _availableDays.isNotEmpty
                         ? _availableDays[
-                            _selectedDays.isNotEmpty ? _selectedDays.last : 0]
+                            _selectedDayIndex != null ? _selectedDayIndex! : 0]
                         : 'N/A',
                     style: const TextStyle(
                         color: Colors.white,
@@ -192,94 +201,115 @@ class _ScheduleTimePageState extends State<ScheduleTimePage> {
   }
 
   Widget _daysStrip() {
-    return SizedBox(
-      height: 84,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: _availableDays.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (context, i) {
-          final dayName = _availableDays[i];
-          final isSelected = _selectedDays.contains(i);
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                if (isSelected) {
-                  _selectedDays.remove(i);
-                } else {
-                  _selectedDays.add(i);
-                }
-              });
+    return Column(
+      children: [
+        Text('Select Day',
+            style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: const Color.fromARGB(149, 0, 0, 0))),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 60,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: _availableDays.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, i) {
+              final dayName = _availableDays[i];
+              final isSelected = _selectedDayIndex == i;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedDayIndex = i;
+                  });
+                },
+                child: Container(
+                  width: 60,
+                  decoration: BoxDecoration(
+                    color: isSelected ? Colors.teal : Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                        color: isSelected ? Colors.teal : Colors.grey.shade300),
+                    boxShadow: isSelected
+                        ? [BoxShadow(color: Colors.teal.shade100, blurRadius: 6)]
+                        : [],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(dayName,
+                          style: TextStyle(
+                              color: isSelected ? Colors.white : Colors.grey[600],
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                ),
+              );
             },
-            child: Container(
-              width: 60,
-              decoration: BoxDecoration(
-                color: isSelected ? Colors.teal : Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                    color: isSelected ? Colors.teal : Colors.grey.shade300),
-                boxShadow: isSelected
-                    ? [BoxShadow(color: Colors.teal.shade100, blurRadius: 6)]
-                    : [],
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(dayName,
-                      style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.grey[600],
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600)),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _timeGrid(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: _availableTimeSlots.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 3.1,
-      ),
-      itemBuilder: (context, i) {
-        final isSelected = _selectedTimes.contains(i);
-        Color bg = isSelected ? Colors.teal : Colors.white;
-        Color txt = isSelected ? Colors.white : Colors.black;
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              if (isSelected) {
-                _selectedTimes.remove(i);
-              } else {
-                _selectedTimes.add(i);
-              }
-            });
-          },
-          child: Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: bg,
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(
-                color: isSelected ? Colors.teal : Colors.grey.shade300,
+  Widget _timeRangeDisplay() {
+    if (_selectedDayIndex == null) {
+      return const Text('Please select a day to see available times.');
+    }
+    final day = _availableDays[_selectedDayIndex!];
+    final ranges = _availableTimeRangesPerDay[day];
+    if (ranges == null || !(ranges is List) || ranges.isEmpty) {
+      return Text('No time slots set for $day.');
+    }
+    return Column(
+      children: [
+        Text('Select Time Slot',
+            style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: const Color.fromARGB(149, 0, 0, 0))),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: List.generate(ranges.length, (i) {
+            final slot = ranges[i];
+            final slotStr = '${slot['from']} - ${slot['to']}';
+            final isSelected = _selectedSlotIndex == i;
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedSlotIndex = i;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.teal : Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(
+                    color: isSelected ? Colors.teal : Colors.grey.shade300,
+                    width: 2,
+                  ),
+                  boxShadow: isSelected
+                      ? [BoxShadow(color: Colors.teal.shade50, blurRadius: 6)]
+                      : [],
+                ),
+                child: Text(
+                  slotStr,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : Colors.teal,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
               ),
-            ),
-            child: Text(
-              _availableTimeSlots[i],
-              style: TextStyle(fontSize: 13, color: txt),
-            ),
-          ),
-        );
-      },
+            );
+          }),
+        ),
+      ],
     );
   }
 
@@ -316,20 +346,18 @@ class _ScheduleTimePageState extends State<ScheduleTimePage> {
   }
 
   Widget _saveButton() {
-    return SizedBox(
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24, top: 8),
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () async {
-          if (_selectedDays.isEmpty || _selectedTimes.isEmpty) {
+          if (_selectedDayIndex == null || _selectedSlotIndex == null) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                  content:
-                      Text('Please select at least one day and time slot.')),
+                  content: Text('Please select a day and a time slot.')),
             );
             return;
           }
-
-          // Get current hospital info from FirebaseAuth
           final user = FirebaseAuth.instance.currentUser;
           if (user == null) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -338,8 +366,6 @@ class _ScheduleTimePageState extends State<ScheduleTimePage> {
             );
             return;
           }
-
-          // Fetch hospital details from Firestore
           final hospitalDoc = await FirebaseFirestore.instance
               .collection('hospitaldetails')
               .doc(user.uid)
@@ -347,15 +373,10 @@ class _ScheduleTimePageState extends State<ScheduleTimePage> {
           final hospitalData = hospitalDoc.data() ?? {};
           final hospitalId = user.uid;
           final hospitalName = hospitalData['name'] ?? 'Hospital';
-
           final doctorId = widget.doctor['id'] ?? widget.doctor['uid'] ?? '';
           final doctorName = widget.doctor['name'] ?? '';
-
-          final selectedDays =
-              _selectedDays.map((i) => _availableDays[i]).toList();
-          final selectedTimes =
-              _selectedTimes.map((i) => _availableTimeSlots[i]).toList();
-
+          final selectedDay = _availableDays[_selectedDayIndex!];
+          final selectedSlot = (_availableTimeRangesPerDay[selectedDay] as List)[_selectedSlotIndex!];
           try {
             await FirebaseFirestore.instance
                 .collection('scheduleRequests')
@@ -364,8 +385,8 @@ class _ScheduleTimePageState extends State<ScheduleTimePage> {
               'doctorName': doctorName,
               'hospitalId': hospitalId,
               'hospitalName': hospitalName,
-              'selectedDays': selectedDays,
-              'selectedTimes': selectedTimes,
+              'selectedDay': selectedDay,
+              'selectedTimeRange': selectedSlot,
               'status': 'pending',
               'createdAt': FieldValue.serverTimestamp(),
             });
@@ -376,7 +397,7 @@ class _ScheduleTimePageState extends State<ScheduleTimePage> {
           } catch (e) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                  content: Text('Failed to send request: ${e.toString()}')),
+                  content: Text('Failed to send request: \\${e.toString()}')),
             );
           }
         },
@@ -387,7 +408,10 @@ class _ScheduleTimePageState extends State<ScheduleTimePage> {
           ),
           padding: const EdgeInsets.symmetric(vertical: 16),
         ),
-        child: const Text('Save', style: TextStyle(fontSize: 16)),
+        child: const Text('Save',
+         style: TextStyle(fontSize: 16,color: Colors.white),
+         
+         ),
       ),
     );
   }

@@ -44,8 +44,12 @@ class ScheduleRequestsPage extends StatelessWidget {
                 child: ListTile(
                   leading: const Icon(Icons.local_hospital, color: Colors.teal),
                   title: Text(req['hospitalName'] ?? 'Hospital'),
-                  subtitle:
-                      Text('Days: ${(req['selectedDays'] as List).join(', ')}'),
+                  subtitle: req['selectedTimeRange'] != null
+                      ? Text(
+                          'Day: ${req['selectedDay'] ?? ''}\nTime: ${req['selectedTimeRange']['from']} - ${req['selectedTimeRange']['to']}',
+                          style: const TextStyle(fontSize: 13),
+                        )
+                      : const Text('No time slot selected'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 18),
                   onTap: () {
                     Navigator.push(

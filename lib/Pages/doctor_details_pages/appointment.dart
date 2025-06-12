@@ -29,6 +29,16 @@ class _AppointmentPageState extends State<AppointmentPage> {
   String? reason;
   String selectedPaymentMethod = "VISA";
 
+  // Show the correct time slot format (time range or single time)
+  String getDisplayTime() {
+    // If the time is a range (e.g., "9:00 AM - 11:00 AM"), just return it
+    if (widget.time.contains('-')) {
+      return widget.time;
+    }
+    // Otherwise, just return the time as is
+    return widget.time;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -185,7 +195,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                         const SizedBox(width: 10),
                         Text(
                           _getFullDateTimeString(
-                              widget.day, widget.date, widget.time),
+                              widget.day, widget.date, getDisplayTime()),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,

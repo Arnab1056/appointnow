@@ -55,44 +55,19 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
   bool _agreedToTerms = false;
 
   final List<bool> _selectedDays = List.generate(6, (i) => false); // Mon-Sat
-  List<bool> _selectedTimes = [];
+  // Map to store multiple time ranges per day
+  Map<String, List<Map<String, TimeOfDay?>>> _selectedTimeRangesPerDay = {};
   final List<String> _weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  final List<String> _timeSlots = [
-    '09:00 AM',
-    '09:30 AM',
-    '10:00 AM',
-    '10:30 AM',
-    '11:00 AM',
-    '11:30 AM',
-    '12:00 PM',
-    '12:30 PM',
-    '01:00 PM',
-    '01:30 PM',
-    '02:00 PM',
-    '02:30 PM',
-    '03:00 PM',
-    '03:30 PM',
-    '04:00 PM',
-    '04:30 PM',
-    '05:00 PM',
-    '05:30 PM',
-    '06:00 PM',
-    '06:30 PM',
-    '07:00 PM',
-    '07:30 PM',
-    '08:00 PM',
-    '08:30 PM',
-    '09:00 PM',
-    '09:30 PM',
-    '10:00 PM',
-  ];
 
   @override
   void initState() {
     super.initState();
     _fetchProfileImageUrl();
     _fetchDoctorDetailsAndAvailability();
-    _selectedTimes = List.generate(_timeSlots.length, (i) => false);
+    // Initialize time range map for each day
+    for (final day in _weekDays) {
+      _selectedTimeRangesPerDay[day] = [];
+    }
   }
 
   Future<void> _fetchDoctorDetailsAndAvailability() async {
@@ -123,12 +98,19 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
             _selectedDays[i] = days.contains(_weekDays[i]);
           }
         }
-        // Restore available time slots
-        if (data['availableTimeSlots'] != null &&
-            data['availableTimeSlots'] is List) {
-          final List times = data['availableTimeSlots'];
-          for (int i = 0; i < _timeSlots.length; i++) {
-            _selectedTimes[i] = times.contains(_timeSlots[i]);
+        // Restore available time ranges per day (multiple slots)
+        if (data['availableTimeRangesPerDay'] != null && data['availableTimeRangesPerDay'] is Map) {
+          final Map rangesPerDay = data['availableTimeRangesPerDay'];
+          for (final day in _weekDays) {
+            final ranges = rangesPerDay[day];
+            if (ranges is List) {
+              _selectedTimeRangesPerDay[day] = ranges.map<Map<String, TimeOfDay?>>((range) {
+                return {
+                  'from': _parseTimeOfDay(range['from']),
+                  'to': _parseTimeOfDay(range['to']),
+                };
+              }).toList();
+            }
           }
         }
         setState(() {});
@@ -145,11 +127,16 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
     for (int i = 0; i < _selectedDays.length; i++) {
       if (_selectedDays[i]) selectedDays.add(_weekDays[i]);
     }
-    final selectedTimeSlots = <String>[];
-    for (int i = 0; i < _selectedTimes.length; i++) {
-      if (_selectedTimes[i]) selectedTimeSlots.add(_timeSlots[i]);
+    // Prepare per-day time ranges (multiple slots)
+    final Map<String, List<Map<String, String>>> selectedTimeRangesPerDay = {};
+    for (final day in selectedDays) {
+      final ranges = _selectedTimeRangesPerDay[day] ?? [];
+      final validRanges = ranges.where((range) => range['from'] != null && range['to'] != null).toList();
+      selectedTimeRangesPerDay[day] = validRanges.map((range) => {
+        'from': _formatTimeOfDay(range['from']),
+        'to': _formatTimeOfDay(range['to']),
+      }).toList();
     }
-
     await FirebaseFirestore.instance
         .collection('doctordetails')
         .doc(user.uid)
@@ -164,7 +151,7 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
       'profileImageUrl': _profileImageUrl ?? '',
       'profileImageName': _profileImageName ?? '',
       'availableDays': selectedDays,
-      'availableTimeSlots': selectedTimeSlots,
+      'availableTimeRangesPerDay': selectedTimeRangesPerDay,
       'timestamp': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
     ScaffoldMessenger.of(context).showSnackBar(
@@ -286,26 +273,101 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
     );
   }
 
-  Widget _buildTimeSelector() {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: List.generate(_timeSlots.length, (i) {
-        return FilterChip(
-          label: Text(_timeSlots[i]),
-          selected: _selectedTimes[i],
-          selectedColor: Colors.teal,
-          labelStyle: TextStyle(
-            color: _selectedTimes[i] ? Colors.white : Colors.black,
+  Widget _buildTimeRangeSelectorForDay(String day) {
+    final ranges = _selectedTimeRangesPerDay[day] ?? [];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (int i = 0; i < ranges.length; i++)
+          Row(
+            children: [
+              const Text('From:'),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () async {
+                  final picked = await showTimePicker(
+                    context: context,
+                    initialTime: ranges[i]['from'] ?? TimeOfDay(hour: 9, minute: 0),
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      ranges[i]['from'] = picked;
+                      // If 'to' is before 'from', reset 'to'
+                      if (ranges[i]['to'] != null && _compareTimeOfDay(ranges[i]['to']!, picked) <= 0) {
+                        ranges[i]['to'] = null;
+                      }
+                    });
+                  }
+                },
+                child: Text(ranges[i]['from'] != null ? _formatTimeOfDay(ranges[i]['from']) : 'Select'),
+              ),
+              const SizedBox(width: 16),
+              const Text('To:'),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: ranges[i]['from'] == null
+                    ? null
+                    : () async {
+                        final picked = await showTimePicker(
+                          context: context,
+                          initialTime: ranges[i]['to'] ?? TimeOfDay(hour: ((ranges[i]['from']!.hour + 1) % 24), minute: ranges[i]['from']!.minute),
+                        );
+                        if (picked != null && _compareTimeOfDay(picked, ranges[i]['from']!) > 0) {
+                          setState(() {
+                            ranges[i]['to'] = picked;
+                          });
+                        }
+                      },
+                child: Text(ranges[i]['to'] != null ? _formatTimeOfDay(ranges[i]['to']) : 'Select'),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () {
+                  setState(() {
+                    ranges.removeAt(i);
+                  });
+                },
+              ),
+            ],
           ),
-          onSelected: (selected) {
+        TextButton.icon(
+          onPressed: () {
             setState(() {
-              _selectedTimes[i] = selected;
+              ranges.add({'from': null, 'to': null});
             });
           },
-        );
-      }),
+          icon: const Icon(Icons.add, color: Colors.teal),
+          label: const Text('Add Time Slot', style: TextStyle(color: Colors.teal)),
+        ),
+      ],
     );
+  }
+
+  int _compareTimeOfDay(TimeOfDay a, TimeOfDay b) {
+    return a.hour == b.hour ? a.minute - b.minute : a.hour - b.hour;
+  }
+
+  TimeOfDay? _parseTimeOfDay(String? timeStr) {
+    if (timeStr == null || timeStr.isEmpty) return null;
+    final format = RegExp(r'^(\d{1,2}):(\d{2}) (AM|PM)\$');
+    final match = format.firstMatch(timeStr);
+    if (match != null) {
+      int hour = int.parse(match.group(1)!);
+      final int minute = int.parse(match.group(2)!);
+      final String period = match.group(3)!;
+      if (period == 'PM' && hour != 12) hour += 12;
+      if (period == 'AM' && hour == 12) hour = 0;
+      return TimeOfDay(hour: hour, minute: minute);
+    }
+    return null;
+  }
+
+  String _formatTimeOfDay(TimeOfDay? time) {
+    if (time == null) return '';
+    final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = time.period == DayPeriod.am ? 'AM' : 'PM';
+    return '$hour:$minute $period';
   }
 
   @override
@@ -527,7 +589,21 @@ class _DoctorProfileEditState extends State<DoctorProfileEdit> {
               ),
             ),
             const SizedBox(height: 8),
-            _buildTimeSelector(),
+            // Per-day time ranges
+            for (int i = 0; i < _weekDays.length; i++)
+              if (_selectedDays[i]) ...[
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '${_weekDays[i]} Time Range',
+                    style: const TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                _buildTimeRangeSelectorForDay(_weekDays[i]),
+                const SizedBox(height: 12),
+              ],
             const SizedBox(height: 30),
 
             // Save Button at the end

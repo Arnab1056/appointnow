@@ -41,17 +41,16 @@ class _AppointmentsSerialPageState extends State<AppointmentsSerialPage> {
   }
 
   Future<void> _fetchAppointments() async {
-    final doctorId = widget.doctorName;
+    // Use doctorId and hospitalId from the serial collection fields
+    final doctorId = widget.doctorName; // This should be doctorId, but widget.doctorName is used as a param. If you have doctorId, use it here.
     final hospitalId = widget.hospitalId;
-    // Only show appointments for the currently logged-in hospital
+    // Fetch from 'serial' collection using doctorName and hospitalId
     final query = await FirebaseFirestore.instance
         .collection('serial')
         .where('doctorName', isEqualTo: doctorId)
-        .where('hospitalId',
-            isEqualTo: hospitalId) // Only for logged-in hospital
+        .where('hospitalId', isEqualTo: hospitalId)
         .get();
-    final docs =
-        query.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+    final docs = query.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
     setState(() {
       appointments = docs;
       appointmentCount = docs.length;
@@ -64,7 +63,8 @@ class _AppointmentsSerialPageState extends State<AppointmentsSerialPage> {
 
   List<Map<String, dynamic>> get _filteredAppointments {
     if (selectedDate == null) return [];
-    return appointments.where((a) => a['date'] == selectedDate).toList();
+    // Filter by date and day for accuracy
+    return appointments.where((a) => a['date'] == selectedDate && a['day'] == selectedDay).toList();
   }
 
   @override
@@ -266,7 +266,7 @@ class _AppointmentsSerialPageState extends State<AppointmentsSerialPage> {
                     serialNumber: serial,
                     appointmentDate: patient['date'] ?? '',
                     appointmentDay: patient['day'] ?? '',
-                    appointmentTime: patient['time'] ?? '',
+                    appointmentTime: patient['time'] ?? '', // Use 'time' field from serial
                   ),
                 ),
               );
