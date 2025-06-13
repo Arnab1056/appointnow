@@ -12,6 +12,8 @@ class UserSerialPage extends StatefulWidget {
   final int totalRatings;
   final Color primaryColor;
   final String hospitalId; // Renamed from hospitalName
+  final String? initialDate;
+  final String? initialDay;
 
   UserSerialPage({
     Key? key,
@@ -20,8 +22,10 @@ class UserSerialPage extends StatefulWidget {
     required this.doctorImage,
     required this.avgRating,
     required this.totalRatings,
-    required this.hospitalId, // Renamed from hospitalName
+    required this.hospitalId,
     this.primaryColor = const Color(0xFF009E7F),
+    this.initialDate,
+    this.initialDay,
   }) : super(key: key);
 
   @override
@@ -45,6 +49,8 @@ class _UserSerialPageState extends State<UserSerialPage> {
         .where('hospitalId', isEqualTo: widget.hospitalId)
         .where('status', isEqualTo: 'accepted')
         .snapshots();
+    selectedDate = widget.initialDate;
+    selectedDay = widget.initialDay;
   }
 
   List<Map<String, dynamic>> get _filteredAppointments {
@@ -95,10 +101,11 @@ class _UserSerialPageState extends State<UserSerialPage> {
               selectedDate = appointments[0]['date'];
               selectedDay = appointments[0]['day'];
             }
+            // Do not show the date selector at all in this context
             return Column(
               children: [
                 _buildDoctorCard(),
-                if (appointments.isNotEmpty) _buildDateSelector(),
+                // Date selector removed
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: Text(
@@ -112,64 +119,6 @@ class _UserSerialPageState extends State<UserSerialPage> {
             );
           },
         ),
-      ),
-    );
-  }
-
-  Widget _buildDateSelector() {
-    final uniqueDates = <Map<String, String>>[];
-    final seen = <String>{};
-    for (final a in appointments) {
-      final key = a['day'] ?? '';
-      if (!seen.contains(key)) {
-        seen.add(key);
-        uniqueDates.add({'date': a['date'], 'day': a['day']});
-      }
-    }
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: uniqueDates.map((d) {
-          final isSelected = d['date'] == selectedDate;
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                backgroundColor:
-                    isSelected ? widget.primaryColor : Colors.white,
-                side: BorderSide(color: widget.primaryColor),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: () {
-                setState(() {
-                  selectedDate = d['date'];
-                  selectedDay = d['day'];
-                  selectedSerial = 1;
-                });
-              },
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    d['day'] ?? '',
-                    style: GoogleFonts.poppins(
-                        color: isSelected ? Colors.white : widget.primaryColor,
-                        fontWeight: FontWeight.w600),
-                  ),
-                  Text(
-                    d['date'] ?? '',
-                    style: GoogleFonts.poppins(
-                        color: isSelected ? Colors.white : widget.primaryColor,
-                        fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
       ),
     );
   }
@@ -247,7 +196,7 @@ class _UserSerialPageState extends State<UserSerialPage> {
   }
 
   Widget _buildPatientGrid() {
-    // Sort filtered appointments by serialNumber ascending
+    // Only show serials for the selected date and day
     final filtered = List<Map<String, dynamic>>.from(_filteredAppointments)
       ..sort((a, b) {
         int aSerial = int.tryParse(a['serialNumber']?.toString() ?? '') ?? 0;

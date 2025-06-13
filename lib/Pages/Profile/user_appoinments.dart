@@ -4,17 +4,19 @@ import 'user_serial_page.dart'; // Import UserSerialPage
 
 class UserAppointmentsPage extends StatelessWidget {
   final String userId;
-  const UserAppointmentsPage({Key? key, required this.userId}) : super(key: key);
+  const UserAppointmentsPage({Key? key, required this.userId})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     if (userId.isEmpty) {
-      return const Center(child: Text('You must be logged in to view appointments.'));
+      return const Center(
+          child: Text('You must be logged in to view appointments.'));
     }
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Appointments',style: TextStyle(color: Colors.white)),
-        
+        title: const Text('My Appointments',
+            style: TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF199A8E),
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -42,7 +44,8 @@ class UserAppointmentsPage extends StatelessWidget {
                   leading: CircleAvatar(
                     backgroundColor: const Color(0xFF199A8E),
                     child: Text(
-                      (data['serialNumber'] != null && data['serialNumber'].toString().isNotEmpty)
+                      (data['serialNumber'] != null &&
+                              data['serialNumber'].toString().isNotEmpty)
                           ? data['serialNumber'].toString()
                           : (index + 1).toString(),
                       style: const TextStyle(
@@ -58,9 +61,11 @@ class UserAppointmentsPage extends StatelessWidget {
                       Text('Date: ${data['day'] ?? ''}, ${data['date'] ?? ''}'),
                       Text('Time: ${data['time'] ?? ''}'),
                       Text('Hospital: ${data['hospitalName'] ?? ''}'),
-                      if (data['reason'] != null && data['reason'].toString().isNotEmpty)
+                      if (data['reason'] != null &&
+                          data['reason'].toString().isNotEmpty)
                         Text('Reason: ${data['reason']}'),
-                      Text('Status: ${data['status'] ?? 'unknown'}',
+                      Text(
+                        'Status: ${data['status'] ?? 'unknown'}',
                         style: TextStyle(
                           color: (data['status'] == 'accepted')
                               ? Colors.green
@@ -87,6 +92,8 @@ class UserAppointmentsPage extends StatelessWidget {
                           avgRating: data['avgRating'] ?? 0.0,
                           totalRatings: data['totalRatings'] ?? 0,
                           hospitalId: data['hospitalId'] ?? '',
+                          initialDate: data['date'],
+                          initialDay: data['day'],
                         ),
                       ),
                     );
