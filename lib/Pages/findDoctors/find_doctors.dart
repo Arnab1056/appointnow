@@ -4,7 +4,6 @@ import 'package:appointnow/pages/index/homepage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-
 class FindDoctorsPage extends StatefulWidget {
   const FindDoctorsPage({super.key});
 
@@ -139,8 +138,10 @@ class _FindDoctorsPageState extends State<FindDoctorsPage> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) =>
-                                          DoctorDetailsPage(doctor: data, userName: ''), // TODO: Replace '' with actual user name if available
+                                      builder: (_) => DoctorDetailsPage(
+                                          doctor: data,
+                                          userName:
+                                              ''), // TODO: Replace '' with actual user name if available
                                     ),
                                   );
                                 },
@@ -335,8 +336,10 @@ class _FindDoctorsPageState extends State<FindDoctorsPage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) =>
-                                        DoctorDetailsPage(doctor: topDoctor, userName: ''), // TODO: Replace '' with actual user name if available
+                                    builder: (_) => DoctorDetailsPage(
+                                        doctor: topDoctor,
+                                        userName:
+                                            ''), // TODO: Replace '' with actual user name if available
                                   ),
                                 );
                               },

@@ -43,6 +43,7 @@ class DoctorCategoryPage extends StatelessWidget {
             return Center(child: Text('No doctors found for $category'));
           }
           final doctors = snapshot.data!.docs;
+          // The ListView and all doctor cards will auto-refresh as the stream updates
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: doctors.length,
