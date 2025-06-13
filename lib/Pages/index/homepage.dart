@@ -375,7 +375,7 @@ class _HomePageState extends State<HomePage> {
                     }
                     final hospitals = snapshot.data!.docs;
                     return SizedBox(
-                      height: 140,
+                      height: 160,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         itemCount: hospitals.length,
