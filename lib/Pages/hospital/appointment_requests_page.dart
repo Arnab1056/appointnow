@@ -17,6 +17,7 @@ class AppointmentRequestsPage extends StatelessWidget {
         stream: FirebaseFirestore.instance
             .collection('serial')
             .where('hospitalId', isEqualTo: hospitalId)
+            .where('status', isEqualTo: 'pending') // Only show pending requests
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -63,19 +64,23 @@ class AppointmentRequestsPage extends StatelessWidget {
                               .get();
                           final serialNumber = acceptedQuery.docs.length + 1;
                           await doc.reference.update({'status': 'accepted', 'serialNumber': serialNumber});
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Appointment accepted. Serial: $serialNumber')),
-                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Appointment accepted. Serial: $serialNumber')),
+                            );
+                          }
                         },
                       ),
                       IconButton(
                         icon: const Icon(Icons.cancel, color: Colors.red),
                         onPressed: () async {
                           await doc.reference.update({'status': 'rejected'});
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Appointment rejected.')),
-                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Appointment rejected.')),
+                            );
+                          }
                         },
                       ),
                     ],

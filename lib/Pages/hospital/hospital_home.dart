@@ -191,12 +191,12 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
             const SizedBox(height: 20),
 
             // Appointments Request Card
-            FutureBuilder<QuerySnapshot>(
-              future: FirebaseFirestore.instance
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
                   .collection('serial')
-                  .where('hospitalId',
-                      isEqualTo: FirebaseAuth.instance.currentUser?.uid)
-                  .get(),
+                  .where('hospitalId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+                  .where('status', isEqualTo: 'pending')
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Padding(
@@ -205,6 +205,7 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
                   );
                 }
                 final count = snapshot.hasData ? snapshot.data!.docs.length : 0;
+                if (count == 0) return const SizedBox.shrink(); // Hide card if no requests
                 return Card(
                   color: Colors.teal[50],
                   shape: RoundedRectangleBorder(
