@@ -85,6 +85,71 @@ class DoctorCategoryPage extends StatelessWidget {
                         ),
                       );
                     },
+                    onLongPress: () async {
+                      final user = FirebaseAuth.instance.currentUser;
+                      if (user == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('You must be logged in to rate.')),
+                        );
+                        return;
+                      }
+                      double? selectedRating = await showDialog<double>(
+                        context: context,
+                        builder: (context) {
+                          double tempRating = avgRating > 0 ? avgRating : 5.0;
+                          return AlertDialog(
+                            title: const Text('Rate this doctor'),
+                            content: StatefulBuilder(
+                              builder: (context, setState) {
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: List.generate(5, (starIdx) {
+                                        return IconButton(
+                                          icon: Icon(
+                                            tempRating >= starIdx + 1 ? Icons.star : Icons.star_border,
+                                            color: Colors.amber,
+                                          ),
+                                          onPressed: () {
+                                            setState(() {
+                                              tempRating = (starIdx + 1).toDouble();
+                                            });
+                                          },
+                                        );
+                                      }),
+                                    ),
+                                    Text('Your rating:  ${tempRating.toStringAsFixed(1)}'),
+                                  ],
+                                );
+                              },
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Cancel'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context, tempRating),
+                                child: const Text('Submit'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                      if (selectedRating != null) {
+                        await FirebaseFirestore.instance
+                            .collection('doctordetails')
+                            .doc(docId)
+                            .collection('ratings')
+                            .doc(user.uid)
+                            .set({'rating': selectedRating});
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Thank you for rating!')),
+                        );
+                      }
+                    },
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 16),
                       padding: const EdgeInsets.all(12),
