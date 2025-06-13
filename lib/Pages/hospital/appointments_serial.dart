@@ -44,11 +44,12 @@ class _AppointmentsSerialPageState extends State<AppointmentsSerialPage> {
     // Use doctorId and hospitalId from the serial collection fields
     final doctorId = widget.doctorName; // This should be doctorId, but widget.doctorName is used as a param. If you have doctorId, use it here.
     final hospitalId = widget.hospitalId;
-    // Fetch from 'serial' collection using doctorName and hospitalId
+    // Fetch from 'serial' collection using doctorName and hospitalId, and only accepted
     final query = await FirebaseFirestore.instance
         .collection('serial')
         .where('doctorName', isEqualTo: doctorId)
         .where('hospitalId', isEqualTo: hospitalId)
+        .where('status', isEqualTo: 'accepted')
         .get();
     final docs = query.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
     setState(() {

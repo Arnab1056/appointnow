@@ -7,6 +7,7 @@ import 'package:appointnow/Pages/hospital/doctor_list_for_hospital.dart'; // <--
 // Make sure the file doctor_list_for_hospital.dart exports DoctorListPageForHospital
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:appointnow/Pages/hospital/appointment_requests_page.dart'; // Import the new AppointmentRequestsPage
 
 class HospitalHomePage extends StatefulWidget {
   const HospitalHomePage({super.key});
@@ -188,6 +189,59 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
                   ),
 
             const SizedBox(height: 20),
+
+            // Appointments Request Card
+            FutureBuilder<QuerySnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection('serial')
+                  .where('hospitalId',
+                      isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+                  .get(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                final count = snapshot.hasData ? snapshot.data!.docs.length : 0;
+                return Card(
+                  color: Colors.teal[50],
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  margin: const EdgeInsets.only(bottom: 20),
+                  child: ListTile(
+                    leading: const Icon(Icons.notifications_active,
+                        color: Colors.teal, size: 36),
+                    title: Text('Appointment Requests',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text('You have $count appointment requests'),
+                    trailing: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)),
+                      ),
+                      onPressed: () {
+                        final hospitalId =
+                            FirebaseAuth.instance.currentUser?.uid;
+                        if (hospitalId != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AppointmentRequestsPage(
+                                  hospitalId: hospitalId),
+                            ),
+                          );
+                        }
+                      },
+                      child: const Text('View',
+                          style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                );
+              },
+            ),
 
             // Action Grid
             GridView.builder(

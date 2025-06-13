@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AppointmentPage extends StatefulWidget {
   final Map<String, dynamic> doctor;
@@ -538,8 +539,10 @@ class _AppointmentPageState extends State<AppointmentPage> {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () async {
-                      await _addSerialToDatabase();
-                      _showSuccessPopup(); // Show the success popup
+                      final booked = await _addSerialToDatabase();
+                      if (booked) {
+                        _showSuccessPopup(); // Show the success popup only if booking is new
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF199A8E),
@@ -561,7 +564,25 @@ class _AppointmentPageState extends State<AppointmentPage> {
     );
   }
 
-  Future<void> _addSerialToDatabase() async {
+  // Change return type to Future<bool>
+  Future<bool> _addSerialToDatabase() async {
+    final user = FirebaseAuth.instance.currentUser;
+    // Prevent double booking: check if user already has a pending/accepted appointment for this doctor, date, and time
+    final existing = await FirebaseFirestore.instance
+        .collection('serial')
+        .where('doctorId', isEqualTo: widget.doctor['id'] ?? widget.doctor['uid'] ?? '')
+        .where('date', isEqualTo: widget.date)
+        .where('day', isEqualTo: widget.day)
+        .where('time', isEqualTo: widget.time)
+        .where('patientUid', isEqualTo: user?.uid ?? '')
+        .where('status', whereIn: ['pending', 'accepted'])
+        .get();
+    if (existing.docs.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You already have a booking for this slot.')),
+      );
+      return false; // Indicate booking was not performed
+    }
     final serialData = {
       'doctorId': widget.doctor['id'] ?? widget.doctor['uid'] ?? '',
       'doctorName': widget.doctor['name'] ?? '',
@@ -575,8 +596,11 @@ class _AppointmentPageState extends State<AppointmentPage> {
       'paymentMethod': selectedPaymentMethod,
       'createdAt': FieldValue.serverTimestamp(),
       'patientName': widget.patientName, // Save patient name
+      'patientUid': user?.uid ?? '', // Save user id
+      'status': 'pending', // Add status for workflow
     };
     await FirebaseFirestore.instance.collection('serial').add(serialData);
+    return true; // Indicate booking was performed
   }
 
   /// Helper for building payment rows

@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:image/image.dart' as img;
 import 'package:appointnow/Pages/doctor/doctor_home.dart';
+import 'package:appointnow/Pages/Profile/user_appoinments.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -33,10 +34,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
   Future<void> _fetchUserName() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
+      // Fetch user data from Firestore using the logged-in user's UID
       final doc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get();
+      // You can access the user id as user.uid
+      // Example: print('Current user id: ' + user.uid);
       setState(() {
         _userName = doc.data()?['name'] ?? 'No Name';
         _isLoading = false;
@@ -232,8 +236,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          insetPadding: const EdgeInsets.symmetric(
-              horizontal: 24, vertical: 24),
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
@@ -343,6 +347,15 @@ class _UserProfilePageState extends State<UserProfilePage> {
             onTap: () {
               if (title == 'Logout') {
                 showLogoutDialog(context); // ✅ show dialog here
+              } else if (title == 'Appointment') {
+                final user = FirebaseAuth.instance.currentUser;
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        UserAppointmentsPage(userId: user?.uid ?? ''),
+                  ),
+                );
               } else {
                 // TODO: Handle other tile taps
               }
@@ -356,7 +369,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
   void _navigateToHome(BuildContext context) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
       final role = doc.data()?['role'] as String?;
       if (role == 'doctor') {
         Navigator.pushReplacement(
