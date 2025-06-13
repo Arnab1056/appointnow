@@ -10,7 +10,6 @@ import 'package:appointnow/Pages/hospital/appointment_requests_page.dart';
 import 'package:appointnow/Pages/hospital/add_assistant.dart';
 import 'package:appointnow/Pages/assistant/assistant_profile.dart';
 
-
 class AssistantHomePage extends StatefulWidget {
   const AssistantHomePage({super.key});
 
@@ -48,7 +47,7 @@ class _AssistantHomePageState extends State<AssistantHomePage> {
       final assistantData = assistantDoc.data();
       final hospitalId = assistantData?['hospitalId'];
       if (hospitalId != null && hospitalId.toString().isNotEmpty) {
-        // Step 2: Get hospital details
+        // Step 2: Get hospital name from hospitaldetails
         final doc = await FirebaseFirestore.instance
             .collection('hospitaldetails')
             .doc(hospitalId)
@@ -84,7 +83,6 @@ class _AssistantHomePageState extends State<AssistantHomePage> {
 
       {"label": "Doctors list"},
       {"label": "Appointments"},
-      // <-- Add this line
     ];
 
     return Scaffold(
@@ -220,7 +218,8 @@ class _AssistantHomePageState extends State<AssistantHomePage> {
                   );
                 }
                 final count = snapshot.hasData ? snapshot.data!.docs.length : 0;
-                if (count == 0) return const SizedBox.shrink(); // Hide card if no requests
+                if (count == 0)
+                  return const SizedBox.shrink(); // Hide card if no requests
                 return Card(
                   color: Colors.teal[50],
                   shape: RoundedRectangleBorder(
@@ -272,20 +271,6 @@ class _AssistantHomePageState extends State<AssistantHomePage> {
                 final label = items[index]['label']!;
                 return GestureDetector(
                   onTap: () {
-                    if (label == "Add Doctor") {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const AddDoctorPage()),
-                      );
-                    }
-                    if (label == "Add Assistant") {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => AddAssistantPage()),
-                      );
-                    }
                     if (label == "Doctors list") {
                       if (_hospitalId != null) {
                         Navigator.push(
@@ -302,13 +287,27 @@ class _AssistantHomePageState extends State<AssistantHomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                DoctorListForAppointmentsPage(
-                                    hospitalUid: _hospitalId!),
+                            builder: (context) => DoctorListForAppointmentsPage(
+                                hospitalUid: _hospitalId!),
                           ),
                         );
                       }
                     }
+                    if (label == "Add Doctor") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const AddDoctorPage()),
+                      );
+                    }
+                    if (label == "Add Assistant") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AddAssistantPage()),
+                      );
+                    }
+                    // Add navigation for other items as needed
                   },
                   child: Container(
                     decoration: BoxDecoration(
@@ -332,7 +331,6 @@ class _AssistantHomePageState extends State<AssistantHomePage> {
                 );
               },
             ),
-            
           ],
         ),
       ),

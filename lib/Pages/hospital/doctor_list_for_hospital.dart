@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:appointnow/Pages/doctor_details_pages/doctor_details.dart';
+import 'hospital_doctor_details.dart';
 
 class DoctorListForHospitalPage extends StatelessWidget {
   final String hospitalUid;
@@ -96,13 +96,12 @@ class DoctorListForHospitalPage extends StatelessWidget {
                   }
                   return GestureDetector(
                     onTap: () {
-                      // Navigate to the doctor's appointments page
+                      // Navigate to the hospital doctor details page
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => DoctorAppointmentsPage(
-                            doctorId: docId,
-                            doctorName: doctor['name'] ?? 'Doctor',
+                          builder: (_) => HospitalDoctorDetailsPage(
+                            doctor: doctor,
                           ),
                         ),
                       );

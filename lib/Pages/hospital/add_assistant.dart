@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';  
+import 'package:firebase_core/firebase_core.dart';
 
 class AddAssistantPage extends StatefulWidget {
   @override
@@ -139,21 +140,27 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
                   return;
                 }
                 try {
-                  final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                  final hospitalId = FirebaseAuth.instance.currentUser?.uid;
+                  // Use a secondary FirebaseApp to register the assistant without logging out the hospital
+                  final FirebaseApp tempApp = await Firebase.initializeApp(
+                    name: 'tempApp',
+                    options: Firebase.app().options,
+                  );
+                  final tempAuth = FirebaseAuth.instanceFor(app: tempApp);
+                  final userCredential = await tempAuth.createUserWithEmailAndPassword(
                     email: email,
                     password: password,
                   );
-                  final hospitalId = FirebaseAuth.instance.currentUser?.uid;
                   // Add assistant details to 'assistants' collection
                   await FirebaseFirestore.instance.collection('assistants').doc(userCredential.user!.uid).set({
                     'name': name,
                     'email': email,
                     'hospitalId': hospitalId,
                     'createdAt': FieldValue.serverTimestamp(),
-                    'about': '', // You can add about field if you want to collect it
-                    'profileImageUrl': '', // Add image url if you implement image upload
+                    'about': '',
+                    'profileImageUrl': '',
+                    'uid': userCredential.user!.uid,
                   });
-                  // Also add to 'users' collection for login if needed
                   await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
                     'name': name,
                     'email': email,
@@ -161,13 +168,24 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
                     'hospitalId': hospitalId,
                     'createdAt': FieldValue.serverTimestamp(),
                   });
+                  await tempAuth.signOut();
+                  await tempApp.delete();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Assistant registered successfully!')),
                   );
-                  Navigator.pop(context);
+                  // Clear all input fields and reset state
+                  _nameController.clear();
+                  _emailController.clear();
+                  _passwordController.clear();
+                  _confirmPasswordController.clear();
+                  setState(() {
+                    agreeToTerms = false;
+                    obscurePassword = true;
+                    obscureConfirmPassword = true;
+                  });
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Registration failed:  ${e.toString()}')),
+                    SnackBar(content: Text('Registration failed:  ${e.toString()}')),
                   );
                 }
               },

@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:appointnow/Pages/hospital/appointment_requests_page.dart'; // Import the new AppointmentRequestsPage
 import 'package:appointnow/Pages/hospital/add_assistant.dart'; // Import AddAssistantPage
+import 'package:appointnow/Pages/hospital/assistant_list.dart'; // Import AssistantListPage
 
 class HospitalHomePage extends StatefulWidget {
   const HospitalHomePage({super.key});
@@ -195,7 +196,8 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('serial')
-                  .where('hospitalId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+                  .where('hospitalId',
+                      isEqualTo: FirebaseAuth.instance.currentUser?.uid)
                   .where('status', isEqualTo: 'pending')
                   .snapshots(),
               builder: (context, snapshot) {
@@ -206,7 +208,8 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
                   );
                 }
                 final count = snapshot.hasData ? snapshot.data!.docs.length : 0;
-                if (count == 0) return const SizedBox.shrink(); // Hide card if no requests
+                if (count == 0)
+                  return const SizedBox.shrink(); // Hide card if no requests
                 return Card(
                   color: Colors.teal[50],
                   shape: RoundedRectangleBorder(
@@ -306,6 +309,19 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
                             ),
                           );
                         });
+                      }
+                    }
+                    if (label == "Assistant list") {
+                      final hospitalUid =
+                          FirebaseAuth.instance.currentUser?.uid;
+                      if (hospitalUid != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                AssistantListPage(hospitalUid: hospitalUid),
+                          ),
+                        );
                       }
                     }
                   },
