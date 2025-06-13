@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:image/image.dart' as img;
 import 'package:appointnow/Pages/doctor/doctor_home.dart';
 import 'package:appointnow/Pages/Profile/user_appoinments.dart';
+// Make sure the import path is correct and matches the file where UserAppointmentsPage is defined.
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -118,6 +119,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
     return Scaffold(
       backgroundColor: const Color(0xFF00B5A2),
       body: SafeArea(
@@ -186,21 +188,31 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     topRight: Radius.circular(30),
                   ),
                 ),
-                child: Column(
-                  mainAxisAlignment:
-                      MainAxisAlignment.start, // 👈 Add this line
-                  children: [
-                    _buildListTile(Icons.favorite_border, 'My Saved',
-                        iconSize: 20.0, iconColor: const Color(0xFF00B5A2)),
-                    _buildListTile(Icons.calendar_today_outlined, 'Appointment',
-                        iconSize: 20.0, iconColor: const Color(0xFF00B5A2)),
-                    _buildListTile(Icons.payment_outlined, 'Payment Method',
-                        iconSize: 20.0, iconColor: const Color(0xFF00B5A2)),
-                    _buildListTile(Icons.question_answer_outlined, 'FAQs',
-                        iconSize: 20.0, iconColor: const Color(0xFF00B5A2)),
-                    _buildListTile(Icons.logout, 'Logout',
-                        iconSize: 20.0, iconColor: Colors.red),
-                  ],
+                child: StreamBuilder<DocumentSnapshot>(
+                  stream: user != null
+                      ? FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(user.uid)
+                          .snapshots()
+                      : const Stream.empty(),
+                  builder: (context, snapshot) {
+                    // You can use snapshot.data to auto-refresh user info if needed
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        _buildListTile(Icons.favorite_border, 'My Saved',
+                            iconSize: 20.0, iconColor: const Color(0xFF00B5A2)),
+                        _buildListTile(Icons.calendar_today_outlined, 'Appointment',
+                            iconSize: 20.0, iconColor: const Color(0xFF00B5A2)),
+                        _buildListTile(Icons.payment_outlined, 'Payment Method',
+                            iconSize: 20.0, iconColor: const Color(0xFF00B5A2)),
+                        _buildListTile(Icons.question_answer_outlined, 'FAQs',
+                            iconSize: 20.0, iconColor: const Color(0xFF00B5A2)),
+                        _buildListTile(Icons.logout, 'Logout',
+                            iconSize: 20.0, iconColor: Colors.red),
+                      ],
+                    );
+                  },
                 ),
               ),
             ],
@@ -216,11 +228,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
           });
           switch (index) {
             case 0:
-              // If the user is a doctor, go to Doctorhome, else go to HomePage
               _navigateToHome(context);
               break;
             case 3:
-              // Already on profile, do nothing
               break;
             default:
               break;
@@ -353,7 +363,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        UserAppointmentsPage(userId: user?.uid ?? ''),
+                      UserAppointmentsPage(userId: user?.uid ?? ''),
                   ),
                 );
               } else {

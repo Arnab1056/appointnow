@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:appointnow/Pages/hospital/patient_details_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class AppointmentsSerialPage extends StatefulWidget {
+class UserSerialPage extends StatefulWidget {
   final String doctorName;
   final String doctorDesignation;
   final String doctorImage;
@@ -12,7 +13,7 @@ class AppointmentsSerialPage extends StatefulWidget {
   final Color primaryColor;
   final String hospitalId; // Renamed from hospitalName
 
-  AppointmentsSerialPage({
+  UserSerialPage({
     Key? key,
     required this.doctorName,
     required this.doctorDesignation,
@@ -24,48 +25,34 @@ class AppointmentsSerialPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<AppointmentsSerialPage> createState() => _AppointmentsSerialPageState();
+  State<UserSerialPage> createState() => _UserSerialPageState();
 }
 
-class _AppointmentsSerialPageState extends State<AppointmentsSerialPage> {
+class _UserSerialPageState extends State<UserSerialPage> {
   int selectedSerial = 1;
   int appointmentCount = 0;
   List<Map<String, dynamic>> appointments = [];
   String? selectedDate;
   String? selectedDay;
+  late final Stream<QuerySnapshot> _serialStream;
 
   @override
   void initState() {
     super.initState();
-    _fetchAppointments();
-  }
-
-  Future<void> _fetchAppointments() async {
-    // Use doctorId and hospitalId from the serial collection fields
-    final doctorId = widget.doctorName; // This should be doctorId, but widget.doctorName is used as a param. If you have doctorId, use it here.
-    final hospitalId = widget.hospitalId;
-    // Fetch from 'serial' collection using doctorName and hospitalId, and only accepted
-    final query = await FirebaseFirestore.instance
+    _serialStream = FirebaseFirestore.instance
         .collection('serial')
-        .where('doctorName', isEqualTo: doctorId)
-        .where('hospitalId', isEqualTo: hospitalId)
+        .where('doctorName', isEqualTo: widget.doctorName)
+        .where('hospitalId', isEqualTo: widget.hospitalId)
         .where('status', isEqualTo: 'accepted')
-        .get();
-    final docs = query.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
-    setState(() {
-      appointments = docs;
-      appointmentCount = docs.length;
-      if (appointments.isNotEmpty) {
-        selectedDate = appointments[0]['date'];
-        selectedDay = appointments[0]['day'];
-      }
-    });
+        .snapshots();
   }
 
   List<Map<String, dynamic>> get _filteredAppointments {
     if (selectedDate == null) return [];
     // Filter by date and day for accuracy
-    return appointments.where((a) => a['date'] == selectedDate && a['day'] == selectedDay).toList();
+    return appointments
+        .where((a) => a['date'] == selectedDate && a['day'] == selectedDay)
+        .toList();
   }
 
   @override
@@ -89,20 +76,41 @@ class _AppointmentsSerialPageState extends State<AppointmentsSerialPage> {
                 onPressed: () {}),
           ],
         ),
-        body: Column(
-          children: [
-            _buildDoctorCard(),
-            if (appointments.isNotEmpty) _buildDateSelector(),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: Text(
-                "Patients (${_filteredAppointments.length})",
-                style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600, fontSize: 16),
-              ),
-            ),
-            Expanded(child: _buildPatientGrid())
-          ],
+        body: StreamBuilder<QuerySnapshot>(
+          stream: _serialStream,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Center(child: Text('No appointments found.'));
+            }
+            final docs = snapshot.data!.docs
+                .map((doc) => doc.data() as Map<String, dynamic>)
+                .toList();
+            appointments = docs;
+            appointmentCount = docs.length;
+            if (appointments.isNotEmpty &&
+                (selectedDate == null || selectedDay == null)) {
+              selectedDate = appointments[0]['date'];
+              selectedDay = appointments[0]['day'];
+            }
+            return Column(
+              children: [
+                _buildDoctorCard(),
+                if (appointments.isNotEmpty) _buildDateSelector(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Text(
+                    "Patients (${_filteredAppointments.length})",
+                    style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600, fontSize: 16),
+                  ),
+                ),
+                Expanded(child: _buildPatientGrid())
+              ],
+            );
+          },
         ),
       ),
     );
@@ -246,6 +254,8 @@ class _AppointmentsSerialPageState extends State<AppointmentsSerialPage> {
         int bSerial = int.tryParse(b['serialNumber']?.toString() ?? '') ?? 0;
         return aSerial.compareTo(bSerial);
       });
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final currentUid = currentUser?.uid;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: GridView.builder(
@@ -256,71 +266,37 @@ class _AppointmentsSerialPageState extends State<AppointmentsSerialPage> {
         physics: NeverScrollableScrollPhysics(),
         itemBuilder: (context, index) {
           final patient = filtered[index];
-          // Show the serial number from the serialNumber field in Firestore
           int serial = 1;
-          if (patient['serialNumber'] != null && patient['serialNumber'].toString().isNotEmpty) {
-            serial = int.tryParse(patient['serialNumber'].toString()) ?? (index + 1);
+          if (patient['serialNumber'] != null &&
+              patient['serialNumber'].toString().isNotEmpty) {
+            serial =
+                int.tryParse(patient['serialNumber'].toString()) ?? (index + 1);
           } else {
             serial = index + 1;
           }
-          bool selected = serial == selectedSerial;
+          bool isCurrentUser = (patient['patientUid'] == currentUid);
           bool isSeen = patient['seen'] == true;
-          return GestureDetector(
-            onTap: () async {
-              setState(() {
-                selectedSerial = serial;
-              });
-              // Toggle seen/unseen on tap
-              bool newSeen = !(patient['seen'] == true);
-              try {
-                final query = await FirebaseFirestore.instance
-                    .collection('serial')
-                    .where('doctorName', isEqualTo: widget.doctorName)
-                    .where('hospitalId', isEqualTo: widget.hospitalId)
-                    .where('date', isEqualTo: patient['date'])
-                    .where('day', isEqualTo: patient['day'])
-                    .where('serialNumber', isEqualTo: patient['serialNumber'])
-                    .limit(1)
-                    .get();
-                if (query.docs.isNotEmpty) {
-                  await query.docs.first.reference.update({'seen': newSeen});
-                  setState(() {
-                    patient['seen'] = newSeen;
-                  });
-                }
-              } catch (e) {
-                // Handle error if needed
-              }
-            },
-            onLongPress: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => PatientDetailsPage(
-                    patient: patient,
-                    serialNumber: serial,
-                    appointmentDate: patient['date'] ?? '',
-                    appointmentDay: patient['day'] ?? '',
-                    appointmentTime: patient['time'] ?? '',
-                  ),
-                ),
-              );
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: isSeen ? Colors.teal : Colors.white,
-                border: Border.all(
-                    color: selected ? widget.primaryColor : Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                serial.toString(),
-                style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: isSeen ? Colors.white : (selected ? widget.primaryColor : Colors.black)),
-              ),
+          Color bgColor;
+          if (isCurrentUser) {
+            bgColor = isSeen ? Colors.teal : Colors.yellow[700]!;
+          } else {
+            bgColor = isSeen ? Colors.teal : Colors.white;
+          }
+          return Container(
+            decoration: BoxDecoration(
+              color: bgColor,
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            alignment: Alignment.center,
+            margin: const EdgeInsets.all(2),
+            child: Text(
+              serial.toString(),
+              style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color:
+                      (isCurrentUser || isSeen) ? Colors.white : Colors.black),
             ),
           );
         },
