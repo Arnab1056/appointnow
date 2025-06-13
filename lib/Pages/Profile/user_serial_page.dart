@@ -39,6 +39,33 @@ class _UserSerialPageState extends State<UserSerialPage> {
   String? selectedDate;
   String? selectedDay;
   late final Stream<QuerySnapshot> _serialStream;
+  String? doctorImageUrl;
+
+  Future<void> _fetchDoctorImage() async {
+    try {
+      final query = await FirebaseFirestore.instance
+          .collection('doctordetails')
+          .where('name', isEqualTo: widget.doctorName)
+          .limit(1)
+          .get();
+      if (query.docs.isNotEmpty) {
+        final data = query.docs.first.data();
+        if (mounted && data['profileImageUrl'] != null && data['profileImageUrl'].toString().isNotEmpty) {
+          setState(() {
+            doctorImageUrl = data['profileImageUrl'];
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
+  List<Map<String, dynamic>> get _filteredAppointments {
+    if (selectedDate == null) return [];
+    // Filter by date and day for accuracy
+    return appointments
+        .where((a) => a['date'] == selectedDate && a['day'] == selectedDay)
+        .toList();
+  }
 
   @override
   void initState() {
@@ -51,14 +78,7 @@ class _UserSerialPageState extends State<UserSerialPage> {
         .snapshots();
     selectedDate = widget.initialDate;
     selectedDay = widget.initialDay;
-  }
-
-  List<Map<String, dynamic>> get _filteredAppointments {
-    if (selectedDate == null) return [];
-    // Filter by date and day for accuracy
-    return appointments
-        .where((a) => a['date'] == selectedDate && a['day'] == selectedDay)
-        .toList();
+    _fetchDoctorImage();
   }
 
   @override
@@ -124,6 +144,9 @@ class _UserSerialPageState extends State<UserSerialPage> {
   }
 
   Widget _buildDoctorCard() {
+    final imageToShow = (doctorImageUrl != null && doctorImageUrl!.isNotEmpty)
+        ? doctorImageUrl!
+        : widget.doctorImage;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(12),
@@ -139,8 +162,8 @@ class _UserSerialPageState extends State<UserSerialPage> {
         children: [
           CircleAvatar(
             backgroundColor: Colors.grey[200],
-            backgroundImage: widget.doctorImage.isNotEmpty
-                ? NetworkImage(widget.doctorImage) as ImageProvider
+            backgroundImage: imageToShow.isNotEmpty
+                ? NetworkImage(imageToShow) as ImageProvider
                 : const AssetImage('assets/doctor.jpg'),
             radius: 30,
           ),
