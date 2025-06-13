@@ -12,6 +12,20 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
 
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,10 +80,10 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
               ),
             ),
             SizedBox(height: 10),
-            buildTextField(Icons.person, "Enter assistant name"),
-            buildTextField(Icons.email, "Enter assistant email"),
-            buildPasswordField("Enter assistant password", true),
-            buildPasswordField("Confirm assistant password", false),
+            buildTextField(Icons.person, "Enter assistant name", controller: _nameController),
+            buildTextField(Icons.email, "Enter assistant email", controller: _emailController),
+            buildPasswordField("Enter assistant password", true, controller: _passwordController),
+            buildPasswordField("Confirm assistant password", false, controller: _confirmPasswordController),
             SizedBox(height: 10),
             Row(
               children: [
@@ -101,7 +115,62 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () async {
+                if (!agreeToTerms) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('You must agree to the terms.')),
+                  );
+                  return;
+                }
+                final name = _nameController.text.trim();
+                final email = _emailController.text.trim();
+                final password = _passwordController.text;
+                final confirmPassword = _confirmPasswordController.text;
+                if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('All fields are required.')),
+                  );
+                  return;
+                }
+                if (password != confirmPassword) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Passwords do not match.')),
+                  );
+                  return;
+                }
+                try {
+                  final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                    email: email,
+                    password: password,
+                  );
+                  final hospitalId = FirebaseAuth.instance.currentUser?.uid;
+                  // Add assistant details to 'assistants' collection
+                  await FirebaseFirestore.instance.collection('assistants').doc(userCredential.user!.uid).set({
+                    'name': name,
+                    'email': email,
+                    'hospitalId': hospitalId,
+                    'createdAt': FieldValue.serverTimestamp(),
+                    'about': '', // You can add about field if you want to collect it
+                    'profileImageUrl': '', // Add image url if you implement image upload
+                  });
+                  // Also add to 'users' collection for login if needed
+                  await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
+                    'name': name,
+                    'email': email,
+                    'role': 'assistant',
+                    'hospitalId': hospitalId,
+                    'createdAt': FieldValue.serverTimestamp(),
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Assistant registered successfully!')),
+                  );
+                  Navigator.pop(context);
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Registration failed:  ${e.toString()}')),
+                  );
+                }
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.teal,
                 minimumSize: Size(double.infinity, 50),
@@ -115,10 +184,11 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
     );
   }
 
-  Widget buildTextField(IconData icon, String hint) {
+  Widget buildTextField(IconData icon, String hint, {TextEditingController? controller}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: TextField(
+        controller: controller,
         decoration: InputDecoration(
           prefixIcon: Icon(icon),
           hintText: hint,
@@ -128,10 +198,11 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
     );
   }
 
-  Widget buildPasswordField(String hint, bool isPassword) {
+  Widget buildPasswordField(String hint, bool isPassword, {TextEditingController? controller}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: TextField(
+        controller: controller,
         obscureText: isPassword ? obscurePassword : obscureConfirmPassword,
         decoration: InputDecoration(
           prefixIcon: Icon(Icons.lock),

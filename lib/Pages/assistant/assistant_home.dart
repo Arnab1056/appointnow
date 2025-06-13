@@ -1,23 +1,24 @@
+import 'package:appointnow/Pages/auth/login.dart';
 import 'package:appointnow/Pages/hospital/doctorlistforappointments.dart';
 import 'package:flutter/material.dart';
 import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
-import 'package:appointnow/Pages/hospital/hospitalprofile.dart';
-import 'package:appointnow/Pages/hospital/add_doctor_page.dart'; // Import AddDoctorPage from the correct path
-import 'package:appointnow/Pages/hospital/doctor_list_for_hospital.dart'; // <-- Add this import (update the path if needed)
-// Make sure the file doctor_list_for_hospital.dart exports DoctorListPageForHospital
+import 'package:appointnow/Pages/hospital/add_doctor_page.dart';
+import 'package:appointnow/Pages/hospital/doctor_list_for_hospital.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:appointnow/Pages/hospital/appointment_requests_page.dart'; // Import the new AppointmentRequestsPage
-import 'package:appointnow/Pages/hospital/add_assistant.dart'; // Import AddAssistantPage
+import 'package:appointnow/Pages/hospital/appointment_requests_page.dart';
+import 'package:appointnow/Pages/hospital/add_assistant.dart';
+import 'package:appointnow/Pages/assistant/assistant_profile.dart';
 
-class HospitalHomePage extends StatefulWidget {
-  const HospitalHomePage({super.key});
+
+class AssistantHomePage extends StatefulWidget {
+  const AssistantHomePage({super.key});
 
   @override
-  State<HospitalHomePage> createState() => _HospitalHomePageState();
+  State<AssistantHomePage> createState() => _AssistantHomePageState();
 }
 
-class _HospitalHomePageState extends State<HospitalHomePage> {
+class _AssistantHomePageState extends State<AssistantHomePage> {
   int _currentIndex = 0;
 
   // Add state for hospital details
@@ -28,6 +29,7 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
   String? _hospitalDistance;
   String? _hospitalAbout; // <-- Add about field
   bool _isLoading = true;
+  String? _hospitalId; // Store the fetched hospitalId
 
   @override
   void initState() {
@@ -38,22 +40,37 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
   Future<void> _fetchHospitalDetails() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      final doc = await FirebaseFirestore.instance
-          .collection('hospitaldetails')
+      // Step 1: Get assistant doc
+      final assistantDoc = await FirebaseFirestore.instance
+          .collection('assistants')
           .doc(user.uid)
           .get();
-      final data = doc.data();
-      setState(() {
-        _hospitalName = data?['name'] ?? 'Hospital Name';
-        _hospitalLocation = data?['location'] ?? 'Location';
-        _hospitalImageUrl = data?['profileImageUrl'];
-        _hospitalRating = (data?['rating'] is num)
-            ? (data?['rating'] as num).toDouble()
-            : 5.0;
-        _hospitalDistance = data?['distance'] ?? '800m away';
-        _hospitalAbout = data?['about'] ?? ''; // <-- Fetch about
-        _isLoading = false;
-      });
+      final assistantData = assistantDoc.data();
+      final hospitalId = assistantData?['hospitalId'];
+      if (hospitalId != null && hospitalId.toString().isNotEmpty) {
+        // Step 2: Get hospital details
+        final doc = await FirebaseFirestore.instance
+            .collection('hospitaldetails')
+            .doc(hospitalId)
+            .get();
+        final data = doc.data();
+        setState(() {
+          _hospitalId = hospitalId;
+          _hospitalName = data?['name'] ?? 'Hospital Name';
+          _hospitalLocation = data?['location'] ?? 'Location';
+          _hospitalImageUrl = data?['profileImageUrl'];
+          _hospitalRating = (data?['rating'] is num)
+              ? (data?['rating'] as num).toDouble()
+              : 5.0;
+          _hospitalDistance = data?['distance'] ?? '800m away';
+          _hospitalAbout = data?['about'] ?? '';
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } else {
       setState(() {
         _isLoading = false;
@@ -64,13 +81,8 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
   @override
   Widget build(BuildContext context) {
     final List<Map<String, String>> items = [
-      {"label": "Add Doctor"},
-      {"label": "Add Assistant"},
-      {"label": "Add Laboratory"},
-      {"label": "Assistant list"},
+
       {"label": "Doctors list"},
-      {"label": "Laboratory list"},
-      {"label": "Lab Reports"},
       {"label": "Appointments"},
       // <-- Add this line
     ];
@@ -193,11 +205,13 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
 
             // Appointments Request Card
             StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('serial')
-                  .where('hospitalId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
-                  .where('status', isEqualTo: 'pending')
-                  .snapshots(),
+              stream: (_hospitalId != null)
+                  ? FirebaseFirestore.instance
+                      .collection('serial')
+                      .where('hospitalId', isEqualTo: _hospitalId)
+                      .where('status', isEqualTo: 'pending')
+                      .snapshots()
+                  : const Stream.empty(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Padding(
@@ -225,14 +239,12 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
                             borderRadius: BorderRadius.circular(20)),
                       ),
                       onPressed: () {
-                        final hospitalId =
-                            FirebaseAuth.instance.currentUser?.uid;
-                        if (hospitalId != null) {
+                        if (_hospitalId != null) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => AppointmentRequestsPage(
-                                  hospitalId: hospitalId),
+                                  hospitalId: _hospitalId!),
                             ),
                           );
                         }
@@ -275,37 +287,26 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
                       );
                     }
                     if (label == "Doctors list") {
-                      final hospitalUid =
-                          FirebaseAuth.instance.currentUser?.uid;
-                      if (hospitalUid != null) {
+                      if (_hospitalId != null) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => DoctorListForHospitalPage(
-                                hospitalUid: hospitalUid),
+                                hospitalUid: _hospitalId!),
                           ),
                         );
                       }
                     }
                     if (label == "Appointments") {
-                      final user = FirebaseAuth.instance.currentUser;
-                      if (user != null) {
-                        FirebaseFirestore.instance
-                            .collection('hospitaldetails')
-                            .doc(user.uid)
-                            .get()
-                            .then((doc) {
-                          final hospitalId = doc
-                              .id; // Always use the Firestore doc id as hospitalId
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  DoctorListForAppointmentsPage(
-                                      hospitalUid: hospitalId),
-                            ),
-                          );
-                        });
+                      if (_hospitalId != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                DoctorListForAppointmentsPage(
+                                    hospitalUid: _hospitalId!),
+                          ),
+                        );
                       }
                     }
                   },
@@ -331,6 +332,7 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
                 );
               },
             ),
+            
           ],
         ),
       ),
@@ -342,14 +344,137 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
             _currentIndex = index;
           });
           if (index == 3) {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
-              MaterialPageRoute(
-                  builder: (context) => const HospitalProfilePage()),
+              MaterialPageRoute(builder: (context) => const UserProfilePage()),
             );
           }
           // Add navigation logic for other tabs if needed
         },
+      ),
+    );
+  }
+
+  // Logout dialog and tile logic (mirroring hospital home)
+  void showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            padding: const EdgeInsets.all(20),
+            width: MediaQuery.of(context).size.width * 0.8,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  backgroundColor: Colors.teal.withOpacity(0.1),
+                  radius: 30,
+                  child: const Icon(Icons.logout, size: 30, color: Colors.teal),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  "Are you sure to log out of your account?",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop(); // Close the dialog
+                    await FirebaseAuth.instance.signOut();
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const LoginPage()),
+                      (route) => false, // Removes all previous routes
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    shape: const StadiumBorder(),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30, vertical: 12),
+                  ),
+                  child: const Text("Log Out",
+                      style: TextStyle(color: Colors.white)),
+                ),
+                const SizedBox(height: 10),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: const Text(
+                    "Cancel",
+                    style: TextStyle(color: Colors.teal, fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildListTile(IconData icon, String title,
+      {Color color = Colors.black, double iconSize = 24.0, Color? iconColor}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5.0),
+      child: MouseRegion(
+        onEnter: (_) => setState(() {}),
+        onExit: (_) => setState(() {}),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: ListTile(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            leading: Container(
+              width: 43.0,
+              height: 43.0,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE5F8F6),
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              child: Icon(icon,
+                  color: iconColor ?? const Color(0xFF00B5A2), size: iconSize),
+            ),
+            title: Text(title,
+                style: TextStyle(fontWeight: FontWeight.normal, color: color)),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              if (title == 'Logout') {
+                showLogoutDialog(context);
+              }
+            },
+          ),
+        ),
       ),
     );
   }

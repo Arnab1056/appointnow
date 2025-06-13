@@ -4,6 +4,9 @@ import 'register.dart'; // Ensure this is the correct path to the file containin
 import 'package:appointnow/pages/index/homepage.dart'; // Ensure this is the correct path to the file containing HomePage
 import 'package:appointnow/Pages/doctor/doctor_home.dart' as doctor;
 import 'package:appointnow/Pages/hospital/hospital_home.dart'; // Add this import
+import 'package:appointnow/Pages/assistant/assistant_home.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -16,6 +19,30 @@ class _LoginPageState extends State<LoginPage> {
   final AuthController _authController = AuthController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfAssistantLoggedIn();
+  }
+
+  Future<void> _checkIfAssistantLoggedIn() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Fetch user data from Firestore
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      final role = doc.data()?['role']?.toString().toLowerCase();
+      if (role == 'assistant' && mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const AssistantHomePage()),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -130,6 +157,12 @@ class _LoginPageState extends State<LoginPage> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) => const HospitalHomePage()),
+                          );
+                        } else if (role == 'assistant') {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const AssistantHomePage()),
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
