@@ -171,7 +171,18 @@ class HospitalDoctorDetailsPage extends StatelessWidget {
                                     onTap: alreadyAssigned
                                         ? null
                                         : () async {
-                                            // Add doctor id to assistant's document (as a list)
+                                            // Remove doctorId from all assistants for this hospital
+                                            for (final aDoc in assistants) {
+                                              final aId = aDoc.id;
+                                              final aData = aDoc.data();
+                                              final aDoctorIds = (aData['doctorIds'] as List?)?.map((e) => e.toString()).toList() ?? [];
+                                              if (aDoctorIds.contains(docData['id'])) {
+                                                await FirebaseFirestore.instance.collection('assistants').doc(aId).update({
+                                                  'doctorIds': FieldValue.arrayRemove([docData['id']])
+                                                });
+                                              }
+                                            }
+                                            // Add doctorId to the selected assistant
                                             final docRef = FirebaseFirestore.instance.collection('assistants').doc(assistantId);
                                             await docRef.set({
                                               'doctorIds': FieldValue.arrayUnion([docData['id']])
