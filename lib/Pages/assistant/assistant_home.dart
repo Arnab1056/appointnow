@@ -1,3 +1,4 @@
+import 'package:appointnow/Pages/assistant/assistant_doctorlist..dart';
 import 'package:appointnow/Pages/auth/login.dart';
 import 'package:appointnow/Pages/hospital/doctorlistforappointments.dart';
 import 'package:flutter/material.dart';
@@ -80,7 +81,6 @@ class _AssistantHomePageState extends State<AssistantHomePage> {
   @override
   Widget build(BuildContext context) {
     final List<Map<String, String>> items = [
-
       {"label": "Doctors list"},
       {"label": "Appointments"},
     ];
@@ -272,15 +272,12 @@ class _AssistantHomePageState extends State<AssistantHomePage> {
                 return GestureDetector(
                   onTap: () {
                     if (label == "Doctors list") {
-                      if (_hospitalId != null) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DoctorListForHospitalPage(
-                                hospitalUid: _hospitalId!),
-                          ),
-                        );
-                      }
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AssistantDoctorListPage(),
+                        ),
+                      );
                     }
                     if (label == "Appointments") {
                       if (_hospitalId != null) {
