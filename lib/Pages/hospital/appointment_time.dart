@@ -68,8 +68,7 @@ class _ScheduleTimePageState extends State<ScheduleTimePage> {
                     const SizedBox(height: 12),
                     _timeRangeDisplay(),
                     const SizedBox(height: 24),
-                    _assignAssistantCard(),
-                    const SizedBox(height: 40),
+                   
                   ],
                 ),
               ),
@@ -313,37 +312,7 @@ class _ScheduleTimePageState extends State<ScheduleTimePage> {
     );
   }
 
-  Widget _assignAssistantCard() {
-    return GestureDetector(
-      onTap: () {}, // TODO: navigation
-      child: Container(
-        width: 110,
-        height: 120,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-                color: Colors.grey.shade200,
-                blurRadius: 8,
-                offset: const Offset(0, 4))
-          ],
-        ),
-        child: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.medical_services_outlined, size: 40, color: Colors.teal),
-            SizedBox(height: 12),
-            Text(
-              'Assign\nAssistant',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13),
-            )
-          ],
-        ),
-      ),
-    );
-  }
+  
 
   Widget _saveButton() {
     return Container(

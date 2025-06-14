@@ -1,3 +1,4 @@
+import 'package:appointnow/Pages/doctor/doctor_serial.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -104,7 +105,7 @@ class _DoctorAppointmentsHospitalsPageState
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => AppointmentsSerialPage(
+                      builder: (_) => DoctorSerialPage(
                         doctorName: doctor['name'] ?? '',
                         doctorDesignation: doctor['designation'] ?? '',
                         doctorImage: doctor['profileImageUrl'] ?? '',

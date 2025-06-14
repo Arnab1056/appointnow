@@ -95,25 +95,80 @@ class AboutDoctorPage extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
+                // Doctor Ratings
+                FutureBuilder<QuerySnapshot>(
+                  future: FirebaseFirestore.instance
+                      .collection('doctors')
+                      .where('name', isEqualTo: doctorName)
+                      .limit(1)
+                      .get(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const SizedBox(height: 16);
+                    }
+                    if (!snapshot.hasData || snapshot.data == null || snapshot.data!.docs.isEmpty) {
+                      return const SizedBox();
+                    }
+                    final doc = snapshot.data!.docs.first;
+                    final rating = doc['rating'] != null ? doc['rating'] as num : null;
+                    final ratingCount = doc['ratingCount'] != null ? doc['ratingCount'] as int : null;
+                    if (rating == null) return const SizedBox();
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.star, color: Colors.amber, size: 20),
+                          const SizedBox(width: 4),
+                          Text(
+                            rating.toStringAsFixed(1),
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          if (ratingCount != null) ...[
+                            const SizedBox(width: 6),
+                            Text(
+                              '($ratingCount reviews)',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ]
+                        ],
+                      ),
+                    );
+                  },
+                ),
                 if (hospitalNames.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Icon(Icons.location_on,
-                          color: Colors.grey, size: 18),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          hospitalNames.join(', '),
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
+                      ...hospitalNames.map((name) => Padding(
+                            padding: const EdgeInsets.only(bottom: 4.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.location_on, color: Colors.grey, size: 18),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    name,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )),
                     ],
                   ),
                 ],
