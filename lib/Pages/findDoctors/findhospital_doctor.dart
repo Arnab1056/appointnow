@@ -66,19 +66,10 @@ class FindHospitalDoctorsPage extends StatelessWidget {
               },
             ),
             SizedBox(height: 24),
-            if (hospital['hasLab'] == true) ...[
+            if (hospital['hasLab'] == true && hospital['laboratories'] != null && (hospital['laboratories'] as List).isNotEmpty) ...[
               _buildSectionHeader("Laboratory"),
               SizedBox(height: 12),
-              _buildIconGrid(context, [
-                'X-Ray',
-                'MRI',
-                'ECO',
-                'Blood Test',
-                'Pressure',
-                'Urine Test',
-                'CT-Scan',
-                'Endoscopy',
-              ]),
+              _buildIconGrid(context, List<String>.from(hospital['laboratories'])),
             ],
             if (hospital['hasCabin'] == true) ...[
               SizedBox(height: 24),

@@ -23,6 +23,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
   int _currentIndex = 3;
   String? _userName;
   String? _profileImageUrl;
+  String? _userNumber;
   bool _isLoading = true;
 
   @override
@@ -30,6 +31,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     super.initState();
     _fetchUserName();
     _fetchProfileImageUrl();
+    _fetchUserNumber();
   }
 
   Future<void> _fetchUserName() async {
@@ -63,6 +65,32 @@ class _UserProfilePageState extends State<UserProfilePage> {
           .get();
       setState(() {
         _profileImageUrl = doc.data()?['profileImageUrl'];
+      });
+    }
+  }
+
+  Future<void> _fetchUserNumber() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      setState(() {
+        _userNumber = doc.data()?['number'] ?? '';
+      });
+    }
+  }
+
+  Future<void> _updateUserNumber(String newNumber) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'number': newNumber});
+      setState(() {
+        _userNumber = newNumber;
       });
     }
   }
@@ -163,14 +191,77 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     const SizedBox(height: 10),
                     _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : Text(
-                            _userName ?? '',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 25,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.bold,
-                            ),
+                        : Column(
+                            children: [
+                              Text(
+                                _userName ?? '',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 25,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.phone,
+                                      color: Colors.white, size: 18),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    _userNumber != null &&
+                                            _userNumber!.isNotEmpty
+                                        ? _userNumber!
+                                        : 'No number',
+                                    style: const TextStyle(
+                                        color: Colors.white, fontSize: 16),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.edit,
+                                        color: Colors.white, size: 18),
+                                    onPressed: () {
+                                      final controller = TextEditingController(
+                                          text: _userNumber ?? '');
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: const Text('Edit Number'),
+                                            content: TextField(
+                                              controller: controller,
+                                              keyboardType: TextInputType.phone,
+                                              decoration: const InputDecoration(
+                                                  hintText:
+                                                      'Enter your number'),
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
+                                                child: const Text('Cancel'),
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: () async {
+                                                  final newNumber =
+                                                      controller.text.trim();
+                                                  if (newNumber.isNotEmpty) {
+                                                    await _updateUserNumber(
+                                                        newNumber);
+                                                    Navigator.pop(context);
+                                                  }
+                                                },
+                                                child: const Text('Save'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                     const SizedBox(height: 180),
                   ],
@@ -200,9 +291,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        _buildListTile(Icons.favorite_border, 'My Saved',
+                        _buildListTile(Icons.favorite_border, 'My reports',
                             iconSize: 20.0, iconColor: const Color(0xFF00B5A2)),
-                        _buildListTile(Icons.calendar_today_outlined, 'Appointment',
+                        _buildListTile(
+                            Icons.calendar_today_outlined, 'Appointment',
                             iconSize: 20.0, iconColor: const Color(0xFF00B5A2)),
                         _buildListTile(Icons.payment_outlined, 'Payment Method',
                             iconSize: 20.0, iconColor: const Color(0xFF00B5A2)),
@@ -363,9 +455,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                      UserAppointmentsPage(userId: user?.uid ?? ''),
+                        UserAppointmentsPage(userId: user?.uid ?? ''),
                   ),
                 );
+              } else if (title == 'My reports') {
+                Navigator.pushNamed(context, '/user-labreports');
               } else {
                 // TODO: Handle other tile taps
               }

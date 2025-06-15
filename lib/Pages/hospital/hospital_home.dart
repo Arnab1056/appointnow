@@ -10,6 +10,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:appointnow/Pages/hospital/appointment_requests_page.dart'; // Import the new AppointmentRequestsPage
 import 'package:appointnow/Pages/hospital/add_assistant.dart'; // Import AddAssistantPage
 import 'package:appointnow/Pages/hospital/assistant_list.dart'; // Import AssistantListPage
+import 'package:appointnow/Pages/hospital/add_laborator.dart'; // Import AddLaboratoryPage
+import 'package:appointnow/Pages/hospital/laboratory_list.dart'; // Import LaboratoryListPage
+import 'package:appointnow/Pages/hospital/labreports_lablist.dart'; // Import LabReportsLabListPage
 
 class HospitalHomePage extends StatefulWidget {
   const HospitalHomePage({super.key});
@@ -323,6 +326,30 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
                           ),
                         );
                       }
+                    }
+                    if (label == "Add Laboratory") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddLaboratoryPage(),
+                        ),
+                      );
+                    }
+                    if (label == "Laboratory list") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => LaboratoryListPage(),
+                        ),
+                      );
+                    }
+                    if (label == "Lab Reports") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => LabReportsLabListPage(),
+                        ),
+                      );
                     }
                   },
                   child: Container(
