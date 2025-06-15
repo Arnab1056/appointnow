@@ -10,14 +10,15 @@ class UserLabReportsPage extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Lab Reports'),
-        backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.black),
+        title:
+            const Text('My Lab Reports', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF199A8E),
+        iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: true,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF5F5F5),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(0),
         child: user == null
             ? const Center(child: Text('Not logged in'))
             : StreamBuilder<DocumentSnapshot>(
@@ -57,20 +58,67 @@ class UserLabReportsPage extends StatelessWidget {
                       return ListView.builder(
                         itemCount: reports.length,
                         itemBuilder: (context, index) {
-                          final report = reports[index];
-                          final data = report.data() as Map<String, dynamic>;
+                          final doc = reports[index];
+                          final data = doc.data() as Map<String, dynamic>;
                           final isDone = data['done'] == true;
                           return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 8),
-                            child: ListTile(
-                              title: Text(data['patientName'] ?? 'Unknown'),
-                              subtitle: Column(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Phone: \\${data['phone'] ?? '-'}'),
+                                  Row(
+                                    children: [
+                                      CircleAvatar(
+                                        backgroundColor:
+                                            const Color(0xFF199A8E),
+                                        child: Text(
+                                          data['patientName'] != null &&
+                                                  data['patientName']
+                                                      .toString()
+                                                      .isNotEmpty
+                                              ? data['patientName']
+                                                  .toString()[0]
+                                                  .toUpperCase()
+                                              : '?',
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          data['patientName'] ?? 'Unknown',
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18),
+                                        ),
+                                      ),
+                                      Icon(
+                                        isDone
+                                            ? Icons.check_circle
+                                            : Icons.pending,
+                                        color: isDone
+                                            ? Colors.green
+                                            : Colors.orange,
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text('Phone: ${data['phone'] ?? '-'}',
+                                      style: const TextStyle(fontSize: 15)),
+                                  const SizedBox(height: 4),
                                   Text(
-                                      'Details: \\${data['reportDetails'] ?? '-'}'),
-                                  const SizedBox(height: 8),
+                                      'Details: ${data['reportDetails'] ?? '-'}',
+                                      style: const TextStyle(fontSize: 15)),
+                                  const SizedBox(height: 4),
                                   Text(
                                     isDone
                                         ? 'Report is done'
@@ -80,6 +128,16 @@ class UserLabReportsPage extends StatelessWidget {
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
+                                  if (data['createdAt'] != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8.0),
+                                      child: Text(
+                                        'Created: '
+                                        '${(data['createdAt'] as Timestamp).toDate().toString().split('.')[0]}',
+                                        style: const TextStyle(
+                                            fontSize: 12, color: Colors.grey),
+                                      ),
+                                    ),
                                 ],
                               ),
                             ),
