@@ -3,6 +3,7 @@ import 'package:appointnow/pages/findDoctors/find_doctors.dart';
 import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
 import 'package:appointnow/Pages/doctor_details_pages/doctor_details.dart'; // <-- Add this import
 import 'package:appointnow/Pages/findDoctors/hospitallist.dart'; // Add this import
+import 'package:appointnow/Pages/ambulance/Ambulance_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -521,6 +522,13 @@ class _AmbulanceHomePageState extends State<AmbulanceHomePage> {
               context,
               MaterialPageRoute(
                 builder: (context) => HospitallistPage(category: 'hospital'),
+              ),
+            );
+          } else if (label == 'Ambulance') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AmbulanceListPage(),
               ),
             );
           } else {

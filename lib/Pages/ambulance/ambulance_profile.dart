@@ -207,67 +207,7 @@ class _AmbulanceProfilePageState extends State<AmbulanceProfilePage> {
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(Icons.phone,
-                                        color: Colors.white, size: 18),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      _userNumber != null &&
-                                              _userNumber!.isNotEmpty
-                                          ? _userNumber!
-                                          : 'No number',
-                                      style: const TextStyle(
-                                          color: Colors.white, fontSize: 16),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.edit,
-                                          color: Colors.white, size: 18),
-                                      onPressed: () {
-                                        final controller =
-                                            TextEditingController(
-                                                text: _userNumber ?? '');
-                                        showDialog(
-                                          context: context,
-                                          builder: (context) {
-                                            return AlertDialog(
-                                              title: const Text('Edit Number'),
-                                              content: TextField(
-                                                controller: controller,
-                                                keyboardType:
-                                                    TextInputType.phone,
-                                                decoration:
-                                                    const InputDecoration(
-                                                        hintText:
-                                                            'Enter your number'),
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () =>
-                                                      Navigator.pop(context),
-                                                  child: const Text('Cancel'),
-                                                ),
-                                                ElevatedButton(
-                                                  onPressed: () async {
-                                                    final newNumber =
-                                                        controller.text.trim();
-                                                    if (newNumber.isNotEmpty) {
-                                                      await _updateUserNumber(
-                                                          newNumber);
-                                                      Navigator.pop(context);
-                                                    }
-                                                  },
-                                                  child: const Text('Save'),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
+                               
                               ],
                             ),
                       const SizedBox(height: 180),
