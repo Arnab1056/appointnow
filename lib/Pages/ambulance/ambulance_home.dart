@@ -3,6 +3,9 @@ import 'package:appointnow/pages/findDoctors/find_doctors.dart';
 import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
 import 'package:appointnow/Pages/doctor_details_pages/doctor_details.dart'; // <-- Add this import
 import 'package:appointnow/Pages/findDoctors/hospitallist.dart'; // Add this import
+import 'package:appointnow/Pages/ambulance/ambulance_booking.dart';
+
+import 'package:appointnow/Pages/ambulance/find_ambulance.dart';
 
 import 'package:appointnow/Pages/ambulance/Ambulance_list.dart';
 import 'package:flutter/material.dart';
@@ -470,7 +473,9 @@ class _AmbulanceHomePageState extends State<AmbulanceHomePage> {
                 _buildSectionHeader('Top Ambulance Service', onViewAll: () {}),
                 const SizedBox(height: 8.0),
                 StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance.collection('ambulance_details').snapshots(),
+                  stream: FirebaseFirestore.instance
+                      .collection('ambulance_details')
+                      .snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
@@ -503,89 +508,129 @@ class _AmbulanceHomePageState extends State<AmbulanceHomePage> {
                         };
                       }).toList()),
                       builder: (context, ratingSnapshot) {
-                        if (!ratingSnapshot.hasData || ratingSnapshot.data!.isEmpty) {
+                        if (!ratingSnapshot.hasData ||
+                            ratingSnapshot.data!.isEmpty) {
                           return const Text("No top ambulances found");
                         }
-                        final sorted = List<Map<String, dynamic>>.from(ratingSnapshot.data!);
-                        sorted.sort((a, b) => (b['avgRating'] as double).compareTo(a['avgRating'] as double));
+                        final sorted = List<Map<String, dynamic>>.from(
+                            ratingSnapshot.data!);
+                        sorted.sort((a, b) => (b['avgRating'] as double)
+                            .compareTo(a['avgRating'] as double));
                         final topAmbulances = sorted.take(5).toList();
                         return SizedBox(
-                          height: 140.0,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: topAmbulances.length,
-                            separatorBuilder: (context, idx) => const SizedBox(width: 12),
-                            itemBuilder: (context, idx) {
-                              final amb = topAmbulances[idx];
-                              return Container(
-                                width: 120,
-                                margin: const EdgeInsets.symmetric(vertical: 4.0),
-                                padding: const EdgeInsets.all(10.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.15),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 28,
-                                      backgroundColor: Colors.grey[200],
-                                      backgroundImage: (amb['profileImageUrl'] != null && amb['profileImageUrl'].toString().isNotEmpty)
-                                          ? NetworkImage(amb['profileImageUrl'])
-                                          : const AssetImage('assets/ambulance.jpg') as ImageProvider,
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      amb['name'] ?? '',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                                    ),
-                                    Text(
-                                      amb['location'] ?? '',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontSize: 11, color: Colors.grey),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(Icons.star, size: 13, color: Color(0xFF199A8E)),
-                                        const SizedBox(width: 2),
-                                        Text(
-                                          amb['avgRating'] > 0 ? amb['avgRating'].toStringAsFixed(1) : 'No rating',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 11,
-                                            color: Color(0xFF199A8E),
-                                          ),
+                            height: 140.0,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: topAmbulances.length,
+                              separatorBuilder: (context, idx) =>
+                                  const SizedBox(width: 12),
+                              itemBuilder: (context, idx) {
+                                final amb = topAmbulances[idx];
+                                return InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            AmbulanceBookingPage(
+                                          ambulanceData: amb,
+                                          avgRating: amb['avgRating'] ?? 0.0,
+                                          totalRatings:
+                                              amb['totalRatings'] ?? 0,
                                         ),
-                                        if (amb['totalRatings'] > 0) ...[
-                                          const SizedBox(width: 2),
-                                          Text('(${amb['totalRatings']})', style: const TextStyle(fontSize: 9, color: Colors.grey)),
-                                        ]
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    width: 120,
+                                    margin: const EdgeInsets.symmetric(
+                                        vertical: 4.0),
+                                    padding: const EdgeInsets.all(10.0),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(16.0),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.15),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 3),
+                                        ),
                                       ],
                                     ),
-                                  ],
-                                ),
-                              );
-                            },
-                          )
-                          );
-                        },
-                      );
-                    },
-                  ),
-
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 28,
+                                          backgroundColor: Colors.grey[200],
+                                          backgroundImage: (amb[
+                                                          'profileImageUrl'] !=
+                                                      null &&
+                                                  amb['profileImageUrl']
+                                                      .toString()
+                                                      .isNotEmpty)
+                                              ? NetworkImage(
+                                                  amb['profileImageUrl'])
+                                              : const AssetImage(
+                                                      'assets/ambulance.jpg')
+                                                  as ImageProvider,
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          amb['name'] ?? '',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13),
+                                        ),
+                                        Text(
+                                          amb['location'] ?? '',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                              fontSize: 11, color: Colors.grey),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            const Icon(Icons.star,
+                                                size: 13,
+                                                color: Color(0xFF199A8E)),
+                                            const SizedBox(width: 2),
+                                            Text(
+                                              amb['avgRating'] > 0
+                                                  ? amb['avgRating']
+                                                      .toStringAsFixed(1)
+                                                  : 'No rating',
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 11,
+                                                color: Color(0xFF199A8E),
+                                              ),
+                                            ),
+                                            if (amb['totalRatings'] > 0) ...[
+                                              const SizedBox(width: 2),
+                                              Text('(${amb['totalRatings']})',
+                                                  style: const TextStyle(
+                                                      fontSize: 9,
+                                                      color: Colors.grey)),
+                                            ]
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ));
+                      },
+                    );
+                  },
+                ),
               ],
             ),
           ),
@@ -644,7 +689,7 @@ class _AmbulanceHomePageState extends State<AmbulanceHomePage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const AmbulanceListPage(),
+                builder: (context) => const FindAmbulancePage(),
               ),
             );
           } else {
