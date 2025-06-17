@@ -5,6 +5,7 @@ import 'package:appointnow/Pages/doctor_details_pages/doctor_details.dart'; // <
 import 'package:appointnow/Pages/findDoctors/hospitallist.dart'; // Add this import
 import 'package:appointnow/Pages/findDoctors/all_doctor_list.dart'; // Add this import
 import 'package:appointnow/Pages/ambulance/Ambulance_list.dart';
+import 'package:appointnow/Pages/ambulance/find_ambulance.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -189,12 +190,10 @@ class _HomePageState extends State<HomePage> {
                 // Top Doctors
                 _buildSectionHeader('Top Doctor', onViewAll: () {
                   Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AllDoctorListPage(
-                         
-                    ),
-                  ));
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AllDoctorListPage(),
+                      ));
                 }),
                 const SizedBox(height: 8.0),
                 StreamBuilder<QuerySnapshot>(
@@ -683,7 +682,7 @@ class _HomePageState extends State<HomePage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const AmbulanceListPage(),
+                builder: (context) => const FindAmbulancePage(),
               ),
             );
           } else {

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:appointnow/Pages/ambulance/Ambulance_booking.dart'; // Import the AmbulanceBookingPage
 
 class AmbulanceListPage extends StatelessWidget {
   const AmbulanceListPage({super.key});
@@ -9,6 +10,20 @@ class AmbulanceListPage extends StatelessWidget {
     return FirebaseFirestore.instance
         .collection('ambulance_details')
         .snapshots();
+  }
+
+  void _navigateToBooking(BuildContext context, Map<String, dynamic> data,
+      double avgRating, int totalRatings) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AmbulanceBookingPage(
+          ambulanceData: data,
+          avgRating: avgRating,
+          totalRatings: totalRatings,
+        ),
+      ),
+    );
   }
 
   @override
@@ -67,6 +82,18 @@ class AmbulanceListPage extends StatelessWidget {
                     totalRatings = ratings.length;
                   }
                   return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AmbulanceBookingPage(
+                            ambulanceData: data,
+                            avgRating: avgRating,
+                            totalRatings: totalRatings,
+                          ),
+                        ),
+                      );
+                    },
                     onLongPress: () async {
                       final user = FirebaseAuth.instance.currentUser;
                       if (user == null) {

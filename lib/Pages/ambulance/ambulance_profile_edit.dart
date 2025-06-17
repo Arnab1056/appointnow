@@ -26,6 +26,17 @@ class _AmbulanceProfileEditPageState extends State<AmbulanceProfileEditPage> {
   bool _isLoading = true;
   final ImagePicker _picker = ImagePicker();
 
+  final List<String> ambulanceCategories = [
+    'Basic',
+    'ICU',
+    'AC',
+    'Non-AC',
+    'Freezer',
+    'Patient Transport',
+    'Other',
+  ];
+  String? _selectedCategory;
+
   @override
   void initState() {
     super.initState();
@@ -47,6 +58,7 @@ class _AmbulanceProfileEditPageState extends State<AmbulanceProfileEditPage> {
         _hotlineController.text = data['hotline'] ?? '';
         _registerController.text = data['register_number'] ?? '';
         _locationController.text = data['location'] ?? '';
+        _selectedCategory = data['category'] ?? null;
       }
       setState(() {});
     }
@@ -144,6 +156,7 @@ class _AmbulanceProfileEditPageState extends State<AmbulanceProfileEditPage> {
       'hotline': _hotlineController.text.trim(),
       'register_number': _registerController.text.trim(),
       'location': _locationController.text.trim(),
+      'category': _selectedCategory ?? '',
       'uid': user.uid,
       'profileImageUrl': _profileImageUrl ?? '',
       'profileImageName': _profileImageName ?? '',
@@ -234,6 +247,36 @@ class _AmbulanceProfileEditPageState extends State<AmbulanceProfileEditPage> {
                 _registerController),
             _buildTextField(
                 Icons.confirmation_number, "Location", _locationController),
+            // Category dropdown
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: DropdownButtonFormField<String>(
+                value: ambulanceCategories.contains(_selectedCategory)
+                    ? _selectedCategory
+                    : null,
+                items: ambulanceCategories
+                    .map((cat) => DropdownMenuItem(
+                          value: cat,
+                          child: Text(cat),
+                        ))
+                    .toList(),
+                onChanged: (val) {
+                  setState(() {
+                    _selectedCategory = val;
+                  });
+                },
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.local_shipping, color: Colors.grey),
+                  hintText: 'Category',
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            ),
 
             SizedBox(height: 16),
             Row(
