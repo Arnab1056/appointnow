@@ -255,12 +255,11 @@ class _RegisterPageState extends State<RegisterPage>
                   items: const [
                     DropdownMenuItem(value: 'User', child: Text('User')),
                     DropdownMenuItem(value: 'Doctor', child: Text('Doctor')),
-                    DropdownMenuItem(
-                        value: 'Assistant', child: Text('Assistant')),
+                    
                     DropdownMenuItem(
                         value: 'Hospital', child: Text('Hospital')),
                     DropdownMenuItem(
-                        value: 'Diagnosis', child: Text('Diagnosis')),
+                        value: 'ambulance', child: Text('Ambulance')),
                   ],
                   onChanged: (value) {
                     setState(() {

@@ -80,6 +80,7 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
     ];
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text("Home", style: TextStyle(color: Colors.black)),
         centerTitle: true,
@@ -94,6 +95,9 @@ class _HospitalHomePageState extends State<HospitalHomePage> {
           children: [
             // Hospital Card
             Card(
+              color: 
+              Colors.white,
+              shadowColor: Colors.grey.withOpacity(0.2),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16)),
               elevation: 2,

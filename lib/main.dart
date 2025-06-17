@@ -9,6 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'firebase_options.dart';
 import 'package:appointnow/Pages/hospital/hospital_home.dart' as hospital;
 import 'package:appointnow/Pages/Laboratory/user-labreports.dart';
+import 'package:appointnow/Pages/ambulance/ambulance_home.dart' as ambulance;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,6 +69,8 @@ Widget _getHomePage(String? role) {
     return const doctor.Doctorhome();
   } else if (role != null && role.trim().toLowerCase() == 'hospital') {
     return const hospital.HospitalHomePage();
+  } else if (role != null && role.trim().toLowerCase() == 'ambulance') {
+    return const ambulance.AmbulanceHomePage();
   } else {
     return const user.HomePage();
   }

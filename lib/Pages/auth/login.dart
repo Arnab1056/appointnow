@@ -1,3 +1,4 @@
+import 'package:appointnow/Pages/ambulance/ambulance_home.dart';
 import 'package:flutter/material.dart';
 import '../controllers/auth_controller.dart';
 import 'register.dart'; // Ensure this is the correct path to the file containing RegisterPage
@@ -5,6 +6,7 @@ import 'package:appointnow/pages/index/homepage.dart'; // Ensure this is the cor
 import 'package:appointnow/Pages/doctor/doctor_home.dart' as doctor;
 import 'package:appointnow/Pages/hospital/hospital_home.dart'; // Add this import
 import 'package:appointnow/Pages/assistant/assistant_home.dart';
+import 'package:appointnow/Pages/ambulance/ambulance_home.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -162,7 +164,15 @@ class _LoginPageState extends State<LoginPage> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const AssistantHomePage()),
+                                builder: (context) =>
+                                    const AssistantHomePage()),
+                          );
+                        } else if (role == 'ambulance') {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const AmbulanceHomePage()),
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
