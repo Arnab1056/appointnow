@@ -3,6 +3,9 @@ import 'package:appointnow/pages/findDoctors/find_doctors.dart';
 import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
 import 'package:appointnow/Pages/doctor_details_pages/doctor_details.dart'; // <-- Add this import
 import 'package:appointnow/Pages/findDoctors/hospitallist.dart'; // Add this import
+import 'package:appointnow/Pages/findDoctors/all_doctor_list.dart'; // Add this import
+import 'package:appointnow/Pages/ambulance/Ambulance_list.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -184,7 +187,15 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 16.0),
 
                 // Top Doctors
-                _buildSectionHeader('Top Doctor', onViewAll: () {}),
+                _buildSectionHeader('Top Doctor', onViewAll: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AllDoctorListPage(
+                         
+                    ),
+                  ));
+                }),
                 const SizedBox(height: 8.0),
                 StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
@@ -465,10 +476,19 @@ class _HomePageState extends State<HomePage> {
 
                 // Top Ambulance Service
                 const SizedBox(height: 16.0),
-                _buildSectionHeader('Top Ambulance Service', onViewAll: () {}),
+                _buildSectionHeader('Top Ambulance Service', onViewAll: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AmbulanceListPage(),
+                    ),
+                  );
+                }),
                 const SizedBox(height: 8.0),
                 StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance.collection('ambulance_details').snapshots(),
+                  stream: FirebaseFirestore.instance
+                      .collection('ambulance_details')
+                      .snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
@@ -501,209 +521,111 @@ class _HomePageState extends State<HomePage> {
                         };
                       }).toList()),
                       builder: (context, ratingSnapshot) {
-                        if (!ratingSnapshot.hasData || ratingSnapshot.data!.isEmpty) {
+                        if (!ratingSnapshot.hasData ||
+                            ratingSnapshot.data!.isEmpty) {
                           return const Text("No top ambulances found");
                         }
-                        final sorted = List<Map<String, dynamic>>.from(ratingSnapshot.data!);
-                        sorted.sort((a, b) => (b['avgRating'] as double).compareTo(a['avgRating'] as double));
+                        final sorted = List<Map<String, dynamic>>.from(
+                            ratingSnapshot.data!);
+                        sorted.sort((a, b) => (b['avgRating'] as double)
+                            .compareTo(a['avgRating'] as double));
                         final topAmbulances = sorted.take(5).toList();
                         return SizedBox(
-                          height: 140.0,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: topAmbulances.length,
-                            separatorBuilder: (context, idx) => const SizedBox(width: 12),
-                            itemBuilder: (context, idx) {
-                              final amb = topAmbulances[idx];
-                              return Container(
-                                width: 120,
-                                margin: const EdgeInsets.symmetric(vertical: 4.0),
-                                padding: const EdgeInsets.all(10.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.15),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 28,
-                                      backgroundColor: Colors.grey[200],
-                                      backgroundImage: (amb['profileImageUrl'] != null && amb['profileImageUrl'].toString().isNotEmpty)
-                                          ? NetworkImage(amb['profileImageUrl'])
-                                          : const AssetImage('assets/ambulance.jpg') as ImageProvider,
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      amb['name'] ?? '',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                                    ),
-                                    Text(
-                                      amb['location'] ?? '',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontSize: 11, color: Colors.grey),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(Icons.star, size: 13, color: Color(0xFF199A8E)),
-                                        const SizedBox(width: 2),
-                                        Text(
-                                          amb['avgRating'] > 0 ? amb['avgRating'].toStringAsFixed(1) : 'No rating',
-                                          style: const TextStyle(
+                            height: 140.0,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: topAmbulances.length,
+                              separatorBuilder: (context, idx) =>
+                                  const SizedBox(width: 12),
+                              itemBuilder: (context, idx) {
+                                final amb = topAmbulances[idx];
+                                return Container(
+                                  width: 120,
+                                  margin:
+                                      const EdgeInsets.symmetric(vertical: 4.0),
+                                  padding: const EdgeInsets.all(10.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.15),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 28,
+                                        backgroundColor: Colors.grey[200],
+                                        backgroundImage:
+                                            (amb['profileImageUrl'] != null &&
+                                                    amb['profileImageUrl']
+                                                        .toString()
+                                                        .isNotEmpty)
+                                                ? NetworkImage(
+                                                    amb['profileImageUrl'])
+                                                : const AssetImage(
+                                                        'assets/ambulance.jpg')
+                                                    as ImageProvider,
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        amb['name'] ?? '',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 11,
-                                            color: Color(0xFF199A8E),
-                                          ),
-                                        ),
-                                        if (amb['totalRatings'] > 0) ...[
+                                            fontSize: 13),
+                                      ),
+                                      Text(
+                                        amb['location'] ?? '',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            fontSize: 11, color: Colors.grey),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(Icons.star,
+                                              size: 13,
+                                              color: Color(0xFF199A8E)),
                                           const SizedBox(width: 2),
-                                          Text('(${amb['totalRatings']})', style: const TextStyle(fontSize: 9, color: Colors.grey)),
-                                        ]
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          )
-                          );
-                        },
-                      );
-                    },
-                  ),
-
-                // Top Ambulance Service
-                const SizedBox(height: 16.0),
-                _buildSectionHeader('Top Ambulance Service', onViewAll: () {}),
-                const SizedBox(height: 8.0),
-                StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance.collection('ambulance_details').snapshots(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return const Text("No top ambulances found");
-                    }
-                    final allAmbulances = snapshot.data!.docs;
-                    return FutureBuilder<List<Map<String, dynamic>>>(
-                      future: Future.wait(allAmbulances.map((doc) async {
-                        final ratingsSnap = await FirebaseFirestore.instance
-                            .collection('ambulance_details')
-                            .doc(doc.id)
-                            .collection('ratings')
-                            .get();
-                        double avg = 0.0;
-                        if (ratingsSnap.docs.isNotEmpty) {
-                          double sum = 0;
-                          for (var r in ratingsSnap.docs) {
-                            final data = r.data();
-                            sum += (data['rating'] ?? 0).toDouble();
-                          }
-                          avg = sum / ratingsSnap.docs.length;
-                        }
-                        return {
-                          ...doc.data() as Map<String, dynamic>,
-                          'avgRating': avg,
-                          'id': doc.id,
-                          'totalRatings': ratingsSnap.docs.length,
-                        };
-                      }).toList()),
-                      builder: (context, ratingSnapshot) {
-                        if (!ratingSnapshot.hasData || ratingSnapshot.data!.isEmpty) {
-                          return const Text("No top ambulances found");
-                        }
-                        final sorted = List<Map<String, dynamic>>.from(ratingSnapshot.data!);
-                        sorted.sort((a, b) => (b['avgRating'] as double).compareTo(a['avgRating'] as double));
-                        final topAmbulances = sorted.take(5).toList();
-                        return SizedBox(
-                          height: 140.0,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: topAmbulances.length,
-                            separatorBuilder: (context, idx) => const SizedBox(width: 12),
-                            itemBuilder: (context, idx) {
-                              final amb = topAmbulances[idx];
-                              return Container(
-                                width: 120,
-                                margin: const EdgeInsets.symmetric(vertical: 4.0),
-                                padding: const EdgeInsets.all(10.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.15),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 28,
-                                      backgroundColor: Colors.grey[200],
-                                      backgroundImage: (amb['profileImageUrl'] != null && amb['profileImageUrl'].toString().isNotEmpty)
-                                          ? NetworkImage(amb['profileImageUrl'])
-                                          : const AssetImage('assets/ambulance.jpg') as ImageProvider,
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      amb['name'] ?? '',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                                    ),
-                                    Text(
-                                      amb['location'] ?? '',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontSize: 11, color: Colors.grey),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(Icons.star, size: 13, color: Color(0xFF199A8E)),
-                                        const SizedBox(width: 2),
-                                        Text(
-                                          amb['avgRating'] > 0 ? amb['avgRating'].toStringAsFixed(1) : 'No rating',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 11,
-                                            color: Color(0xFF199A8E),
+                                          Text(
+                                            amb['avgRating'] > 0
+                                                ? amb['avgRating']
+                                                    .toStringAsFixed(1)
+                                                : 'No rating',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 11,
+                                              color: Color(0xFF199A8E),
+                                            ),
                                           ),
-                                        ),
-                                        if (amb['totalRatings'] > 0) ...[
-                                          const SizedBox(width: 2),
-                                          Text('(${amb['totalRatings']})', style: const TextStyle(fontSize: 9, color: Colors.grey)),
-                                        ]
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          )
-                          );
-                        },
-                      );
-                    },
-                  ),
+                                          if (amb['totalRatings'] > 0) ...[
+                                            const SizedBox(width: 2),
+                                            Text('(${amb['totalRatings']})',
+                                                style: const TextStyle(
+                                                    fontSize: 9,
+                                                    color: Colors.grey)),
+                                          ]
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ));
+                      },
+                    );
+                  },
+                ),
               ],
             ),
           ),
@@ -755,6 +677,13 @@ class _HomePageState extends State<HomePage> {
               context,
               MaterialPageRoute(
                 builder: (context) => HospitallistPage(category: 'hospital'),
+              ),
+            );
+          } else if (label == 'Ambulance') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AmbulanceListPage(),
               ),
             );
           } else {
