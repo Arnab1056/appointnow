@@ -6,6 +6,7 @@ import 'package:appointnow/Pages/findDoctors/hospitallist.dart'; // Add this imp
 import 'package:appointnow/Pages/findDoctors/all_doctor_list.dart'; // Add this import
 import 'package:appointnow/Pages/ambulance/Ambulance_list.dart';
 import 'package:appointnow/Pages/ambulance/find_ambulance.dart';
+import 'package:appointnow/Pages/premium/doctorlist.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -642,6 +643,13 @@ class _HomePageState extends State<HomePage> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const HomePage()),
+                );
+                break;
+              case 2:
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const PremiumDoctorListPage()),
                 );
                 break;
               case 3:
