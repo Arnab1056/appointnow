@@ -61,125 +61,173 @@ class _PremiumPlansPageState extends State<PremiumPlansPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
-        child: SizedBox(
-          height: 500,
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: plans.length,
-            onPageChanged: (index) {
-              setState(() {
-                selectedIndex = index;
-              });
-            },
-            itemBuilder: (context, i) {
-              final plan = plans[i];
-              final isSelected = selectedIndex == i;
-              return AnimatedScale(
-                scale: isSelected ? 1.1 : 0.9,
-                duration: Duration(milliseconds: 350),
-                curve: Curves.easeInOut,
-                child: GestureDetector(
-                  onTap: () {
-                    _pageController.animateToPage(
-                      i,
-                      duration: Duration(milliseconds: 350),
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                  child: Container(
-                    width: 260,
-                    margin: EdgeInsets.symmetric(horizontal: 12, vertical: 32),
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(color: Colors.black12, blurRadius: 10),
-                      ],
-                      color: Colors.white,
-                      border: isSelected
-                          ? Border.all(color: plan['color'] as Color, width: 2)
-                          : null,
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(height: 20),
+          Image.asset('assets/no.png', height: 100),
+          SizedBox(height: 20),
+         
+
+          Center(
+            child: SizedBox(
+              height: 500,
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: plans.length,
+                onPageChanged: (index) {
+                  setState(() {
+                    selectedIndex = index;
+                  });
+                },
+                itemBuilder: (context, i) {
+                  final plan = plans[i];
+                  final isSelected = selectedIndex == i;
+                  return AnimatedScale(
+                    scale: isSelected ? 1.1 : 0.9,
+                    duration: Duration(milliseconds: 350),
+                    curve: Curves.easeInOut,
+                    child: GestureDetector(
+                      onTap: () {
+                        _pageController.animateToPage(
+                          i,
+                          duration: Duration(milliseconds: 350),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      child: Container(
+                        width: 260,
+                        margin:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 32),
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(color: Colors.black12, blurRadius: 10),
+                          ],
+                          color: Colors.white,
+                          border: isSelected
+                              ? Border.all(
+                                  color: plan['color'] as Color, width: 2)
+                              : null,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              plan['title'] as String,
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 12),
+                            Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
+                                color:
+                                    (plan['color'] as Color).withOpacity(0.9),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Column(
+                                children: [
+                                  // Price with different font sizes before and after '.'
+                                  RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: (plan['price'] as String)
+                                              .split('.')[0],
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 40,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: '.' +
+                                              (plan['price'] as String)
+                                                  .split('.')[1]
+                                                  .split(' ')[0],
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: ' TK',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Text(
+                                    plan['period'] as String,
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 15),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 12),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children:
+                                  List.generate(featureTitles.length, (index) {
+                                bool enabled =
+                                    (plan['features'] as List<bool>)[index];
+                                return ListTile(
+                                  dense: true,
+                                  leading: Icon(
+                                    enabled ? Icons.check_circle : Icons.cancel,
+                                    color: enabled ? Colors.green : Colors.grey,
+                                  ),
+                                  title: Text(
+                                    featureTitles[index],
+                                    style: TextStyle(
+                                      color:
+                                          enabled ? Colors.black : Colors.grey,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ),
+                            SizedBox(height: 10),
+                            ElevatedButton(
+                              onPressed: () {
+                                // Handle plan selection
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: plan['color'] as Color,
+                                shape: StadiumBorder(),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 32, vertical: 12),
+                              ),
+                              child: Text("SELECT",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 16)),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          plan['title'] as String,
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(height: 12),
-                        Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                            color: (plan['color'] as Color).withOpacity(0.9),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            children: [
-                              Text(
-                                plan['price'] as String,
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                plan['period'] as String,
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 15),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children:
-                              List.generate(featureTitles.length, (index) {
-                            bool enabled =
-                                (plan['features'] as List<bool>)[index];
-                            return ListTile(
-                              dense: true,
-                              leading: Icon(
-                                enabled ? Icons.check_circle : Icons.cancel,
-                                color: enabled ? Colors.green : Colors.grey,
-                              ),
-                              title: Text(
-                                featureTitles[index],
-                                style: TextStyle(
-                                  color: enabled ? Colors.black : Colors.grey,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                        SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Handle plan selection
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: plan['color'] as Color,
-                            shape: StadiumBorder(),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 32, vertical: 12),
-                          ),
-                          child: Text("SELECT",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 16)),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
+                  );
+                },
+              ),
+            ),
           ),
-        ),
+           Text("Buy Premium Plans",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: const Color.fromARGB(193, 209, 209, 209),
+              )),
+        ],
       ),
       bottomNavigationBar: AppBottomNavigationBar(
         currentIndex: 2,
