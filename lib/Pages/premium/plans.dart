@@ -14,25 +14,28 @@ class _PremiumPlansPageState extends State<PremiumPlansPage> {
     {
       'title': 'FREE',
       'price': '0.00 TK',
+      'period': '/ everyday',
       'color': Colors.blue,
       'features': [true, false, false, false],
     },
     {
       'title': 'Yearly',
       'price': '360.00 TK',
+      'period': '/ year',
       'color': Colors.deepOrange,
       'features': [true, true, true, true],
     },
     {
       'title': 'Monthly',
       'price': '30.00 TK',
+      'period': '/ month',
       'color': Colors.teal,
       'features': [true, true, true, true],
     },
   ];
 
   final featureTitles = [
-    "Offline Appointment Booking",
+    "Online Appointment Booking",
     "Online Consultation",
     "Realtime Messaging",
     "Video Call"
@@ -124,7 +127,7 @@ class _PremiumPlansPageState extends State<PremiumPlansPage> {
                                     fontWeight: FontWeight.bold),
                               ),
                               Text(
-                                "/ month",
+                                plan['period'] as String,
                                 style: TextStyle(
                                     color: Colors.white, fontSize: 15),
                               ),
