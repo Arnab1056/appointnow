@@ -95,6 +95,7 @@ flutter:
     - assets/icon/chat.png
     - assets/VISA.png
     - assets/icon/chamber.png
+    - assets/premium_intro.png
     - assets/icon/ratting.png
 
     # - images/a_dot_burr.jpeg

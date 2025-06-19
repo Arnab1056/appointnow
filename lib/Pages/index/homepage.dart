@@ -1,3 +1,4 @@
+import 'package:appointnow/Pages/premium/intro.dart';
 import 'package:appointnow/pages/Profile/user_profile.dart';
 import 'package:appointnow/pages/findDoctors/find_doctors.dart';
 import 'package:appointnow/Pages/widgets/app_bottom_navigation_bar.dart';
@@ -649,7 +650,7 @@ class _HomePageState extends State<HomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const PremiumDoctorListPage()),
+                      builder: (context) => PremiumIntroPage()),
                 );
                 break;
               case 3:
