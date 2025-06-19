@@ -42,7 +42,8 @@ class _AppointmentsSerialPageState extends State<AppointmentsSerialPage> {
 
   Future<void> _fetchAppointments() async {
     // Use doctorId and hospitalId from the serial collection fields
-    final doctorId = widget.doctorName; // This should be doctorId, but widget.doctorName is used as a param. If you have doctorId, use it here.
+    final doctorId = widget
+        .doctorName; // This should be doctorId, but widget.doctorName is used as a param. If you have doctorId, use it here.
     final hospitalId = widget.hospitalId;
     // Fetch from 'serial' collection using doctorName and hospitalId, and only accepted
     final query = await FirebaseFirestore.instance
@@ -51,7 +52,8 @@ class _AppointmentsSerialPageState extends State<AppointmentsSerialPage> {
         .where('hospitalId', isEqualTo: hospitalId)
         .where('status', isEqualTo: 'accepted')
         .get();
-    final docs = query.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+    final docs =
+        query.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
     setState(() {
       appointments = docs;
       appointmentCount = docs.length;
@@ -65,7 +67,9 @@ class _AppointmentsSerialPageState extends State<AppointmentsSerialPage> {
   List<Map<String, dynamic>> get _filteredAppointments {
     if (selectedDate == null) return [];
     // Filter by date and day for accuracy
-    return appointments.where((a) => a['date'] == selectedDate && a['day'] == selectedDay).toList();
+    return appointments
+        .where((a) => a['date'] == selectedDate && a['day'] == selectedDay)
+        .toList();
   }
 
   @override
@@ -84,9 +88,9 @@ class _AppointmentsSerialPageState extends State<AppointmentsSerialPage> {
           backgroundColor: Colors.white,
           elevation: 0,
           actions: [
-            IconButton(
-                icon: Icon(Icons.shopping_cart_outlined, color: Colors.black),
-                onPressed: () {}),
+            // IconButton(
+            //     icon: Icon(Icons.shopping_cart_outlined, color: Colors.black),
+            //     onPressed: () {}),
           ],
         ),
         body: Column(
@@ -258,8 +262,10 @@ class _AppointmentsSerialPageState extends State<AppointmentsSerialPage> {
           final patient = filtered[index];
           // Show the serial number from the serialNumber field in Firestore
           int serial = 1;
-          if (patient['serialNumber'] != null && patient['serialNumber'].toString().isNotEmpty) {
-            serial = int.tryParse(patient['serialNumber'].toString()) ?? (index + 1);
+          if (patient['serialNumber'] != null &&
+              patient['serialNumber'].toString().isNotEmpty) {
+            serial =
+                int.tryParse(patient['serialNumber'].toString()) ?? (index + 1);
           } else {
             serial = index + 1;
           }
@@ -310,7 +316,8 @@ class _AppointmentsSerialPageState extends State<AppointmentsSerialPage> {
               decoration: BoxDecoration(
                 color: isSeen ? Colors.teal : Colors.white,
                 border: Border.all(
-                    color: selected ? widget.primaryColor : Colors.grey.shade300),
+                    color:
+                        selected ? widget.primaryColor : Colors.grey.shade300),
                 borderRadius: BorderRadius.circular(12),
               ),
               alignment: Alignment.center,
@@ -319,7 +326,9 @@ class _AppointmentsSerialPageState extends State<AppointmentsSerialPage> {
                 style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: isSeen ? Colors.white : (selected ? widget.primaryColor : Colors.black)),
+                    color: isSeen
+                        ? Colors.white
+                        : (selected ? widget.primaryColor : Colors.black)),
               ),
             ),
           );

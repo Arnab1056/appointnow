@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:async'; // Import for Timer
 
 // Converted the HomePage widget to a StatefulWidget
 class HomePage extends StatefulWidget {
@@ -135,60 +136,12 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 16.0),
 
-                // Banner
-                Container(
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    color: Colors.teal.withOpacity(
-                        0.2), // Changed background color to teal with opacity
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                'Early protection for your family health',
-                                style: TextStyle(
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors
-                                      .black, // Text color changed to black
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 20.0),
-                            ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Colors.teal, // Button color changed to teal
-                              ),
-                              child: const Text('Learn more',
-                                  style: TextStyle(
-                                      color: Colors
-                                          .white)), // Text color changed to white
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16.0),
-                      Image.asset('assets/image.png',
-                          width: 120.0, height: 120.0),
-                      // Icon(Icons.health_and_safety,
-                      //     size: 64.0,
-                      //     color: Colors.teal), // Icon color changed to teal
-                    ],
-                  ),
-                ),
+                // Banner Carousel
+                BannerCarousel(),
                 const SizedBox(height: 16.0),
 
                 // Top Doctors
-                _buildSectionHeader('Top Doctor', onViewAll: () {
+                _buildSectionHeader('Top Doctors', onViewAll: () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -772,5 +725,118 @@ class _HomePageState extends State<HomePage> {
         },
       ),
     );
+  }
+}
+
+// Added horizontally scrollable banners with automatic scrolling functionality
+class BannerCarousel extends StatefulWidget {
+  @override
+  _BannerCarouselState createState() => _BannerCarouselState();
+}
+
+class _BannerCarouselState extends State<BannerCarousel> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  final List<Map<String, dynamic>> _banners = [
+    {
+      'text': 'Early protection for your family health',
+      'image': 'assets/image.png',
+    },
+    {
+      'text': 'Access expert medical advice anytime, anywhere',
+      'image': 'assets/MaleDoctor.png',
+    },
+    {
+      'text': 'Discover top-rated hospitals near you',
+      'image': 'assets/HospitalPicture.png',
+    },
+    {
+      'text': 'Quick and reliable ambulance services',
+      'image': 'assets/Ambulance.png',
+    },
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Automatically scroll banners every 2 seconds
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Timer.periodic(Duration(seconds: 3), (Timer timer) {
+        if (_pageController.hasClients) {
+          setState(() {
+            _currentPage = (_currentPage + 1) % _banners.length;
+          });
+          _pageController.animateToPage(
+            _currentPage,
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 150.0, // Adjust height as needed
+      child: PageView.builder(
+        controller: _pageController,
+        itemCount: _banners.length,
+        itemBuilder: (context, index) {
+          final banner = _banners[index];
+          return Container(
+            padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: Colors.teal.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          banner['text'],
+                          style: const TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20.0),
+                      ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                        ),
+                        child: const Text(
+                          'Learn more',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16.0),
+                Image.asset(banner['image'], width: 120.0, height: 120.0),
+                // Image.asset(banner['image'], width: 120.0, height: 120.0),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 }

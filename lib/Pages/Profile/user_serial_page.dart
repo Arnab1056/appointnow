@@ -50,7 +50,9 @@ class _UserSerialPageState extends State<UserSerialPage> {
           .get();
       if (query.docs.isNotEmpty) {
         final data = query.docs.first.data();
-        if (mounted && data['profileImageUrl'] != null && data['profileImageUrl'].toString().isNotEmpty) {
+        if (mounted &&
+            data['profileImageUrl'] != null &&
+            data['profileImageUrl'].toString().isNotEmpty) {
           setState(() {
             doctorImageUrl = data['profileImageUrl'];
           });
@@ -96,11 +98,11 @@ class _UserSerialPageState extends State<UserSerialPage> {
           centerTitle: true,
           backgroundColor: Colors.white,
           elevation: 0,
-          actions: [
-            IconButton(
-                icon: Icon(Icons.shopping_cart_outlined, color: Colors.black),
-                onPressed: () {}),
-          ],
+          // actions: [
+          //   IconButton(
+          //       icon: Icon(Icons.shopping_cart_outlined, color: Colors.black),
+          //       onPressed: () {}),
+          // ],
         ),
         body: StreamBuilder<QuerySnapshot>(
           stream: _serialStream,

@@ -165,9 +165,10 @@ class AddLaboratoryPage extends StatelessWidget {
                 return TextField(
                   decoration: InputDecoration(
                     hintText: 'Search laboratory category...',
+                    hintStyle: TextStyle(color: Colors.grey.shade600),
                     prefixIcon: Icon(Icons.search, color: primaryColor),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(30),
                       borderSide: BorderSide(color: Colors.grey.shade300),
                     ),
                     contentPadding:

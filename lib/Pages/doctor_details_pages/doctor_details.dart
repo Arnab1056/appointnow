@@ -501,25 +501,25 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        print("Chat icon clicked");
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.only(left: 10, right: 10),
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.teal.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Image.asset(
-                          'assets/icon/chat.png',
-                          width: 24,
-                          height: 24,
-                        ),
-                      ),
-                    ),
+                    // GestureDetector(
+                    //   onTap: () {
+                    //     print("Chat icon clicked");
+                    //   },
+                    //   child: Container(
+                    //     padding: const EdgeInsets.only(left: 10, right: 10),
+                    //     width: 50,
+                    //     height: 50,
+                    //     decoration: BoxDecoration(
+                    //       color: Colors.teal.withOpacity(0.1),
+                    //       shape: BoxShape.circle,
+                    //     ),
+                    //     child: Image.asset(
+                    //       'assets/icon/chat.png',
+                    //       width: 24,
+                    //       height: 24,
+                    //     ),
+                    //   ),
+                    // ),
                     SizedBox(
                       width: 250,
                       height: 45,

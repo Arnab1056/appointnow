@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';  
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 class AddAssistantPage extends StatefulWidget {
@@ -16,7 +16,8 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   @override
   void dispose() {
@@ -30,6 +31,7 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: BackButton(color: Colors.black),
         title: Text('Add Assistant', style: TextStyle(color: Colors.black)),
@@ -45,7 +47,8 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
                 children: [
                   CircleAvatar(
                     radius: 50,
-                    backgroundImage: AssetImage('assets/assistant.jpg'), // Replace with your image
+                    backgroundImage: AssetImage(
+                        'assets/assistant.jpg'), // Replace with your image
                   ),
                   Positioned(
                     bottom: 0,
@@ -60,13 +63,19 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
               ),
             ),
             SizedBox(height: 10),
-            Text("Assistant Name", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text("Assistant Name",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text("About", style: TextStyle(fontWeight: FontWeight.bold)),
-                TextButton(onPressed: () {}, child: Text("Change")),
+                TextButton(
+                    onPressed: () {},
+                    child: Text(
+                      "Change",
+                      style: TextStyle(color: Colors.teal, fontSize: 12),
+                    )),
               ],
             ),
             Text(
@@ -81,14 +90,19 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
               ),
             ),
             SizedBox(height: 10),
-            buildTextField(Icons.person, "Enter assistant name", controller: _nameController),
-            buildTextField(Icons.email, "Enter assistant email", controller: _emailController),
-            buildPasswordField("Enter assistant password", true, controller: _passwordController),
-            buildPasswordField("Confirm assistant password", false, controller: _confirmPasswordController),
+            buildTextField(Icons.person, "Enter assistant name",
+                controller: _nameController),
+            buildTextField(Icons.email, "Enter assistant email",
+                controller: _emailController),
+            buildPasswordField("Enter assistant password", true,
+                controller: _passwordController),
+            buildPasswordField("Confirm assistant password", false,
+                controller: _confirmPasswordController),
             SizedBox(height: 10),
             Row(
               children: [
                 Checkbox(
+                  activeColor: Colors.teal,
                   value: agreeToTerms,
                   onChanged: (value) {
                     setState(() {
@@ -102,12 +116,14 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
                       Text("I agree to the medidoc "),
                       GestureDetector(
                         onTap: () {},
-                        child: Text("Terms of Service", style: TextStyle(color: Colors.teal)),
+                        child: Text("Terms of Service",
+                            style: TextStyle(color: Colors.teal)),
                       ),
                       Text(" and "),
                       GestureDetector(
                         onTap: () {},
-                        child: Text("Privacy Policy", style: TextStyle(color: Colors.teal)),
+                        child: Text("Privacy Policy",
+                            style: TextStyle(color: Colors.teal)),
                       ),
                     ],
                   ),
@@ -119,7 +135,8 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
               onPressed: () async {
                 if (!agreeToTerms) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('You must agree to the terms.')),
+                    const SnackBar(
+                        content: Text('You must agree to the terms.')),
                   );
                   return;
                 }
@@ -127,7 +144,10 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
                 final email = _emailController.text.trim();
                 final password = _passwordController.text;
                 final confirmPassword = _confirmPasswordController.text;
-                if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+                if (name.isEmpty ||
+                    email.isEmpty ||
+                    password.isEmpty ||
+                    confirmPassword.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('All fields are required.')),
                   );
@@ -147,12 +167,16 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
                     options: Firebase.app().options,
                   );
                   final tempAuth = FirebaseAuth.instanceFor(app: tempApp);
-                  final userCredential = await tempAuth.createUserWithEmailAndPassword(
+                  final userCredential =
+                      await tempAuth.createUserWithEmailAndPassword(
                     email: email,
                     password: password,
                   );
                   // Add assistant details to 'assistants' collection
-                  await FirebaseFirestore.instance.collection('assistants').doc(userCredential.user!.uid).set({
+                  await FirebaseFirestore.instance
+                      .collection('assistants')
+                      .doc(userCredential.user!.uid)
+                      .set({
                     'name': name,
                     'email': email,
                     'hospitalId': hospitalId,
@@ -161,7 +185,10 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
                     'profileImageUrl': '',
                     'uid': userCredential.user!.uid,
                   });
-                  await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userCredential.user!.uid)
+                      .set({
                     'name': name,
                     'email': email,
                     'role': 'assistant',
@@ -171,7 +198,8 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
                   await tempAuth.signOut();
                   await tempApp.delete();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Assistant registered successfully!')),
+                    const SnackBar(
+                        content: Text('Assistant registered successfully!')),
                   );
                   // Clear all input fields and reset state
                   _nameController.clear();
@@ -185,16 +213,20 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
                   });
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Registration failed:  ${e.toString()}')),
+                    SnackBar(
+                        content:
+                            Text('Registration failed:  ${e.toString()}')),
                   );
                 }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.teal,
                 minimumSize: Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)),
               ),
-              child: Text("Save", style: TextStyle(fontSize: 16)),
+              child: Text("Save",
+                  style: TextStyle(fontSize: 16, color: Colors.white)),
             ),
           ],
         ),
@@ -202,34 +234,43 @@ class _AddAssistantPageState extends State<AddAssistantPage> {
     );
   }
 
-  Widget buildTextField(IconData icon, String hint, {TextEditingController? controller}) {
+  // Updated the hint text color and icon color to grey
+  Widget buildTextField(IconData icon, String hint,
+      {TextEditingController? controller}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: TextField(
         controller: controller,
         decoration: InputDecoration(
-          prefixIcon: Icon(icon),
+          prefixIcon: Icon(icon, color: Colors.grey), // Icon color set to grey
           hintText: hint,
+          hintStyle: const TextStyle(
+              color: Colors.grey), // Hint text color set to grey
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
         ),
       ),
     );
   }
 
-  Widget buildPasswordField(String hint, bool isPassword, {TextEditingController? controller}) {
+  Widget buildPasswordField(String hint, bool isPassword,
+      {TextEditingController? controller}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: TextField(
         controller: controller,
         obscureText: isPassword ? obscurePassword : obscureConfirmPassword,
         decoration: InputDecoration(
-          prefixIcon: Icon(Icons.lock),
+          prefixIcon:
+              Icon(Icons.lock, color: Colors.grey), // Icon color set to grey
           hintText: hint,
+          hintStyle:
+              TextStyle(color: Colors.grey), // Hint text color set to grey
           suffixIcon: IconButton(
             icon: Icon(
               (isPassword ? obscurePassword : obscureConfirmPassword)
                   ? Icons.visibility_off
                   : Icons.visibility,
+              color: Colors.grey, // Icon color set to grey
             ),
             onPressed: () {
               setState(() {

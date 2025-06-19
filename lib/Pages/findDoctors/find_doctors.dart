@@ -286,6 +286,11 @@ class _FindDoctorsPageState extends State<FindDoctorsPage> {
                     ),
                   ),
                   const SizedBox(height: 24),
+                  const Text(
+                    "Recommended Doctors",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 24),
                   // Recommended Doctors Section
                   FutureBuilder<List<Map<String, dynamic>>>(
                     future: Future.wait(filteredDocs.map((doc) async {
@@ -465,25 +470,25 @@ class _FindDoctorsPageState extends State<FindDoctorsPage> {
                     },
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    "Your Recent Doctors",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 80,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        _recentDoctor(
-                            "Dr. Marcus", "assets/images/doctor1.jpg"),
-                        _recentDoctor("Dr. Maria", "assets/images/doctor2.jpg"),
-                        _recentDoctor("Dr. Stevi", "assets/images/doctor3.jpg"),
-                        _recentDoctor("Dr. Luke", "assets/images/doctor4.jpg"),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 50),
+                  // const Text(
+                  //   "Your Recent Doctors",
+                  //   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  // ),
+                  // const SizedBox(height: 12),
+                  // SizedBox(
+                  //   height: 80,
+                  //   child: ListView(
+                  //     scrollDirection: Axis.horizontal,
+                  //     children: [
+                  //       _recentDoctor(
+                  //           "Dr. Marcus", "assets/images/doctor1.jpg"),
+                  //       _recentDoctor("Dr. Maria", "assets/images/doctor2.jpg"),
+                  //       _recentDoctor("Dr. Stevi", "assets/images/doctor3.jpg"),
+                  //       _recentDoctor("Dr. Luke", "assets/images/doctor4.jpg"),
+                  //     ],
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 50),
                 ],
               ),
             );

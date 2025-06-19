@@ -96,6 +96,8 @@ flutter:
     - assets/VISA.png
     - assets/icon/chamber.png
     - assets/icon/ratting.png
+    - assets/HospitalPicture.png
+    - assets/Ambulance.png
 
     # - images/a_dot_burr.jpeg
     # - images/a_dot_ham.jpeg
